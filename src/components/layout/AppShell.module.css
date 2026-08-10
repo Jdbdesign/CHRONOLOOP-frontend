@@ -22,3 +22,22 @@
   flex-direction: column;
   gap: 12px;
 }
+
+.contentScroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.contentScroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.contentScroll::-webkit-scrollbar-thumb {
+  background: var(--border-default);
+  border-radius: 3px;
+}
+
+@media (max-width: 1024px) {
+  .appLayout {
+    grid-template-columns: 60px 1fr;
+  }
+}
