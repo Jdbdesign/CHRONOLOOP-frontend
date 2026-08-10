@@ -50,7 +50,7 @@ export function TopBar() {
           <div className={styles.avatarMd}>
             <img className={styles.avatarImg} src="/avatars/Ellipse 1.png" alt="Jacob Solayinka" />
           </div>
-          <ChevronDown size={16} aria-hidden="true" />
+          <ChevronDown size={14} aria-hidden="true" />
         </button>
       </div>
     </header>

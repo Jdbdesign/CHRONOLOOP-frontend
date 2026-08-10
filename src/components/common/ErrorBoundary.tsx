@@ -27,7 +27,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
   render(): ReactNode {
     if (this.state.hasError) {
       return (
-        <div className={styles.fallback}>
+        <div className={styles.fallback} role="alert">
           <h1 className={styles.heading}>Something went wrong</h1>
           <p className={styles.message}>
             An unexpected error occurred. Reloading the page usually fixes it.
