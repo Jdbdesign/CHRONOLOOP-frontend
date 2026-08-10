@@ -3,14 +3,23 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import App from './App'
 
-describe('App (Vitest/RTL harness smoke test)', () => {
-  it('renders and responds to a user interaction', async () => {
+describe('App', () => {
+  it('renders the Dashboard page by default, with the sidebar and topbar chrome', () => {
     render(<App />)
-    const button = screen.getByRole('button', { name: /count is/i })
-    expect(button).toHaveTextContent('Count is 0')
+    expect(screen.getByRole('heading', { name: 'Dashboard' })).toBeInTheDocument()
+    expect(screen.getByRole('navigation', { name: /main navigation/i })).toBeInTheDocument()
+    expect(screen.getByPlaceholderText('Search')).toBeInTheDocument()
+  })
 
-    await userEvent.click(button)
+  it('navigates to the Tasks page when the Tasks nav link is clicked', async () => {
+    render(<App />)
+    await userEvent.click(screen.getByRole('link', { name: 'Tasks' }))
+    expect(screen.getByRole('heading', { name: 'Tasks' })).toBeInTheDocument()
+  })
 
-    expect(button).toHaveTextContent('Count is 1')
+  it('navigates to the Integrations page when the "Integration" nav link is clicked', async () => {
+    render(<App />)
+    await userEvent.click(screen.getByRole('link', { name: 'Integration' }))
+    expect(screen.getByRole('heading', { name: 'Integrations' })).toBeInTheDocument()
   })
 })
