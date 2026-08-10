@@ -1,0 +1,20 @@
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 10px;
+  padding: 14px 16px;
+  transition: background var(--duration-normal) var(--ease-out);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .hoverable {
+    transition:
+      transform var(--duration-fast),
+      box-shadow var(--duration-fast),
+      background var(--duration-normal) var(--ease-out);
+  }
+  .hoverable:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px hsla(230, 80%, 50%, 0.12);
+  }
+}
