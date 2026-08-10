@@ -11,6 +11,7 @@ import { ReportsPage } from './pages/ReportsPage'
 import { CalendarPage } from './pages/CalendarPage'
 import { IntegrationsPage } from './pages/IntegrationsPage'
 import { SettingsPage } from './pages/SettingsPage'
+import { NotFoundPage } from './pages/NotFoundPage'
 
 function App() {
   useThemeSync()
@@ -29,6 +30,7 @@ function App() {
             <Route path="calendar" element={<CalendarPage />} />
             <Route path="integrations" element={<IntegrationsPage />} />
             <Route path="settings" element={<SettingsPage />} />
+            <Route path="*" element={<NotFoundPage />} />
           </Route>
         </Routes>
       </BrowserRouter>
