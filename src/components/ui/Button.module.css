@@ -44,6 +44,7 @@
   color: var(--accent-red);
   border: 1px solid rgba(255, 77, 77, 0.35);
   font-size: 12px;
+  flex-shrink: 0;
   transition: background var(--duration-fast), border-color var(--duration-fast);
 }
 .danger:hover:not(:disabled) { background: rgba(255, 77, 77, 0.1); border-color: var(--accent-red); }
@@ -57,6 +58,7 @@
   color: var(--text-secondary);
   font-size: 11px;
   font-weight: 400;
+  border-radius: 6px;
   transition: all var(--duration-fast);
 }
 .ghost:hover:not(:disabled) { color: var(--text-primary); border-color: var(--border-default); }
