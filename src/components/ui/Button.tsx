@@ -1,3 +1,4 @@
+import { forwardRef } from 'react'
 import type { ButtonHTMLAttributes, ReactNode } from 'react'
 import styles from './Button.module.css'
 
@@ -15,12 +16,17 @@ const VARIANT_CLASS: Record<ButtonVariant, string> = {
   ghost: styles.ghost,
 }
 
-export function Button({ variant = 'primary', className, children, ...rest }: ButtonProps) {
+export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
+  { variant = 'primary', className, children, ...rest },
+  ref,
+) {
   const combined = [styles.button, VARIANT_CLASS[variant], className].filter(Boolean).join(' ')
 
   return (
-    <button type="button" className={combined} data-variant={variant} {...rest}>
+    <button ref={ref} type="button" className={combined} data-variant={variant} {...rest}>
       {children}
     </button>
   )
-}
+})
+
+Button.displayName = 'Button'

@@ -1,10 +1,22 @@
-import type { ReactNode } from 'react'
+import { forwardRef } from 'react'
+import type { HTMLAttributes, ReactNode } from 'react'
 import styles from './Badge.module.css'
 
-interface BadgeProps {
+interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
   children: ReactNode
 }
 
-export function Badge({ children }: BadgeProps) {
-  return <span className={styles.badge}>{children}</span>
-}
+export const Badge = forwardRef<HTMLSpanElement, BadgeProps>(function Badge(
+  { className, children, ...rest },
+  ref,
+) {
+  const combined = [styles.badge, className].filter(Boolean).join(' ')
+
+  return (
+    <span ref={ref} className={combined} {...rest}>
+      {children}
+    </span>
+  )
+})
+
+Badge.displayName = 'Badge'
