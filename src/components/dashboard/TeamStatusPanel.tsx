@@ -18,7 +18,14 @@ export function TeamStatusPanel() {
   const showToast = useToastStore((s) => s.showToast)
   const [role, setRole] = useState('Developer')
   const [project, setProject] = useState('All Projects')
+  const [projectLabel, setProjectLabel] = useState<string | null>(null)
   const [progress, setProgress] = useState(0)
+
+  function selectProject(title: string) {
+    setProject(title)
+    setProjectLabel(title)
+    showToast(`Project: ${title}`, 'info', 2000)
+  }
 
   useEffect(() => {
     const timer = setTimeout(() => setProgress(85), 400)
@@ -48,19 +55,22 @@ export function TeamStatusPanel() {
       <Dropdown.Root>
         <Dropdown.Trigger asChild>
           <button type="button" className={styles.selectProjectBtn}>
-            {project} <ChevronDown aria-hidden="true" />
+            {projectLabel ?? 'Select Project'} <ChevronDown aria-hidden="true" />
           </button>
         </Dropdown.Trigger>
         <Dropdown.Content align="start">
-          <Dropdown.Item icon={<Layers aria-hidden="true" />} active={project === 'All Projects'} onSelect={() => { setProject('All Projects'); showToast('Project: All Projects', 'info', 2000) }}>
+          <Dropdown.Item icon={<Layers aria-hidden="true" />} active={project === 'All Projects'} onSelect={() => selectProject('All Projects')}>
             All Projects
           </Dropdown.Item>
           <Dropdown.Divider />
           {DASHBOARD_CRITICAL_PROJECTS.map((p) => (
-            <Dropdown.Item key={p.id} icon={<Briefcase aria-hidden="true" />} active={project === p.title} onSelect={() => { setProject(p.title); showToast(`Project: ${p.title}`, 'info', 2000) }}>
+            <Dropdown.Item key={p.id} icon={<Briefcase aria-hidden="true" />} active={project === p.title} onSelect={() => selectProject(p.title)}>
               {p.title}
             </Dropdown.Item>
           ))}
+          <Dropdown.Item icon={<Briefcase aria-hidden="true" />} active={project === 'ChronoLoop Launch'} onSelect={() => selectProject('ChronoLoop Launch')}>
+            ChronoLoop Launch
+          </Dropdown.Item>
         </Dropdown.Content>
       </Dropdown.Root>
 
