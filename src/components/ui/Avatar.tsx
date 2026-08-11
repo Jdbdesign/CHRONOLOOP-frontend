@@ -1,5 +1,5 @@
 import { forwardRef } from 'react'
-import type { ComponentRef } from 'react'
+import type { ComponentRef, CSSProperties } from 'react'
 import * as RadixAvatar from '@radix-ui/react-avatar'
 import styles from './Avatar.module.css'
 
@@ -8,6 +8,7 @@ interface AvatarProps {
   name: string
   size?: 'sm' | 'md'
   className?: string
+  style?: CSSProperties
 }
 
 function getInitials(name: string): string {
@@ -18,12 +19,12 @@ function getInitials(name: string): string {
 }
 
 export const Avatar = forwardRef<ComponentRef<typeof RadixAvatar.Root>, AvatarProps>(
-  function Avatar({ src, name, size = 'sm', className }, ref) {
+  function Avatar({ src, name, size = 'sm', className, style }, ref) {
     const sizeClass = size === 'md' ? styles.md : styles.sm
     const combined = [styles.root, sizeClass, className].filter(Boolean).join(' ')
 
     return (
-      <RadixAvatar.Root ref={ref} className={combined} title={name}>
+      <RadixAvatar.Root ref={ref} className={combined} style={style} title={name}>
         <RadixAvatar.Image className={styles.image} src={src} alt={name} />
         <RadixAvatar.Fallback className={styles.fallback}>{getInitials(name)}</RadixAvatar.Fallback>
       </RadixAvatar.Root>

@@ -17,4 +17,9 @@ describe('Avatar', () => {
     render(<Avatar name="Roger Dokidis" />)
     expect(screen.getByTitle('Roger Dokidis')).toBeInTheDocument()
   })
+
+  it('applies an inline style override for one-off sizing', () => {
+    render(<Avatar name="Aspen Herwitz" style={{ width: 38, height: 38 }} />)
+    expect(screen.getByTitle('Aspen Herwitz')).toHaveStyle({ width: '38px', height: '38px' })
+  })
 })
