@@ -1,6 +1,6 @@
 // src/components/dashboard/DashboardHeader.tsx
 import { useState } from 'react'
-import { Plus, ChevronDown, Calendar, SlidersHorizontal, Upload } from 'lucide-react'
+import { Plus, PlusCircle, Briefcase, Zap, ChevronDown, Calendar, SlidersHorizontal, Upload } from 'lucide-react'
 import { Button } from '../ui/Button'
 import { Dropdown } from '../ui/Dropdown'
 import { useDashboardUiStore } from '../../store/dashboardUiStore'
@@ -24,6 +24,7 @@ export function DashboardHeader() {
   const showToast = useToastStore((s) => s.showToast)
   const [year, setYear] = useState('2024')
   const [filters, setFilters] = useState(FILTER_DEFAULTS)
+  const [filterOpen, setFilterOpen] = useState(false)
 
   const handleAddTaskCaret = (action: 'task' | 'project' | 'sprint' | 'import') => {
     if (action === 'task') openAddTask()
@@ -59,16 +60,16 @@ export function DashboardHeader() {
           </button>
           <Dropdown.Root>
             <Dropdown.Trigger asChild>
-              <button type="button" className={styles.splitCaret} aria-label="More add options">
+              <button type="button" className={styles.splitCaret} aria-label="More options">
                 <ChevronDown aria-hidden="true" />
               </button>
             </Dropdown.Trigger>
             <Dropdown.Content>
-              <Dropdown.Item onSelect={() => handleAddTaskCaret('task')}>New Task</Dropdown.Item>
-              <Dropdown.Item onSelect={() => handleAddTaskCaret('project')}>New Project</Dropdown.Item>
-              <Dropdown.Item onSelect={() => handleAddTaskCaret('sprint')}>New Sprint</Dropdown.Item>
+              <Dropdown.Item icon={<PlusCircle aria-hidden="true" />} onSelect={() => handleAddTaskCaret('task')}>New Task</Dropdown.Item>
+              <Dropdown.Item icon={<Briefcase aria-hidden="true" />} onSelect={() => handleAddTaskCaret('project')}>New Project</Dropdown.Item>
+              <Dropdown.Item icon={<Zap aria-hidden="true" />} onSelect={() => handleAddTaskCaret('sprint')}>New Sprint</Dropdown.Item>
               <Dropdown.Divider />
-              <Dropdown.Item onSelect={() => handleAddTaskCaret('import')}>Import Tasks</Dropdown.Item>
+              <Dropdown.Item icon={<Upload aria-hidden="true" />} onSelect={() => handleAddTaskCaret('import')}>Import Tasks</Dropdown.Item>
             </Dropdown.Content>
           </Dropdown.Root>
         </div>
@@ -88,7 +89,7 @@ export function DashboardHeader() {
           </Dropdown.Content>
         </Dropdown.Root>
 
-        <Dropdown.Root>
+        <Dropdown.Root open={filterOpen} onOpenChange={setFilterOpen}>
           <Dropdown.Trigger asChild>
             <Button variant="secondary">
               <SlidersHorizontal aria-hidden="true" /> Filter
@@ -119,10 +120,10 @@ export function DashboardHeader() {
               </label>
             ))}
             <div className={styles.filterFooter}>
-              <button type="button" className={styles.filterClear} onClick={() => { setFilters({ todo: false, progress: false, done: false, overdue: false, high: false, medium: false, low: false }); showToast('Filters cleared', 'info', 2000) }}>
+              <button type="button" className={styles.filterClear} onClick={() => { setFilters({ todo: false, progress: false, done: false, overdue: false, high: false, medium: false, low: false }); showToast('Filters cleared', 'info', 2000); setFilterOpen(false) }}>
                 Clear all
               </button>
-              <button type="button" className={styles.filterApply} onClick={() => showToast('Filters applied', 'success', 2000)}>
+              <button type="button" className={styles.filterApply} onClick={() => { showToast('Filters applied', 'success', 2000); setFilterOpen(false) }}>
                 Apply
               </button>
             </div>
