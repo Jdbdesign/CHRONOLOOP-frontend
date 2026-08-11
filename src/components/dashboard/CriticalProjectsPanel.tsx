@@ -1,4 +1,5 @@
 // src/components/dashboard/CriticalProjectsPanel.tsx
+import { useState } from 'react'
 import { MoreHorizontal, ChevronDown, Eye, Edit2, Archive, Trash2 } from 'lucide-react'
 import { Dropdown } from '../ui/Dropdown'
 import { DASHBOARD_CRITICAL_PROJECTS } from '../../data/mockDashboardProjects'
@@ -15,6 +16,7 @@ const CTX_ACTIONS = [
 
 export function CriticalProjectsPanel() {
   const showToast = useToastStore((s) => s.showToast)
+  const [week, setWeek] = useState('This week')
 
   return (
     <section className={styles.panel}>
@@ -23,12 +25,12 @@ export function CriticalProjectsPanel() {
         <Dropdown.Root>
           <Dropdown.Trigger asChild>
             <button type="button" className={styles.weekBtn}>
-              This week <ChevronDown aria-hidden="true" />
+              {week} <ChevronDown aria-hidden="true" />
             </button>
           </Dropdown.Trigger>
           <Dropdown.Content>
             {WEEK_OPTIONS.map((label) => (
-              <Dropdown.Item key={label} active={label === 'This week'} onSelect={() => showToast(`Showing ${label.toLowerCase()}`, 'info', 2000)}>
+              <Dropdown.Item key={label} active={label === week} onSelect={() => { setWeek(label); showToast(`Showing ${label.toLowerCase()}`, 'info', 2000) }}>
                 {label}
               </Dropdown.Item>
             ))}
@@ -44,7 +46,12 @@ export function CriticalProjectsPanel() {
             role="button"
             tabIndex={0}
             onClick={() => showToast(`Opening: ${project.title}`, 'info', 2000)}
-            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') showToast(`Opening: ${project.title}`, 'info', 2000) }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                if (e.key === ' ') e.preventDefault()
+                showToast(`Opening: ${project.title}`, 'info', 2000)
+              }
+            }}
           >
             <div>
               <div className={styles.rowTitle}>{project.title}</div>
