@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { ErrorBoundary } from './components/common/ErrorBoundary'
+import { ToastProvider } from './components/ui/ToastProvider'
 import { AppShell } from './components/layout/AppShell'
 import { useThemeSync } from './store/themeStore'
 import { DashboardPage } from './pages/DashboardPage'
@@ -18,22 +19,24 @@ function App() {
 
   return (
     <ErrorBoundary>
-      <BrowserRouter>
-        <Routes>
-          <Route element={<AppShell />}>
-            <Route index element={<DashboardPage />} />
-            <Route path="tasks" element={<TasksPage />} />
-            <Route path="projects" element={<ProjectsPage />} />
-            <Route path="sprints" element={<SprintsPage />} />
-            <Route path="team" element={<TeamPage />} />
-            <Route path="reports" element={<ReportsPage />} />
-            <Route path="calendar" element={<CalendarPage />} />
-            <Route path="integrations" element={<IntegrationsPage />} />
-            <Route path="settings" element={<SettingsPage />} />
-            <Route path="*" element={<NotFoundPage />} />
-          </Route>
-        </Routes>
-      </BrowserRouter>
+      <ToastProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route element={<AppShell />}>
+              <Route index element={<DashboardPage />} />
+              <Route path="tasks" element={<TasksPage />} />
+              <Route path="projects" element={<ProjectsPage />} />
+              <Route path="sprints" element={<SprintsPage />} />
+              <Route path="team" element={<TeamPage />} />
+              <Route path="reports" element={<ReportsPage />} />
+              <Route path="calendar" element={<CalendarPage />} />
+              <Route path="integrations" element={<IntegrationsPage />} />
+              <Route path="settings" element={<SettingsPage />} />
+              <Route path="*" element={<NotFoundPage />} />
+            </Route>
+          </Routes>
+        </BrowserRouter>
+      </ToastProvider>
     </ErrorBoundary>
   )
 }
