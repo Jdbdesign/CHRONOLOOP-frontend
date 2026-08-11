@@ -1,0 +1,47 @@
+.row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.greeting .hello { font-size: 13px; color: var(--text-secondary); margin-bottom: 2px; }
+.greeting .welcome { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 600; color: var(--text-primary); }
+
+.actionBar { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+
+.split { display: flex; align-items: stretch; border-radius: 8px; overflow: hidden; flex-shrink: 0; }
+
+.splitMain {
+  display: flex; align-items: center; gap: 6px;
+  height: 34px; padding: 0 12px;
+  background: var(--accent-blue); color: #fff;
+  border: none; border-radius: 0;
+  font-size: 13px; font-weight: 500; font-family: 'DM Sans', sans-serif;
+  cursor: pointer; transition: opacity var(--duration-fast);
+  white-space: nowrap;
+}
+.splitMain:hover { opacity: 0.88; }
+.splitMain svg { width: 14px; height: 14px; }
+
+.splitCaret {
+  display: flex; align-items: center; justify-content: center;
+  width: 30px; height: 34px;
+  background: var(--accent-blue); color: rgba(255, 255, 255, 0.85);
+  border: none; border-left: 1px solid rgba(255, 255, 255, 0.2);
+  cursor: pointer; transition: opacity var(--duration-fast), background var(--duration-fast); border-radius: 0;
+}
+.splitCaret:hover { opacity: 0.88; background: #3a7de0; }
+.splitCaret svg { width: 13px; height: 13px; }
+
+.filterPanel { min-width: 220px; padding: 0; }
+.filterSectionTitle { font-size: 10px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; padding: 8px 12px 4px; }
+.filterCheckItem { display: flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 6px; cursor: pointer; }
+.filterCheckItem:hover { background: var(--bg-card-hover); }
+.filterCheckItem input { accent-color: var(--accent-blue); cursor: pointer; width: 13px; height: 13px; }
+.filterCheckItem span { font-size: 12px; color: var(--text-secondary); }
+.filterFooter { display: flex; gap: 8px; padding: 8px 8px 4px; border-top: 1px solid var(--border-subtle); margin-top: 4px; }
+.filterClear { flex: 1; padding: 7px; border-radius: 7px; background: transparent; border: 1px solid var(--border-subtle); color: var(--text-secondary); font-size: 12px; cursor: pointer; font-family: 'DM Sans'; transition: background var(--duration-fast); }
+.filterClear:hover { background: var(--bg-card-hover); }
+.filterApply { flex: 1; padding: 7px; border-radius: 7px; background: var(--accent-blue); border: none; color: #fff; font-size: 12px; font-weight: 500; cursor: pointer; font-family: 'DM Sans'; transition: opacity var(--duration-fast); }
+.filterApply:hover { opacity: 0.88; }
