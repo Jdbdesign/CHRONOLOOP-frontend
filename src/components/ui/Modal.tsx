@@ -10,14 +10,17 @@ interface ModalProps {
   subtitle?: string
   footer?: ReactNode
   children: ReactNode
+  className?: string
 }
 
-export function Modal({ open, onOpenChange, title, subtitle, footer, children }: ModalProps) {
+export function Modal({ open, onOpenChange, title, subtitle, footer, children, className }: ModalProps) {
+  const combined = [styles.card, className].filter(Boolean).join(' ')
+
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
         <Dialog.Overlay className={styles.overlay}>
-          <Dialog.Content className={styles.card}>
+          <Dialog.Content className={combined}>
             <div className={styles.header}>
               <div>
                 <Dialog.Title className={styles.title}>{title}</Dialog.Title>

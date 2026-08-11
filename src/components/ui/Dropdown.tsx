@@ -6,12 +6,15 @@ import styles from './Dropdown.module.css'
 interface DropdownContentProps {
   children: ReactNode
   align?: 'start' | 'center' | 'end'
+  className?: string
 }
 
-function DropdownContent({ children, align = 'end' }: DropdownContentProps) {
+function DropdownContent({ children, align = 'end', className }: DropdownContentProps) {
+  const combined = [styles.panel, className].filter(Boolean).join(' ')
+
   return (
     <RadixDropdown.Portal>
-      <RadixDropdown.Content className={styles.panel} align={align} sideOffset={6}>
+      <RadixDropdown.Content className={combined} align={align} sideOffset={6}>
         {children}
       </RadixDropdown.Content>
     </RadixDropdown.Portal>
@@ -23,7 +26,7 @@ interface DropdownItemProps {
   icon?: ReactNode
   active?: boolean
   danger?: boolean
-  onSelect?: () => void
+  onSelect?: (event: Event) => void
 }
 
 function DropdownItem({ children, icon, active, danger, onSelect }: DropdownItemProps) {
