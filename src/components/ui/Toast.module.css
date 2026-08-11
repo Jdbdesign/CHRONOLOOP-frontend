@@ -12,6 +12,7 @@
   font-family: 'DM Sans', sans-serif;
   min-width: 240px;
   max-width: 320px;
+  pointer-events: all;
 }
 
 .toast svg { width: 15px; height: 15px; flex-shrink: 0; }
@@ -44,4 +45,5 @@
   padding: 0;
   margin: 0;
   outline: none;
+  pointer-events: none;
 }
