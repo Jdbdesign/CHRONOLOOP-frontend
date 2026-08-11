@@ -23,7 +23,7 @@ describe('Dropdown', () => {
   })
 
   it('calls onSelect when an item is clicked', async () => {
-    const onSelect = vi.fn()
+    const onSelect = vi.fn<(event: Event) => void>()
     render(
       <Dropdown.Root>
         <Dropdown.Trigger>Open</Dropdown.Trigger>
