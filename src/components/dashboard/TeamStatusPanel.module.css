@@ -1,0 +1,75 @@
+.panel {
+  flex: 1;
+  background: var(--bg-card); border: 1px solid var(--border-subtle);
+  border-radius: 10px; padding: 14px 18px;
+  display: flex; flex-direction: column; gap: 10px;
+  transition: background var(--duration-normal) var(--ease-out);
+}
+
+.header { display: flex; align-items: center; justify-content: space-between; }
+.title { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 600; color: var(--text-primary); }
+
+.roleBtn {
+  display: flex; align-items: center; gap: 5px;
+  padding: 4px 10px;
+  background: var(--bg-card-hover); border: 1px solid var(--border-subtle);
+  border-radius: 6px; color: var(--text-secondary);
+  font-size: 11px; font-family: 'DM Sans', sans-serif;
+  cursor: pointer; transition: background var(--duration-fast);
+}
+.roleBtn:hover { background: var(--border-subtle); color: var(--text-primary); }
+.roleBtn svg { width: 11px; height: 11px; }
+
+.selectProjectBtn {
+  width: 100%; padding: 8px 12px;
+  background: var(--bg-card-hover); border: 1px solid var(--border-subtle);
+  border-radius: 8px; color: var(--text-secondary); font-size: 12px;
+  font-family: 'DM Sans', sans-serif; cursor: pointer; text-align: left;
+  display: flex; align-items: center; justify-content: space-between;
+  transition: background var(--duration-fast);
+}
+.selectProjectBtn:hover { background: var(--border-subtle); color: var(--text-primary); }
+.selectProjectBtn svg { width: 12px; height: 12px; }
+
+.progressRow { display: flex; align-items: center; gap: 10px; }
+.progressBarWrap { flex: 1; }
+.progressTrack { height: 8px; background: var(--border-subtle); border-radius: 4px; overflow: hidden; }
+.progressFill { height: 100%; border-radius: 4px; background: var(--accent-teal); width: 0%; transition: width 600ms var(--ease-out); }
+.progressPct { font-size: 12px; font-weight: 600; color: var(--text-primary); white-space: nowrap; }
+
+.viewActivity {
+  font-size: 11px; color: var(--accent-blue);
+  background: none; border: none; cursor: pointer; font-family: 'DM Sans', sans-serif; white-space: nowrap;
+}
+.viewActivity:hover { text-decoration: underline; }
+
+.grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+
+.member {
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  padding: 6px 4px; border-radius: 8px; cursor: pointer;
+  transition: background var(--duration-fast), transform var(--duration-fast);
+  border: 1px solid transparent; background-color: transparent;
+}
+.member:hover { background: var(--bg-card-hover); border-color: var(--border-subtle); transform: translateY(-2px); }
+
+.memberName { font-size: 10px; font-weight: 600; color: var(--text-primary); text-align: center; line-height: 1.3; }
+.memberEmail { font-size: 9px; color: var(--text-muted); text-align: center; }
+
+.addIndividual {
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  padding: 6px 4px; border-radius: 8px; cursor: pointer;
+  transition: background var(--duration-fast); border: 1px solid transparent; background-color: transparent;
+}
+.addIndividual:hover { background: var(--bg-card-hover); border-color: var(--border-subtle); }
+
+.addCircle {
+  width: 38px; height: 38px; border-radius: 50%;
+  border: 1.5px dashed var(--border-default);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text-muted);
+  transition: border-color var(--duration-fast), color var(--duration-fast);
+}
+.addIndividual:hover .addCircle { border-color: var(--accent-blue); color: var(--accent-blue); }
+.addCircle svg { width: 14px; height: 14px; }
+.addLabel { font-size: 10px; color: var(--text-muted); text-align: center; line-height: 1.3; }
