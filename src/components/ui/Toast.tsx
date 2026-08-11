@@ -1,10 +1,10 @@
 import * as RadixToast from '@radix-ui/react-toast'
-import { CheckCircle, XCircle, Info } from 'lucide-react'
+import { CheckCircle, XCircle, Info, AlertTriangle } from 'lucide-react'
 import { useToastStore, type ToastItem } from '../../store/toastStore'
 import styles from './Toast.module.css'
 
-const ICONS = { success: CheckCircle, error: XCircle, info: Info }
-const VARIANT_CLASS = { success: styles.success, error: styles.error, info: styles.info }
+const ICONS = { success: CheckCircle, error: XCircle, info: Info, warning: AlertTriangle }
+const VARIANT_CLASS = { success: styles.success, error: styles.error, info: styles.info, warning: '' }
 
 interface ToastProps {
   toast: ToastItem
@@ -18,7 +18,7 @@ export function Toast({ toast }: ToastProps) {
     <RadixToast.Root
       className={`${styles.toast} ${VARIANT_CLASS[toast.variant]}`}
       data-variant={toast.variant}
-      duration={3000}
+      duration={toast.duration ?? 3000}
       onOpenChange={(open) => {
         if (!open) dismissToast(toast.id)
       }}

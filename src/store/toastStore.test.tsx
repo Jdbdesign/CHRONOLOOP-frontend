@@ -23,6 +23,24 @@ describe('toastStore', () => {
     expect(toast.variant).toBe('error')
   })
 
+  it('adds a toast with the warning variant', () => {
+    useToastStore.getState().showToast('Heads up', 'warning')
+    const [toast] = useToastStore.getState().toasts
+    expect(toast.variant).toBe('warning')
+  })
+
+  it('defaults duration to 3000ms when not provided', () => {
+    useToastStore.getState().showToast('Task saved')
+    const [toast] = useToastStore.getState().toasts
+    expect(toast.duration).toBe(3000)
+  })
+
+  it('accepts an explicit duration', () => {
+    useToastStore.getState().showToast('Task saved', 'success', 6000)
+    const [toast] = useToastStore.getState().toasts
+    expect(toast.duration).toBe(6000)
+  })
+
   it('removes a toast via dismissToast', () => {
     useToastStore.getState().showToast('Task saved')
     const [toast] = useToastStore.getState().toasts
