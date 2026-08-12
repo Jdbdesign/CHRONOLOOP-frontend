@@ -4,6 +4,7 @@ import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { DashboardHeader } from './DashboardHeader'
 import { useDashboardUiStore } from '../../store/dashboardUiStore'
+import ddStyles from '../ui/Dropdown.module.css'
 
 describe('DashboardHeader', () => {
   it('renders the greeting text', () => {
@@ -24,6 +25,20 @@ describe('DashboardHeader', () => {
     await userEvent.click(screen.getByRole('button', { name: /2024/ }))
     await userEvent.click(await screen.findByRole('menuitem', { name: '2023' }))
     expect(screen.getByText('2023')).toBeInTheDocument()
+  })
+
+  it('syncs the year dropdown trigger label and active item together on selection', async () => {
+    render(<DashboardHeader />)
+    await userEvent.click(screen.getByRole('button', { name: /2024/ }))
+    await userEvent.click(await screen.findByRole('menuitem', { name: '2023' }))
+
+    expect(screen.getByRole('button', { name: /2023/ })).toBeInTheDocument()
+
+    await userEvent.click(screen.getByRole('button', { name: /2023/ }))
+    const item2023 = await screen.findByRole('menuitem', { name: '2023' })
+    expect(item2023).toHaveClass(ddStyles.active)
+    const item2024 = screen.getByRole('menuitem', { name: '2024' })
+    expect(item2024).not.toHaveClass(ddStyles.active)
   })
 
   it('closes the filter panel after clicking Apply', async () => {

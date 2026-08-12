@@ -4,6 +4,7 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { CriticalProjectsPanel } from './CriticalProjectsPanel'
 import { useToastStore } from '../../store/toastStore'
+import ddStyles from '../ui/Dropdown.module.css'
 
 describe('CriticalProjectsPanel', () => {
   beforeEach(() => {
@@ -41,5 +42,19 @@ describe('CriticalProjectsPanel', () => {
     render(<CriticalProjectsPanel />)
     await userEvent.click(screen.getByText('DogXpert'))
     expect(useToastStore.getState().toasts.at(-1)?.message).toBe('Opening client profile...')
+  })
+
+  it('syncs the week dropdown trigger label and active item together on selection', async () => {
+    render(<CriticalProjectsPanel />)
+    await userEvent.click(screen.getByRole('button', { name: 'This week' }))
+    await userEvent.click(await screen.findByRole('menuitem', { name: 'Today' }))
+
+    expect(screen.getByRole('button', { name: 'Today' })).toBeInTheDocument()
+
+    await userEvent.click(screen.getByRole('button', { name: 'Today' }))
+    const todayItem = await screen.findByRole('menuitem', { name: 'Today' })
+    expect(todayItem).toHaveClass(ddStyles.active)
+    const thisWeekItem = screen.getByRole('menuitem', { name: 'This week' })
+    expect(thisWeekItem).not.toHaveClass(ddStyles.active)
   })
 })

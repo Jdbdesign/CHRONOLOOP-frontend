@@ -37,11 +37,18 @@ describe('TeamStatusPanel', () => {
     expect(useDashboardUiStore.getState().activeModal).toBe('activity')
   })
 
-  it('animates the progress bar to 85% after mount', () => {
+  it('keeps aria-valuenow at 85 from first render while the fill bar animates its width to 85% after mount', () => {
     vi.useFakeTimers()
     render(<TeamStatusPanel />)
+    const track = screen.getByRole('progressbar')
+    expect(track).toHaveAttribute('aria-valuenow', '85')
+    const fill = track.firstElementChild as HTMLElement
+    expect(fill.style.width).toBe('0%')
+
     act(() => vi.advanceTimersByTime(500))
-    expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '85')
+
+    expect(track).toHaveAttribute('aria-valuenow', '85')
+    expect(fill.style.width).toBe('85%')
     vi.useRealTimers()
   })
 

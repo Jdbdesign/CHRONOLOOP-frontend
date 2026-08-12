@@ -1,5 +1,5 @@
 // src/components/dashboard/TaskPopup.tsx
-import { useEffect, useRef, useState } from 'react'
+import { useLayoutEffect, useRef, useState } from 'react'
 import { X, User, Calendar, Tag } from 'lucide-react'
 import { useOutsideClick } from '../../hooks/useOutsideClick'
 import type { DashboardCalendarTask } from '../../data/mockDashboardCalendar'
@@ -17,7 +17,7 @@ export function TaskPopup({ task, anchorRect, onClose }: TaskPopupProps) {
 
   useOutsideClick(ref, onClose, task !== null)
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!task || !anchorRect || !ref.current) {
       setPosition(null)
       return

@@ -76,11 +76,11 @@ export function TeamStatusPanel() {
 
       <div className={styles.progressRow}>
         <div className={styles.progressBarWrap}>
-          <div className={styles.progressTrack} role="progressbar" aria-valuenow={progress} aria-valuemin={0} aria-valuemax={100}>
+          <div className={styles.progressTrack} role="progressbar" aria-valuenow={85} aria-valuemin={0} aria-valuemax={100}>
             <div className={styles.progressFill} style={{ width: `${progress}%` }} />
           </div>
         </div>
-        <span className={styles.progressPct}>{progress}%</span>
+        <span className={styles.progressPct}>85%</span>
         <button type="button" className={styles.viewActivity} onClick={openActivity}>
           View Activity
         </button>
