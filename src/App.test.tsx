@@ -7,6 +7,7 @@ describe('App', () => {
   it('renders the Dashboard page by default, with the sidebar and topbar chrome', () => {
     render(<App />)
     expect(screen.getByRole('heading', { name: 'Dashboard' })).toBeInTheDocument()
+    expect(screen.getByText('Critical Projects')).toBeInTheDocument()
     expect(screen.getByRole('navigation', { name: /main navigation/i })).toBeInTheDocument()
     expect(screen.getByPlaceholderText('Search')).toBeInTheDocument()
   })
