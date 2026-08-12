@@ -1,0 +1,10 @@
+.card { max-width: 360px !important; }
+.body { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 16px; }
+.name { font-family: 'Syne'; font-size: 17px; font-weight: 700; color: var(--text-primary); }
+.role { font-size: 12px; color: var(--accent-blue); margin-top: 2px; }
+.email { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+.statGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; }
+.stat { background: var(--bg-input); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 12px; text-align: center; }
+.statValue { font-family: 'Syne'; font-size: 20px; font-weight: 700; color: var(--text-primary); }
+.statValue.completion { color: var(--accent-green); }
+.statLabel { font-size: 11px; color: var(--text-muted); }
