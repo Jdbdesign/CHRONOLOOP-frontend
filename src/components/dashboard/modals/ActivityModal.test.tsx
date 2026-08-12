@@ -9,6 +9,11 @@ describe('ActivityModal', () => {
   it('lists the five original activity entries when open', () => {
     useDashboardUiStore.setState({ activeModal: 'activity' })
     render(<ActivityModal />)
+    expect(screen.getByText('Aspen Herwitz')).toBeInTheDocument()
+    expect(screen.getByText('Roger Dokidis')).toBeInTheDocument()
+    expect(screen.getByText('Marley Vaccaro')).toBeInTheDocument()
+    expect(screen.getByText('Ryan Culhane')).toBeInTheDocument()
+    expect(screen.getByText('You')).toBeInTheDocument()
     expect(screen.getByText(/completed/i)).toBeInTheDocument()
     expect(screen.getByText(/moved/i)).toBeInTheDocument()
     expect(screen.getByText('Yesterday')).toBeInTheDocument()

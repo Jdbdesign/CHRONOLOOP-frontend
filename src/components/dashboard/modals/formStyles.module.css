@@ -15,8 +15,8 @@
 
 .priorityGroup { display: flex; gap: 6px; flex-wrap: wrap; }
 .priorityPill {
-  padding: 6px 14px; border-radius: 20px; border: 1px solid var(--border-subtle);
-  background: transparent; color: var(--text-secondary); font-size: 12px;
+  padding: 5px 12px; border-radius: 6px; border: 1px solid var(--border-subtle);
+  background: transparent; color: var(--text-secondary); font-size: 11px; font-weight: 500;
   font-family: 'DM Sans', sans-serif; cursor: pointer; transition: all var(--duration-fast);
 }
 .priorityPill.high:hover, .priorityPill.high[data-selected='true'] { background: rgba(255, 77, 77, 0.12); color: var(--accent-red); border-color: var(--accent-red); }

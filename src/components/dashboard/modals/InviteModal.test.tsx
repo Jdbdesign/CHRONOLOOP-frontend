@@ -15,4 +15,13 @@ describe('InviteModal', () => {
     expect(useToastStore.getState().toasts.at(-1)?.message).toBe('Invitation sent to newhire@example.com')
     expect(useDashboardUiStore.getState().activeModal).toBeNull()
   })
+
+  it('does not submit when the email is empty', async () => {
+    useDashboardUiStore.setState({ activeModal: 'invite' })
+    useToastStore.setState({ toasts: [] })
+    render(<InviteModal />)
+    await userEvent.click(screen.getByRole('button', { name: /send invite/i }))
+    expect(useToastStore.getState().toasts).toHaveLength(0)
+    expect(useDashboardUiStore.getState().activeModal).toBe('invite')
+  })
 })
