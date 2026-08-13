@@ -49,29 +49,44 @@ export function AddTaskModal() {
   const tasks = useTasksStore((s) => s.tasks)
   const isEditing = editingTaskId !== null
 
+  // Bumped synchronously on every close *intent* (Cancel, submit, outside click, Escape —
+  // all funnel through here). This is folded into AddTaskFormFields' key below so the form
+  // always gets a fresh mount/lazy-init on the next open, even when reopening the same
+  // create/edit target. We can't rely solely on Radix unmounting the modal body for this:
+  // Modal.module.css gives Dialog.Content a real `cardOut` exit animation, so Radix's
+  // Presence keeps the subtree mounted (state 'unmountSuspended') until that animation
+  // finishes — if the modal is reopened for the same target inside that window, Presence
+  // cancels the exit and never unmounts, so a key based on editingTaskId alone wouldn't
+  // change and stale form values would survive. Bumping this counter here (a plain
+  // setState from an event handler, batched with closeModal()) makes the reset synchronous
+  // and independent of animation timing, without calling setState inside an effect and
+  // without reading a ref during render.
+  const [session, setSession] = useState(0)
+  const handleClose = () => {
+    setSession((s) => s + 1)
+    closeModal()
+  }
+
   return (
     <Modal
       open={isOpen}
-      onOpenChange={(open) => !open && closeModal()}
+      onOpenChange={(open) => !open && handleClose()}
       title={isEditing ? 'Edit Task' : 'Add New Task'}
       subtitle={isEditing ? 'Update the task details' : 'Fill in the details to create a task'}
       footer={
         <>
-          <Button variant="secondary" type="button" onClick={closeModal}>Cancel</Button>
+          <Button variant="secondary" type="button" onClick={handleClose}>Cancel</Button>
           <Button type="submit" form="form-addtask">
             {isEditing ? <><Save aria-hidden="true" /> Save Changes</> : <><Plus aria-hidden="true" /> Add Task</>}
           </Button>
         </>
       }
     >
-      {/* Keyed on the edit target so Radix's own mount/unmount of Dialog content (plus this key)
-          always gives the form a fresh instance — pre-filled from the current task data on open,
-          reset to blank on the next create — without syncing local state via an effect. */}
       <AddTaskFormFields
-        key={editingTaskId ?? 'create'}
+        key={`${editingTaskId ?? 'create'}-${session}`}
         editingTaskId={editingTaskId}
         task={editingTaskId === null ? undefined : tasks.find((t) => t.id === editingTaskId)}
-        onDone={closeModal}
+        onDone={handleClose}
       />
     </Modal>
   )
