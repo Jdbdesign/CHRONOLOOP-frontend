@@ -7,8 +7,9 @@
 .list { display: flex; flex-direction: column; gap: 6px; }
 .item { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 7px; background: var(--bg-input); border: 1px solid var(--border-subtle); transition: background var(--duration-fast); }
 .item:hover { background: var(--bg-card-hover); }
-.check { width: 14px; height: 14px; border-radius: 3px; border: 1.5px solid var(--border-default); background: transparent; padding: 0; cursor: pointer; flex-shrink: 0; }
+.check { width: 14px; height: 14px; border-radius: 3px; border: 1.5px solid var(--border-default); background: transparent; padding: 0; cursor: pointer; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
 .check[data-done="true"] { background: var(--accent-green); border-color: var(--accent-green); }
+.check[data-done="true"]::after { content: '✓'; font-size: 8px; color: #fff; font-weight: 700; }
 .text { font-size: 12px; color: var(--text-primary); flex: 1; }
 .text[data-done="true"] { text-decoration: line-through; color: var(--text-muted); }
 .addRow { display: flex; gap: 8px; margin-top: 8px; }

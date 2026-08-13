@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Circle, Edit2, Trash2, X, Send } from 'lucide-react'
 import { useTaskDetailStore } from '../../store/taskDetailStore'
 import { useTasksStore } from '../../store/tasksStore'
@@ -30,6 +30,14 @@ export function TaskDetailPanel({ onDelete }: TaskDetailPanelProps) {
   const [lastTaskId, setLastTaskId] = useState<number | null>(null)
   const [prevOpenTaskId, setPrevOpenTaskId] = useState<number | null>(null)
   const [commentText, setCommentText] = useState('')
+  const panelRef = useRef<HTMLDivElement>(null)
+
+  const handleClose = useCallback(() => {
+    if (document.activeElement instanceof HTMLElement && panelRef.current?.contains(document.activeElement)) {
+      document.activeElement.blur()
+    }
+    close()
+  }, [close])
 
   // "Adjusting state during render" (React docs) instead of an effect: keeps
   // the last-open task id available so the panel can render its content while
@@ -43,10 +51,19 @@ export function TaskDetailPanel({ onDelete }: TaskDetailPanelProps) {
 
   useEffect(() => {
     if (!isOpen) return
-    const onKeyDown = (e: KeyboardEvent) => { if (e.key === 'Escape') close() }
+    const onKeyDown = (e: KeyboardEvent) => { if (e.key === 'Escape') handleClose() }
     document.addEventListener('keydown', onKeyDown)
     return () => document.removeEventListener('keydown', onKeyDown)
-  }, [isOpen, close])
+  }, [isOpen, handleClose])
+
+  // `inert` isn't in this project's @types/react HTMLAttributes yet (only in the
+  // "experimental" type defs), so it's set as a real DOM property via the ref rather
+  // than as a JSX prop — behaviorally identical, avoids widening the panel's prop types.
+  useEffect(() => {
+    if (panelRef.current) {
+      panelRef.current.inert = !isOpen
+    }
+  }, [isOpen])
 
   const displayTaskId = openTaskId ?? lastTaskId
   const task = tasks.find((t) => t.id === displayTaskId) ?? null
@@ -96,8 +113,8 @@ export function TaskDetailPanel({ onDelete }: TaskDetailPanelProps) {
 
   return (
     <>
-      <div className={styles.overlay} data-open={isOpen} data-testid="task-detail-overlay" onClick={close} />
-      <div className={styles.panel} data-open={isOpen}>
+      <div className={styles.overlay} data-open={isOpen} data-testid="task-detail-overlay" onClick={handleClose} />
+      <div ref={panelRef} className={styles.panel} data-open={isOpen}>
         <div className={styles.header}>
           <div className={[styles.statusBadge, styles[STATUS_BADGE_CLASS[task.status]]].join(' ')}>
             <Circle aria-hidden="true" />
@@ -116,7 +133,7 @@ export function TaskDetailPanel({ onDelete }: TaskDetailPanelProps) {
             >
               <Trash2 aria-hidden="true" />
             </button>
-            <button type="button" className={styles.headerBtn} title="Close" aria-label="Close" onClick={close}>
+            <button type="button" className={styles.headerBtn} title="Close" aria-label="Close" onClick={handleClose}>
               <X aria-hidden="true" />
             </button>
           </div>

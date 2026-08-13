@@ -2,6 +2,7 @@ import { Calendar, Briefcase } from 'lucide-react'
 import type { Task } from '../../types/task'
 import { formatDue } from '../../lib/taskFormatters'
 import { useTasksStore } from '../../store/tasksStore'
+import { useToastStore } from '../../store/toastStore'
 import { TaskAssigneeBubble } from './TaskAssigneeBubble'
 import styles from './TaskDetailBody.module.css'
 
@@ -18,6 +19,7 @@ interface TaskDetailBodyProps {
 
 export function TaskDetailBody({ task }: TaskDetailBodyProps) {
   const updateTaskDescription = useTasksStore((s) => s.updateTaskDescription)
+  const showToast = useToastStore((s) => s.showToast)
 
   return (
     <>
@@ -34,6 +36,7 @@ export function TaskDetailBody({ task }: TaskDetailBodyProps) {
                 avatarSrc={undefined}
                 color={task.aColor}
                 size={22}
+                fontSize={9}
               />
               {ASSIGNEE_NAME_BY_CODE[task.assignee] ?? task.assignee}
             </div>
@@ -72,7 +75,10 @@ export function TaskDetailBody({ task }: TaskDetailBodyProps) {
           contentEditable
           suppressContentEditableWarning
           className={styles.desc}
-          onBlur={(e) => updateTaskDescription(task.id, (e.currentTarget.textContent ?? '').trim())}
+          onBlur={(e) => {
+            updateTaskDescription(task.id, (e.currentTarget.textContent ?? '').trim())
+            showToast('Description saved', 'success', 1500)
+          }}
         >
           {task.description || 'Click to add a description...'}
         </div>

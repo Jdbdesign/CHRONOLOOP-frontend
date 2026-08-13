@@ -69,4 +69,30 @@ describe('TaskDetailPanel', () => {
     })
     expect(input).toHaveValue('')
   })
+
+  it('clicking a subtask checkbox toggles the correct subtask on the correct task', async () => {
+    useTaskDetailStore.setState({ openTaskId: 1 })
+    render(<TaskDetailPanel onDelete={vi.fn()} />)
+    const task1 = MOCK_TASKS.find((t) => t.id === 1)!
+    const subtaskIndex = 0
+    const subtask = task1.subtasks[subtaskIndex]
+    expect(subtask.done).toBe(true)
+
+    const checkbox = screen.getByLabelText(`Reopen "${subtask.t}"`)
+    await userEvent.click(checkbox)
+
+    expect(useTasksStore.getState().tasks.find((t) => t.id === 1)?.subtasks[subtaskIndex].done).toBe(false)
+  })
+
+  it('adding a subtask via the input appends it to the correct task', async () => {
+    useTaskDetailStore.setState({ openTaskId: 1 })
+    render(<TaskDetailPanel onDelete={vi.fn()} />)
+    const input = screen.getByPlaceholderText('Add a subtask...')
+    await userEvent.type(input, 'Write tests{Enter}')
+
+    expect(useTasksStore.getState().tasks.find((t) => t.id === 1)?.subtasks.at(-1)).toMatchObject({
+      t: 'Write tests',
+      done: false,
+    })
+  })
 })
