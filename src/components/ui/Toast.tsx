@@ -25,6 +25,11 @@ export function Toast({ toast }: ToastProps) {
     >
       <Icon aria-hidden="true" />
       <RadixToast.Description className={styles.text}>{toast.message}</RadixToast.Description>
+      {toast.action ? (
+        <button type="button" className={styles.actionBtn} onClick={toast.action.onClick}>
+          {toast.action.label}
+        </button>
+      ) : null}
     </RadixToast.Root>
   )
 }

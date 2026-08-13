@@ -1,5 +1,6 @@
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { render, screen, act } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { ToastProvider } from './ToastProvider'
 import { useToastStore } from '../../store/toastStore'
 
@@ -78,5 +79,16 @@ describe('ToastProvider', () => {
     })
 
     expect(useToastStore.getState().toasts).toHaveLength(0)
+  })
+
+  it('renders an action button and calls its onClick handler when a toast carries an action', async () => {
+    const onClick = vi.fn()
+    render(<ToastProvider>{null}</ToastProvider>)
+    act(() => {
+      useToastStore.getState().showActionToast('Task deleted', { label: 'Undo', onClick })
+    })
+    const undoBtn = await screen.findByRole('button', { name: 'Undo' })
+    await userEvent.click(undoBtn)
+    expect(onClick).toHaveBeenCalledTimes(1)
   })
 })

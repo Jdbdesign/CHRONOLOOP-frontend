@@ -48,3 +48,13 @@ describe('toastStore', () => {
     expect(useToastStore.getState().toasts).toHaveLength(0)
   })
 })
+
+describe('toastStore — action toasts', () => {
+  it('showActionToast adds a toast carrying an action and returns its id', () => {
+    const onClick = () => {}
+    const id = useToastStore.getState().showActionToast('Deleting…', { label: 'Undo', onClick })
+    const toast = useToastStore.getState().toasts.find((t) => t.id === id)
+    expect(toast?.message).toBe('Deleting…')
+    expect(toast?.action?.label).toBe('Undo')
+  })
+})
