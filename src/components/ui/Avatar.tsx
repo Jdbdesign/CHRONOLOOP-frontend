@@ -9,6 +9,8 @@ interface AvatarProps {
   size?: 'sm' | 'md'
   className?: string
   style?: CSSProperties
+  fallbackStyle?: CSSProperties
+  title?: string
 }
 
 function getInitials(name: string): string {
@@ -19,14 +21,15 @@ function getInitials(name: string): string {
 }
 
 export const Avatar = forwardRef<ComponentRef<typeof RadixAvatar.Root>, AvatarProps>(
-  function Avatar({ src, name, size = 'sm', className, style }, ref) {
+  function Avatar({ src, name, size = 'sm', className, style, fallbackStyle, title }, ref) {
     const sizeClass = size === 'md' ? styles.md : styles.sm
     const combined = [styles.root, sizeClass, className].filter(Boolean).join(' ')
+    const displayTitle = title ?? name
 
     return (
-      <RadixAvatar.Root ref={ref} className={combined} style={style} title={name}>
-        <RadixAvatar.Image className={styles.image} src={src} alt={name} />
-        <RadixAvatar.Fallback className={styles.fallback}>{getInitials(name)}</RadixAvatar.Fallback>
+      <RadixAvatar.Root ref={ref} className={combined} style={style} title={displayTitle}>
+        <RadixAvatar.Image className={styles.image} src={src} alt={displayTitle} />
+        <RadixAvatar.Fallback className={styles.fallback} style={fallbackStyle}>{getInitials(name)}</RadixAvatar.Fallback>
       </RadixAvatar.Root>
     )
   },

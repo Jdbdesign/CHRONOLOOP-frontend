@@ -22,4 +22,9 @@ describe('Avatar', () => {
     render(<Avatar name="Aspen Herwitz" style={{ width: 38, height: 38 }} />)
     expect(screen.getByTitle('Aspen Herwitz')).toHaveStyle({ width: '38px', height: '38px' })
   })
+
+  it('applies an inline style override on the fallback element for per-instance coloring', () => {
+    render(<Avatar name="Aspen Herwitz" fallbackStyle={{ background: 'red' }} />)
+    expect(screen.getByText('AH')).toHaveStyle({ background: 'red' })
+  })
 })
