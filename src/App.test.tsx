@@ -15,7 +15,7 @@ describe('App', () => {
   it('navigates to the Tasks page when the Tasks nav link is clicked', async () => {
     render(<App />)
     await userEvent.click(screen.getByRole('link', { name: 'Tasks' }))
-    expect(screen.getByRole('heading', { name: 'Tasks' })).toBeInTheDocument()
+    expect(screen.getByText('My Tasks')).toBeInTheDocument()
   })
 
   it('navigates to the Integrations page when the "Integration" nav link is clicked', async () => {
