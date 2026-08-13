@@ -91,4 +91,28 @@ describe('ToastProvider', () => {
     await userEvent.click(undoBtn)
     expect(onClick).toHaveBeenCalledTimes(1)
   })
+
+  it('an action toast with duration Infinity survives past Radix\'s default 3s auto-close', () => {
+    vi.useFakeTimers()
+    try {
+      render(<ToastProvider>{null}</ToastProvider>)
+      act(() => {
+        useToastStore.getState().showActionToast('Task deleted', { label: 'Undo', onClick: vi.fn() }, Infinity)
+      })
+      expect(screen.getByRole('button', { name: 'Undo' })).toBeInTheDocument()
+
+      act(() => {
+        vi.advanceTimersByTime(3500)
+      })
+
+      // Radix's own Toast.Root auto-close timer defaults to 3000ms whenever
+      // `duration` is finite/undefined. Passing Infinity must disable that
+      // timer entirely, so the toast (and its Undo button) is still present
+      // well past 3s — it's the hook's own countdown, not Radix, that
+      // eventually closes it.
+      expect(screen.getByRole('button', { name: 'Undo' })).toBeInTheDocument()
+    } finally {
+      vi.useRealTimers()
+    }
+  })
 })

@@ -18,6 +18,12 @@ describe('useDeleteWithUndo', () => {
     expect(remove).toHaveBeenCalledWith(1)
     const toast = useToastStore.getState().toasts.at(-1)
     expect(toast?.action?.label).toBe('Undo')
+    // duration must be Infinity so Radix's own auto-close timer never fires —
+    // the hook's setInterval is the sole authority on when this toast closes.
+    // See Toast.tsx's `duration={toast.duration ?? 3000}` fallback: any
+    // finite/undefined duration here races Radix's timer against the 5s
+    // countdown text and closes the toast ~2s early.
+    expect(toast?.duration).toBe(Infinity)
   })
 
   it('clicking Undo calls restore with the removed task and its original index, and dismisses the toast', () => {
