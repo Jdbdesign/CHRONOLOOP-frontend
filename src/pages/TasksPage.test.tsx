@@ -4,11 +4,16 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { TasksPage } from './TasksPage'
 import { useTasksStore } from '../store/tasksStore'
+import { useTaskDetailStore } from '../store/taskDetailStore'
 import { MOCK_TASKS } from '../data/mockTasks'
 
 describe('TasksPage', () => {
   beforeEach(() => {
     useTasksStore.setState({ tasks: MOCK_TASKS, todoKpiOverride: null })
+    // taskDetailStore is a module-level singleton, so a panel left open by one
+    // test (e.g. the "opens the detail panel" test below) would otherwise leak
+    // into the next test's initial render and produce ambiguous getByText matches.
+    useTaskDetailStore.setState({ openTaskId: null })
   })
 
   it('renders the header, stat chips, toolbar, and the list view by default', () => {
@@ -45,5 +50,21 @@ describe('TasksPage', () => {
     await userEvent.type(screen.getByPlaceholderText('Search tasks...'), target.title.slice(0, 8))
     expect(screen.getByText(target.title)).toBeInTheDocument()
     expect(screen.queryByText(other.title)).not.toBeInTheDocument()
+  })
+
+  it('clicking a task row opens the detail panel showing that task', async () => {
+    render(<TasksPage />)
+    const target = MOCK_TASKS[0]
+    await userEvent.click(screen.getByText(target.title))
+    expect(screen.getAllByText(target.title).length).toBeGreaterThan(0)
+    expect(screen.getByPlaceholderText('Add a comment...')).toBeInTheDocument()
+  })
+
+  it('opening a task then clicking its Edit button in the detail panel opens the edit modal', async () => {
+    render(<TasksPage />)
+    const target = MOCK_TASKS[0]
+    await userEvent.click(screen.getByText(target.title))
+    await userEvent.click(screen.getByLabelText('Edit task'))
+    expect(screen.getByText('Edit Task')).toBeInTheDocument()
   })
 })
