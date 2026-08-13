@@ -28,4 +28,13 @@ describe('TaskStatsRow', () => {
     render(<TaskStatsRow activeFilter="overdue" onFilterChange={vi.fn()} />)
     expect(screen.getByText('Overdue').closest('[data-active]')).toHaveAttribute('data-active', 'true')
   })
+
+  it('renders children inline within the same row as the chips', () => {
+    render(
+      <TaskStatsRow activeFilter="all" onFilterChange={vi.fn()}>
+        <div data-testid="toolbar-slot">toolbar</div>
+      </TaskStatsRow>,
+    )
+    expect(screen.getByTestId('toolbar-slot')).toBeInTheDocument()
+  })
 })

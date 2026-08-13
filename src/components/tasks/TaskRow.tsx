@@ -5,6 +5,7 @@ import { TaskTagList } from './TaskTagList'
 import { TaskAssigneeBubble } from './TaskAssigneeBubble'
 import { useTaskModalStore } from '../../store/taskModalStore'
 import { useTasksStore } from '../../store/tasksStore'
+import { useToastStore } from '../../store/toastStore'
 import styles from './TaskRow.module.css'
 
 const PRIORITY_ICON = { high: AlertCircle, medium: MinusCircle, low: CheckCircle } as const
@@ -19,6 +20,7 @@ interface TaskRowProps {
 export function TaskRow({ task, onOpenDetail, onDelete }: TaskRowProps) {
   const openEdit = useTaskModalStore((s) => s.openEdit)
   const setTaskStatus = useTasksStore((s) => s.setTaskStatus)
+  const showToast = useToastStore((s) => s.showToast)
   const isDone = task.status === 'done'
   const dueClass = getDueClass(task.due, task.status)
   const PriorityIcon = PRIORITY_ICON[task.priority]
@@ -32,7 +34,17 @@ export function TaskRow({ task, onOpenDetail, onDelete }: TaskRowProps) {
         aria-label={isDone ? 'Mark as not done' : 'Mark as done'}
         className={styles.checkbox}
         data-checked={isDone}
-        onClick={(e) => { e.stopPropagation(); setTaskStatus(task.id, isDone ? 'todo' : 'done') }}
+        onClick={(e) => {
+          e.stopPropagation()
+          const willBeDone = !isDone
+          setTaskStatus(task.id, willBeDone ? 'done' : 'todo')
+          if (willBeDone) {
+            // Matches the original's substring(0,30) + '…' pattern verbatim
+            // (index.html:6999-7000) — it always appends the ellipsis, even
+            // for titles shorter than 30 characters.
+            showToast(`"${task.title.substring(0, 30)}…" marked complete`, 'success')
+          }
+        }}
       />
 
       <div className={styles.nameCol}>

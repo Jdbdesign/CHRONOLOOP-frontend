@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { useTasksStore } from '../../store/tasksStore'
 import styles from './TaskStatsRow.module.css'
 
@@ -12,9 +13,10 @@ const CHIPS = [
 interface TaskStatsRowProps {
   activeFilter: string
   onFilterChange: (filter: string) => void
+  children?: ReactNode
 }
 
-export function TaskStatsRow({ activeFilter, onFilterChange }: TaskStatsRowProps) {
+export function TaskStatsRow({ activeFilter, onFilterChange, children }: TaskStatsRowProps) {
   const tasks = useTasksStore((s) => s.tasks)
 
   const countFor = (filter: string) => (filter === 'all' ? tasks.length : tasks.filter((t) => t.status === filter).length)
@@ -41,6 +43,7 @@ export function TaskStatsRow({ activeFilter, onFilterChange }: TaskStatsRowProps
           <span className={styles.label}>{label}</span>
         </div>
       ))}
+      {children}
     </div>
   )
 }

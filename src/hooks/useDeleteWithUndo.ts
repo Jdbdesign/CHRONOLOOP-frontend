@@ -8,6 +8,7 @@ export function useDeleteWithUndo<T>(
   const showActionToast = useToastStore((s) => s.showActionToast)
   const updateToastMessage = useToastStore((s) => s.updateToastMessage)
   const dismissToast = useToastStore((s) => s.dismissToast)
+  const showToast = useToastStore((s) => s.showToast)
 
   const deleteWithUndo = useCallback(
     (id: number, label: string) => {
@@ -30,6 +31,7 @@ export function useDeleteWithUndo<T>(
             clearInterval(interval)
             restore(removed.task, removed.index)
             dismissToast(toastId)
+            showToast('Task restored', 'success', 2000)
           },
         },
         Infinity,
@@ -45,7 +47,7 @@ export function useDeleteWithUndo<T>(
         updateToastMessage(toastId, `"${truncated}" deletes in ${secondsLeft}s`)
       }, 1000)
     },
-    [remove, restore, showActionToast, updateToastMessage, dismissToast],
+    [remove, restore, showActionToast, updateToastMessage, dismissToast, showToast],
   )
 
   return { deleteWithUndo }

@@ -4,7 +4,9 @@ import userEvent from '@testing-library/user-event'
 import { TaskRow } from './TaskRow'
 import { useTaskModalStore } from '../../store/taskModalStore'
 import { useTasksStore } from '../../store/tasksStore'
+import { useToastStore } from '../../store/toastStore'
 import { MOCK_TASKS } from '../../data/mockTasks'
+import type { Task } from '../../types/task'
 
 const task = MOCK_TASKS[0]
 
@@ -29,6 +31,25 @@ describe('TaskRow', () => {
     await userEvent.click(screen.getByRole('checkbox'))
     expect(useTasksStore.getState().tasks.find((t) => t.id === task.id)?.status).toBe('done')
     expect(onOpenDetail).not.toHaveBeenCalled()
+  })
+
+  it('shows a "marked complete" success toast when the checkbox transitions todo/in-progress to done', async () => {
+    useTasksStore.setState({ tasks: MOCK_TASKS, todoKpiOverride: null })
+    useToastStore.setState({ toasts: [] })
+    render(<TaskRow task={task} onOpenDetail={vi.fn()} onDelete={vi.fn()} />)
+    await userEvent.click(screen.getByRole('checkbox'))
+    const toast = useToastStore.getState().toasts.at(-1)
+    expect(toast).toMatchObject({ message: `"${task.title.substring(0, 30)}…" marked complete`, variant: 'success' })
+  })
+
+  it('does not show a toast when the checkbox transitions done back to not-done', async () => {
+    const doneTask: Task = { ...task, status: 'done' }
+    useTasksStore.setState({ tasks: MOCK_TASKS.map((t) => (t.id === task.id ? doneTask : t)), todoKpiOverride: null })
+    useToastStore.setState({ toasts: [] })
+    render(<TaskRow task={doneTask} onOpenDetail={vi.fn()} onDelete={vi.fn()} />)
+    await userEvent.click(screen.getByRole('checkbox'))
+    expect(useTasksStore.getState().tasks.find((t) => t.id === task.id)?.status).toBe('todo')
+    expect(useToastStore.getState().toasts).toHaveLength(0)
   })
 
   it('clicking Edit opens the edit modal for this task and does not open the detail view', async () => {

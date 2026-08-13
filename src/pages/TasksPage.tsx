@@ -53,13 +53,14 @@ export function TasksPage() {
   return (
     <div className={styles.page}>
       <TasksPageHeader view={view} onViewChange={setView} />
-      <TaskStatsRow activeFilter={activeFilter} onFilterChange={setActiveFilter} />
-      <TasksToolbar
-        activeSort={activeSort}
-        onSortChange={setActiveSort}
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-      />
+      <TaskStatsRow activeFilter={activeFilter} onFilterChange={setActiveFilter}>
+        <TasksToolbar
+          activeSort={activeSort}
+          onSortChange={setActiveSort}
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+        />
+      </TaskStatsRow>
       {view === 'list' ? (
         <TaskListView tasks={filteredTasks} onOpenDetail={handleOpenDetail} onDelete={handleDelete} />
       ) : (

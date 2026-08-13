@@ -40,6 +40,20 @@ describe('useDeleteWithUndo', () => {
     expect(useToastStore.getState().toasts.find((t) => t.id === toastId)).toBeUndefined()
   })
 
+  it('clicking Undo shows a "Task restored" success toast', () => {
+    const removed = { task: { id: 1, title: 'Sample task' }, index: 2 }
+    const remove = vi.fn().mockReturnValue(removed)
+    const restore = vi.fn()
+    const { result } = renderHook(() => useDeleteWithUndo(remove, restore))
+
+    act(() => result.current.deleteWithUndo(1, 'Sample task'))
+    const toastId = useToastStore.getState().toasts.at(-1)!.id
+    act(() => useToastStore.getState().toasts.find((t) => t.id === toastId)?.action?.onClick())
+
+    const restoredToast = useToastStore.getState().toasts.at(-1)
+    expect(restoredToast).toMatchObject({ message: 'Task restored', variant: 'success', duration: 2000 })
+  })
+
   it('does nothing if remove returns null (task already gone)', () => {
     const remove = vi.fn().mockReturnValue(null)
     const restore = vi.fn()
