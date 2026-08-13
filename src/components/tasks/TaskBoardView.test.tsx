@@ -3,7 +3,9 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { TaskBoardView } from './TaskBoardView'
 import { useTaskModalStore } from '../../store/taskModalStore'
+import { STATUS_CONFIG } from '../../lib/taskFormatters'
 import { MOCK_TASKS } from '../../data/mockTasks'
+import styles from './TaskBoardView.module.css'
 
 describe('TaskBoardView', () => {
   it('renders all four status columns with correct counts', () => {
@@ -11,6 +13,25 @@ describe('TaskBoardView', () => {
     const todoCount = MOCK_TASKS.filter((t) => t.status === 'todo').length
     expect(screen.getByText('To Do')).toBeInTheDocument()
     expect(screen.getByText(String(todoCount))).toBeInTheDocument()
+  })
+
+  it('renders each column label from STATUS_CONFIG rather than a hardcoded copy', () => {
+    render(<TaskBoardView tasks={MOCK_TASKS} onOpenDetail={vi.fn()} />)
+    for (const status of ['todo', 'in-progress', 'done', 'overdue'] as const) {
+      expect(screen.getByText(STATUS_CONFIG[status].label)).toBeInTheDocument()
+    }
+  })
+
+  it("renders each column's dot color from STATUS_CONFIG, in board order", () => {
+    const boardOrder = ['todo', 'in-progress', 'done', 'overdue'] as const
+    const { container } = render(<TaskBoardView tasks={MOCK_TASKS} onOpenDetail={vi.fn()} />)
+    const dots = container.querySelectorAll(`.${styles.colDot}`)
+    expect(dots.length).toBe(boardOrder.length)
+    boardOrder.forEach((status, i) => {
+      const probe = document.createElement('div')
+      probe.style.background = STATUS_CONFIG[status].color
+      expect((dots[i] as HTMLElement).style.background).toBe(probe.style.background)
+    })
   })
 
   it('shows a "No tasks" placeholder for an empty column', () => {

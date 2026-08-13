@@ -1,15 +1,11 @@
 import { Plus } from 'lucide-react'
 import type { Task, TaskStatus } from '../../types/task'
+import { STATUS_CONFIG } from '../../lib/taskFormatters'
 import { TaskBoardCard } from './TaskBoardCard'
 import { useTaskModalStore } from '../../store/taskModalStore'
 import styles from './TaskBoardView.module.css'
 
-const COLUMNS: { key: TaskStatus; label: string; color: string }[] = [
-  { key: 'todo', label: 'To Do', color: '#4A90FF' },
-  { key: 'in-progress', label: 'In Progress', color: '#EAB308' },
-  { key: 'done', label: 'Done', color: '#22C55E' },
-  { key: 'overdue', label: 'Overdue', color: '#FF4D4D' },
-]
+const BOARD_COLUMN_ORDER: TaskStatus[] = ['todo', 'in-progress', 'done', 'overdue']
 
 interface TaskBoardViewProps {
   tasks: Task[]
@@ -21,14 +17,15 @@ export function TaskBoardView({ tasks, onOpenDetail }: TaskBoardViewProps) {
 
   return (
     <div className={styles.board}>
-      {COLUMNS.map((col) => {
-        const colTasks = tasks.filter((t) => t.status === col.key)
+      {BOARD_COLUMN_ORDER.map((status) => {
+        const cfg = STATUS_CONFIG[status]
+        const colTasks = tasks.filter((t) => t.status === status)
         return (
-          <div key={col.key} className={styles.col}>
+          <div key={status} className={styles.col}>
             <div className={styles.colHeader}>
               <div className={styles.colTitle}>
-                <span className={styles.colDot} style={{ background: col.color }} />
-                <span className={styles.colTitleText}>{col.label}</span>
+                <span className={styles.colDot} style={{ background: cfg.color }} />
+                <span className={styles.colTitleText}>{cfg.label}</span>
                 <span className={styles.colCount}>{colTasks.length}</span>
               </div>
               <button type="button" className={styles.addColBtn} aria-label="Add task to column" onClick={openCreate}>
