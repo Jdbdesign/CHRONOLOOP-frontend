@@ -98,3 +98,42 @@ describe('tasksStore — Phase 3.2 extensions', () => {
     expect(useTasksStore.getState().tasks.find((t) => t.id === 1)?.status).toBe('todo')
   })
 })
+
+describe('tasksStore — Phase 3.3 extensions', () => {
+  beforeEach(() => {
+    useTasksStore.setState({ tasks: MOCK_TASKS, todoKpiOverride: null })
+  })
+
+  it('addSubtask appends a new, not-done subtask to the given task', () => {
+    const before = useTasksStore.getState().tasks.find((t) => t.id === 3)!.subtasks.length
+    useTasksStore.getState().addSubtask(3, 'New subtask')
+    const after = useTasksStore.getState().tasks.find((t) => t.id === 3)!.subtasks
+    expect(after).toHaveLength(before + 1)
+    expect(after.at(-1)).toEqual({ t: 'New subtask', done: false })
+  })
+
+  it('toggleSubtask flips the done flag at the given index, leaving other subtasks untouched', () => {
+    useTasksStore.getState().toggleSubtask(1, 2)
+    const subtasks = useTasksStore.getState().tasks.find((t) => t.id === 1)!.subtasks
+    expect(subtasks[2].done).toBe(true)
+    expect(subtasks[0].done).toBe(true)
+    expect(subtasks[1].done).toBe(true)
+    useTasksStore.getState().toggleSubtask(1, 2)
+    expect(useTasksStore.getState().tasks.find((t) => t.id === 1)!.subtasks[2].done).toBe(false)
+  })
+
+  it('updateTaskDescription replaces only the description field', () => {
+    useTasksStore.getState().updateTaskDescription(2, 'Updated description text')
+    const task = useTasksStore.getState().tasks.find((t) => t.id === 2)!
+    expect(task.description).toBe('Updated description text')
+    expect(task.title).toBe('Develop Landing Page for Eatz Website')
+  })
+
+  it('addComment appends a comment authored by "You" with time "Just now"', () => {
+    const before = useTasksStore.getState().tasks.find((t) => t.id === 3)!.comments.length
+    useTasksStore.getState().addComment(3, 'Looks good')
+    const comments = useTasksStore.getState().tasks.find((t) => t.id === 3)!.comments
+    expect(comments).toHaveLength(before + 1)
+    expect(comments.at(-1)).toEqual({ author: 'You', text: 'Looks good', time: 'Just now' })
+  })
+})

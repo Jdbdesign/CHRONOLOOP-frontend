@@ -17,6 +17,10 @@ interface TasksState {
   removeTask: (id: number) => { task: Task; index: number } | null
   restoreTask: (task: Task, index: number) => void
   setTaskStatus: (id: number, status: 'todo' | 'done') => void
+  addSubtask: (id: number, text: string) => void
+  toggleSubtask: (id: number, index: number) => void
+  updateTaskDescription: (id: number, description: string) => void
+  addComment: (id: number, text: string) => void
 }
 
 export const useTasksStore = create<TasksState>((set, get) => ({
@@ -82,6 +86,36 @@ export const useTasksStore = create<TasksState>((set, get) => ({
   setTaskStatus: (id, status) => {
     set((state) => ({
       tasks: state.tasks.map((task) => (task.id === id ? { ...task, status: status as TaskStatus } : task)),
+    }))
+  },
+  addSubtask: (id, text) => {
+    set((state) => ({
+      tasks: state.tasks.map((task) =>
+        task.id === id ? { ...task, subtasks: [...task.subtasks, { t: text, done: false }] } : task,
+      ),
+    }))
+  },
+  toggleSubtask: (id, index) => {
+    set((state) => ({
+      tasks: state.tasks.map((task) =>
+        task.id === id
+          ? { ...task, subtasks: task.subtasks.map((s, i) => (i === index ? { ...s, done: !s.done } : s)) }
+          : task,
+      ),
+    }))
+  },
+  updateTaskDescription: (id, description) => {
+    set((state) => ({
+      tasks: state.tasks.map((task) => (task.id === id ? { ...task, description } : task)),
+    }))
+  },
+  addComment: (id, text) => {
+    set((state) => ({
+      tasks: state.tasks.map((task) =>
+        task.id === id
+          ? { ...task, comments: [...task.comments, { author: 'You', text, time: 'Just now' }] }
+          : task,
+      ),
     }))
   },
 }))
