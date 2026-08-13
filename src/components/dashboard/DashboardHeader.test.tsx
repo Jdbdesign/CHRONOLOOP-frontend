@@ -3,7 +3,7 @@ import { describe, it, expect } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { DashboardHeader } from './DashboardHeader'
-import { useDashboardUiStore } from '../../store/dashboardUiStore'
+import { useTaskModalStore } from '../../store/taskModalStore'
 import ddStyles from '../ui/Dropdown.module.css'
 
 describe('DashboardHeader', () => {
@@ -14,10 +14,10 @@ describe('DashboardHeader', () => {
   })
 
   it('opens the Add Task modal via the split button\'s main action', async () => {
-    useDashboardUiStore.setState({ activeModal: null })
+    useTaskModalStore.setState({ isOpen: false, editingTaskId: null })
     render(<DashboardHeader />)
     await userEvent.click(screen.getByRole('button', { name: /add task/i }))
-    expect(useDashboardUiStore.getState().activeModal).toBe('addTask')
+    expect(useTaskModalStore.getState()).toMatchObject({ isOpen: true, editingTaskId: null })
   })
 
   it('switches the active year label when a year is picked from the dropdown', async () => {

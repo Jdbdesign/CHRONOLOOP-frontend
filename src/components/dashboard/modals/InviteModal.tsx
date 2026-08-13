@@ -5,7 +5,7 @@ import { Modal } from '../../ui/Modal'
 import { Button } from '../../ui/Button'
 import { useDashboardUiStore } from '../../../store/dashboardUiStore'
 import { useToastStore } from '../../../store/toastStore'
-import formStyles from './formStyles.module.css'
+import formStyles from '../../tasks/modals/formStyles.module.css'
 
 const ROLES = ['Developer', 'Designer', 'Manager', 'Viewer']
 const EMPTY_FORM = { email: '', role: ROLES[0], message: '' }

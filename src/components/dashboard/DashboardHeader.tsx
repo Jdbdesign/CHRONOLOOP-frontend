@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { Plus, PlusCircle, Briefcase, Zap, ChevronDown, Calendar, SlidersHorizontal, Upload } from 'lucide-react'
 import { Button } from '../ui/Button'
 import { Dropdown } from '../ui/Dropdown'
-import { useDashboardUiStore } from '../../store/dashboardUiStore'
+import { useTaskModalStore } from '../../store/taskModalStore'
 import { useToastStore } from '../../store/toastStore'
 import styles from './DashboardHeader.module.css'
 
@@ -20,14 +20,14 @@ const FILTER_DEFAULTS = {
 }
 
 export function DashboardHeader() {
-  const openAddTask = useDashboardUiStore((s) => s.openAddTask)
+  const openCreateTask = useTaskModalStore((s) => s.openCreate)
   const showToast = useToastStore((s) => s.showToast)
   const [year, setYear] = useState('2024')
   const [filters, setFilters] = useState(FILTER_DEFAULTS)
   const [filterOpen, setFilterOpen] = useState(false)
 
   const handleAddTaskCaret = (action: 'task' | 'project' | 'sprint' | 'import') => {
-    if (action === 'task') openAddTask()
+    if (action === 'task') openCreateTask()
     else if (action === 'project') showToast('New Project form coming soon', 'info')
     else if (action === 'sprint') showToast('New Sprint form coming soon', 'info')
     else showToast('Import dialog opening...', 'info')
@@ -55,7 +55,7 @@ export function DashboardHeader() {
 
       <div className={styles.actionBar}>
         <div className={styles.split}>
-          <button type="button" className={styles.splitMain} onClick={openAddTask}>
+          <button type="button" className={styles.splitMain} onClick={openCreateTask}>
             <Plus aria-hidden="true" /> Add Task
           </button>
           <Dropdown.Root>

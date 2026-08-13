@@ -1,11 +1,10 @@
 import { create } from 'zustand'
 
-export type DashboardModal = 'addTask' | 'activity' | 'invite' | 'member' | null
+export type DashboardModal = 'activity' | 'invite' | 'member' | null
 
 interface DashboardUiState {
   activeModal: DashboardModal
   selectedMemberId: string | null
-  openAddTask: () => void
   openActivity: () => void
   openInvite: () => void
   openMember: (id: string) => void
@@ -15,7 +14,6 @@ interface DashboardUiState {
 export const useDashboardUiStore = create<DashboardUiState>((set) => ({
   activeModal: null,
   selectedMemberId: null,
-  openAddTask: () => set({ activeModal: 'addTask' }),
   openActivity: () => set({ activeModal: 'activity' }),
   openInvite: () => set({ activeModal: 'invite' }),
   openMember: (id) => set({ activeModal: 'member', selectedMemberId: id }),
