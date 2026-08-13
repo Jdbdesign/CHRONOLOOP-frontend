@@ -1,0 +1,11 @@
+.label { font-size: 10px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; }
+.list { display: flex; flex-direction: column; gap: 6px; }
+.item { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: 7px; background: var(--bg-input); border: 1px solid var(--border-subtle); transition: background var(--duration-fast); }
+.item:hover { background: var(--bg-card-hover); }
+.icon { width: 30px; height: 30px; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.icon svg { width: 14px; height: 14px; }
+.info { flex: 1; min-width: 0; }
+.name { font-size: 12px; color: var(--text-primary); font-weight: 500; }
+.size { font-size: 10px; color: var(--text-muted); margin-top: 1px; }
+.downloadBtn { width: 26px; height: 26px; border-radius: 5px; background: transparent; border: none; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: background var(--duration-fast), color var(--duration-fast); }
+.downloadBtn:hover { background: var(--bg-card-hover); color: var(--text-primary); }

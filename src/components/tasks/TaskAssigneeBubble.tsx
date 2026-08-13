@@ -5,17 +5,18 @@ interface TaskAssigneeBubbleProps {
   assignee: string
   avatarSrc: string | undefined
   color: string
-  size: 26 | 22
+  size: number
+  fontSize?: number
 }
 
-export function TaskAssigneeBubble({ assignee, avatarSrc, color, size }: TaskAssigneeBubbleProps) {
+export function TaskAssigneeBubble({ assignee, avatarSrc, color, size, fontSize }: TaskAssigneeBubbleProps) {
   return (
     <Avatar
       src={avatarSrc}
       name={assignee}
       className={styles.bubble}
       style={{ width: size, height: size }}
-      fallbackStyle={{ background: color, fontSize: size === 22 ? 8 : 9 }}
+      fallbackStyle={{ background: color, fontSize: fontSize ?? (size === 22 ? 8 : 9) }}
     />
   )
 }
