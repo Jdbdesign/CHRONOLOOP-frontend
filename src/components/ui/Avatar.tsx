@@ -10,25 +10,29 @@ interface AvatarProps {
   className?: string
   style?: CSSProperties
   fallbackStyle?: CSSProperties
-  title?: string
 }
 
 function getInitials(name: string): string {
-  const words = name.trim().split(/\s+/)
+  const trimmed = name.trim()
+  // If the input is already a 2-character code with no whitespace (e.g., "AS", "RD", "MV", "RC"),
+  // return it unchanged rather than processing it as a full name
+  if (trimmed.length === 2 && !trimmed.includes(' ')) {
+    return trimmed.toUpperCase()
+  }
+  const words = trimmed.split(/\s+/)
   const first = words[0]?.[0] ?? ''
   const last = words.length > 1 ? words[words.length - 1][0] : ''
   return (first + last).toUpperCase()
 }
 
 export const Avatar = forwardRef<ComponentRef<typeof RadixAvatar.Root>, AvatarProps>(
-  function Avatar({ src, name, size = 'sm', className, style, fallbackStyle, title }, ref) {
+  function Avatar({ src, name, size = 'sm', className, style, fallbackStyle }, ref) {
     const sizeClass = size === 'md' ? styles.md : styles.sm
     const combined = [styles.root, sizeClass, className].filter(Boolean).join(' ')
-    const displayTitle = title ?? name
 
     return (
-      <RadixAvatar.Root ref={ref} className={combined} style={style} title={displayTitle}>
-        <RadixAvatar.Image className={styles.image} src={src} alt={displayTitle} />
+      <RadixAvatar.Root ref={ref} className={combined} style={style} title={name}>
+        <RadixAvatar.Image className={styles.image} src={src} alt={name} />
         <RadixAvatar.Fallback className={styles.fallback} style={fallbackStyle}>{getInitials(name)}</RadixAvatar.Fallback>
       </RadixAvatar.Root>
     )

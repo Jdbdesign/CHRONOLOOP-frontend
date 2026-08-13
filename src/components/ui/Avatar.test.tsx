@@ -27,4 +27,9 @@ describe('Avatar', () => {
     render(<Avatar name="Aspen Herwitz" fallbackStyle={{ background: 'red' }} />)
     expect(screen.getByText('AH')).toHaveStyle({ background: 'red' })
   })
+
+  it('handles 2-character codes (like assignee initials) without whitespace', () => {
+    render(<Avatar name="AS" />)
+    expect(screen.getByText('AS')).toBeInTheDocument()
+  })
 })
