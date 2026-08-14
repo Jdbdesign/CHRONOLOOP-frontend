@@ -50,6 +50,11 @@ export function ProjectCard({ project, index, onOpenDetail, onDelete }: ProjectC
                 className={styles.menuBtn}
                 aria-label="More options"
                 onClick={(e) => e.stopPropagation()}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.stopPropagation()
+                  }
+                }}
               >
                 <MoreHorizontal aria-hidden="true" />
               </button>

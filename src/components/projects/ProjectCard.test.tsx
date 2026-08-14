@@ -29,6 +29,16 @@ describe('ProjectCard', () => {
     expect(onOpenDetail).not.toHaveBeenCalled()
   })
 
+  it('does not open the detail panel when keyboard activating the three-dot menu', async () => {
+    const onOpenDetail = vi.fn()
+    const user = userEvent.setup()
+    render(<ProjectCard project={MOCK_PROJECTS[0]} index={0} onOpenDetail={onOpenDetail} onDelete={() => {}} />)
+    await user.tab()
+    await user.tab()
+    await user.keyboard('{Enter}')
+    expect(onOpenDetail).not.toHaveBeenCalled()
+  })
+
   it('calls onDelete with id and name from the context menu', async () => {
     const onDelete = vi.fn()
     render(<ProjectCard project={MOCK_PROJECTS[0]} index={0} onOpenDetail={() => {}} onDelete={onDelete} />)

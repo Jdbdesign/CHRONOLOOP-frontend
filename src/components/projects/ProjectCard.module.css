@@ -12,7 +12,8 @@
 .top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
 .name { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 600; color: var(--text-primary); line-height: 1.35; flex: 1; }
 .menuBtn { width: 26px; height: 26px; border-radius: 6px; background: transparent; border: none; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity var(--duration-fast), background var(--duration-fast), color var(--duration-fast); flex-shrink: 0; margin-top: -2px; }
-.card:hover .menuBtn { opacity: 1; }
+.card:hover .menuBtn,
+.menuBtn:focus-visible { opacity: 1; }
 .menuBtn:hover { background: var(--border-default); color: var(--text-primary); }
 .menuBtn svg { width: 14px; height: 14px; }
 
