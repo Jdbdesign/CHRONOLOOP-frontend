@@ -30,6 +30,8 @@ describe('ProjectStatsRow', () => {
         <div data-testid="toolbar-slot" />
       </ProjectStatsRow>,
     )
-    expect(screen.getByTestId('toolbar-slot')).toBeInTheDocument()
+    const slot = screen.getByTestId('toolbar-slot')
+    const chip = screen.getByText('Total').closest('div[data-active]')
+    expect(slot.parentElement).toBe(chip?.parentElement)
   })
 })
