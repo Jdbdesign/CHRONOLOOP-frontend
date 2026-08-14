@@ -1,0 +1,142 @@
+import type { Project } from '../types/project'
+
+export const PROJECT_AVATAR_SRC: Record<string, string> = {
+  JA: '/avatars/Ellipse 1.png',
+  AS: '/avatars/Ellipse 2.png',
+  RD: '/avatars/Ellipse 3.png',
+  MV: '/avatars/Ellipse 4.png',
+  RC: '/avatars/Ellipse 5.png',
+}
+
+export const MOCK_PROJECTS: Project[] = [
+  {
+    id: 'p1', name: 'Web 3 App for Fxtrade', client: 'Fxtrade Expert', category: 'Development',
+    status: 'active', priority: 'high', progress: 45, color: '#4A90FF',
+    tasksTotal: 18, tasksDone: 8, dueDays: -1, dueDate: 'Nov 20, 2024',
+    desc: 'Building a comprehensive Web3 application with smart contract integration and DeFi features for the Fxtrade Expert trading platform.',
+    team: [{ i: 'AS', c: '#4A90FF', n: 'Aspen H.' }, { i: 'RD', c: '#FF8C42', n: 'Roger D.' }, { i: 'MV', c: '#A855F7', n: 'Marley V.' }],
+    milestones: [
+      { l: 'Smart Contract Architecture', done: true, d: 'Oct 15' },
+      { l: 'Frontend UI Framework', done: true, d: 'Nov 1' },
+      { l: 'Wallet Integration', done: false, d: 'Nov 18' },
+      { l: 'Security Audit', done: false, d: 'Nov 20' },
+    ],
+  },
+  {
+    id: 'p2', name: 'Healthydog Landing Page', client: 'DogXpert', category: 'Design',
+    status: 'active', priority: 'medium', progress: 72, color: '#00D4AA',
+    tasksTotal: 12, tasksDone: 9, dueDays: 3, dueDate: 'Nov 23, 2024',
+    desc: 'A beautiful, conversion-optimized landing page for DogXpert premium pet nutrition products and services.',
+    team: [{ i: 'RC', c: '#00D4AA', n: 'Ryan C.' }, { i: 'AS', c: '#4A90FF', n: 'Aspen H.' }],
+    milestones: [
+      { l: 'Wireframes & Mockups', done: true, d: 'Nov 2' },
+      { l: 'Design System', done: true, d: 'Nov 8' },
+      { l: 'Content & Copy', done: true, d: 'Nov 14' },
+      { l: 'Development & QA', done: false, d: 'Nov 23' },
+    ],
+  },
+  {
+    id: 'p3', name: 'Redesign of Website', client: 'Artstyle Co.', category: 'Design',
+    status: 'in-progress', priority: 'high', progress: 30, color: '#A855F7',
+    tasksTotal: 20, tasksDone: 6, dueDays: 20, dueDate: 'Dec 10, 2024',
+    desc: 'Complete overhaul of the Artstyle Co. corporate website with a focus on portfolio showcase and client acquisition flow.',
+    team: [{ i: 'MV', c: '#A855F7', n: 'Marley V.' }, { i: 'AS', c: '#4A90FF', n: 'Aspen H.' }, { i: 'RD', c: '#FF8C42', n: 'Roger D.' }, { i: 'RC', c: '#00D4AA', n: 'Ryan C.' }],
+    milestones: [
+      { l: 'Discovery & Research', done: true, d: 'Nov 5' },
+      { l: 'Information Architecture', done: false, d: 'Nov 22' },
+      { l: 'Visual Design', done: false, d: 'Dec 1' },
+      { l: 'Development', done: false, d: 'Dec 10' },
+    ],
+  },
+  {
+    id: 'p4', name: 'ChronoLoop Product Launch', client: 'Internal', category: 'Marketing',
+    status: 'completed', priority: 'high', progress: 100, color: '#22C55E',
+    tasksTotal: 24, tasksDone: 24, dueDays: 20, dueDate: 'Nov 1, 2024',
+    desc: 'Full product launch campaign for ChronoLoop including marketing materials, press releases, and launch event coordination.',
+    team: [{ i: 'AS', c: '#4A90FF', n: 'Aspen H.' }, { i: 'MV', c: '#A855F7', n: 'Marley V.' }],
+    milestones: [
+      { l: 'Marketing Strategy', done: true, d: 'Oct 5' },
+      { l: 'Content Creation', done: true, d: 'Oct 20' },
+      { l: 'Press Release', done: true, d: 'Oct 28' },
+      { l: 'Launch Event', done: true, d: 'Nov 1' },
+    ],
+  },
+  {
+    id: 'p5', name: 'Mobile Banking App', client: 'FinTech Pro', category: 'Development',
+    status: 'on-hold', priority: 'low', progress: 15, color: '#EAB308',
+    tasksTotal: 30, tasksDone: 5, dueDays: 56, dueDate: 'Jan 15, 2025',
+    desc: 'Native mobile banking app with biometric authentication, real-time push notifications, and AI-powered spending insights.',
+    team: [{ i: 'RD', c: '#FF8C42', n: 'Roger D.' }],
+    milestones: [
+      { l: 'Requirements Gathering', done: true, d: 'Nov 8' },
+      { l: 'UI/UX Design', done: false, d: 'Dec 10' },
+      { l: 'Backend Development', done: false, d: 'Jan 5' },
+      { l: 'Testing & QA', done: false, d: 'Jan 15' },
+    ],
+  },
+  {
+    id: 'p6', name: 'E-Commerce Platform Revamp', client: 'ShopMax', category: 'Development',
+    status: 'active', priority: 'medium', progress: 60, color: '#06B6D4',
+    tasksTotal: 22, tasksDone: 13, dueDays: 12, dueDate: 'Dec 2, 2024',
+    desc: 'Modernizing the ShopMax e-commerce platform with improved performance, redesigned UX, and new payment gateway integrations.',
+    team: [{ i: 'AS', c: '#4A90FF', n: 'Aspen H.' }, { i: 'RC', c: '#00D4AA', n: 'Ryan C.' }, { i: 'RD', c: '#FF8C42', n: 'Roger D.' }],
+    milestones: [
+      { l: 'Platform Audit', done: true, d: 'Oct 28' },
+      { l: 'Architecture Design', done: true, d: 'Nov 10' },
+      { l: 'Migration & Dev', done: false, d: 'Nov 28' },
+      { l: 'Testing & Launch', done: false, d: 'Dec 2' },
+    ],
+  },
+  {
+    id: 'p7', name: 'Brand Identity System', client: 'Branders Inc.', category: 'Design',
+    status: 'overdue', priority: 'high', progress: 25, color: '#FF4D4D',
+    tasksTotal: 16, tasksDone: 4, dueDays: -10, dueDate: 'Nov 10, 2024',
+    desc: 'Comprehensive brand identity redesign covering logo, typography system, color palette, and full brand guidelines.',
+    team: [{ i: 'MV', c: '#A855F7', n: 'Marley V.' }, { i: 'AS', c: '#4A90FF', n: 'Aspen H.' }],
+    milestones: [
+      { l: 'Brand Discovery Workshop', done: true, d: 'Oct 20' },
+      { l: 'Logo Concepts', done: false, d: 'Nov 5' },
+      { l: 'Color & Typography', done: false, d: 'Nov 8' },
+      { l: 'Brand Guidelines', done: false, d: 'Nov 10' },
+    ],
+  },
+  {
+    id: 'p8', name: 'API Integration Suite', client: 'TechCorp', category: 'Development',
+    status: 'in-progress', priority: 'medium', progress: 55, color: '#EC4899',
+    tasksTotal: 14, tasksDone: 8, dueDays: 8, dueDate: 'Nov 28, 2024',
+    desc: "Unified API integration suite connecting 12 third-party services into TechCorp's central data platform with real-time sync.",
+    team: [{ i: 'RD', c: '#FF8C42', n: 'Roger D.' }, { i: 'RC', c: '#00D4AA', n: 'Ryan C.' }],
+    milestones: [
+      { l: 'API Mapping & Docs', done: true, d: 'Nov 2' },
+      { l: 'Core Integrations 1–6', done: true, d: 'Nov 12' },
+      { l: 'Integrations 7–12', done: false, d: 'Nov 24' },
+      { l: 'Testing & Docs', done: false, d: 'Nov 28' },
+    ],
+  },
+  {
+    id: 'p9', name: 'Analytics Dashboard', client: 'DataViz Ltd.', category: 'Design',
+    status: 'completed', priority: 'low', progress: 100, color: '#22C55E',
+    tasksTotal: 10, tasksDone: 10, dueDays: 20, dueDate: 'Oct 31, 2024',
+    desc: 'Interactive analytics dashboard with real-time data visualizations, custom reporting tools, and AI-powered anomaly detection.',
+    team: [{ i: 'AS', c: '#4A90FF', n: 'Aspen H.' }, { i: 'MV', c: '#A855F7', n: 'Marley V.' }],
+    milestones: [
+      { l: 'Data Architecture', done: true, d: 'Oct 15' },
+      { l: 'Chart Components', done: true, d: 'Oct 22' },
+      { l: 'Real-time Feed', done: true, d: 'Oct 28' },
+      { l: 'Launch', done: true, d: 'Oct 31' },
+    ],
+  },
+  {
+    id: 'p10', name: 'Content Management System', client: 'MediaGroup', category: 'Development',
+    status: 'active', priority: 'medium', progress: 40, color: '#FF8C42',
+    tasksTotal: 18, tasksDone: 7, dueDays: 25, dueDate: 'Dec 15, 2024',
+    desc: "Custom headless CMS for MediaGroup's network of 8 publications, supporting 50+ content editors with workflow automation.",
+    team: [{ i: 'RC', c: '#00D4AA', n: 'Ryan C.' }, { i: 'RD', c: '#FF8C42', n: 'Roger D.' }, { i: 'AS', c: '#4A90FF', n: 'Aspen H.' }],
+    milestones: [
+      { l: 'Architecture & Stack', done: true, d: 'Nov 8' },
+      { l: 'Content Modeling', done: false, d: 'Nov 22' },
+      { l: 'Editor Interface', done: false, d: 'Dec 5' },
+      { l: 'Publishing Pipeline', done: false, d: 'Dec 15' },
+    ],
+  },
+]
