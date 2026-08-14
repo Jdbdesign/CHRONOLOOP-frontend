@@ -4,12 +4,18 @@ import { ChevronDown, Layers, Briefcase, Plus } from 'lucide-react'
 import { Dropdown } from '../ui/Dropdown'
 import { Avatar } from '../ui/Avatar'
 import { DASHBOARD_TEAM_MEMBERS } from '../../data/mockDashboardTeam'
-import { DASHBOARD_CRITICAL_PROJECTS } from '../../data/mockDashboardProjects'
 import { useDashboardUiStore } from '../../store/dashboardUiStore'
 import { useToastStore } from '../../store/toastStore'
 import styles from './TeamStatusPanel.module.css'
 
 const ROLES = ['All roles', 'Developer', 'Designer', 'Manager']
+
+// Matches index.html:5473-5480 exactly — static markup in the original, not
+// derived from any array. Deliberately its own local literal rather than a
+// projectsStore-backed list: see this plan's Global Constraints for why
+// DASHBOARD_CRITICAL_PROJECTS and the new Projects-page data model are both
+// the wrong source for this dropdown.
+const PROJECT_OPTIONS = ['Web 3 App for Fxtrade', 'Healthydog Landing Page', 'Redesign of Website', 'ChronoLoop Launch']
 
 export function TeamStatusPanel() {
   const openActivity = useDashboardUiStore((s) => s.openActivity)
@@ -63,14 +69,11 @@ export function TeamStatusPanel() {
             All Projects
           </Dropdown.Item>
           <Dropdown.Divider />
-          {DASHBOARD_CRITICAL_PROJECTS.map((p) => (
-            <Dropdown.Item key={p.id} icon={<Briefcase aria-hidden="true" />} active={project === p.title} onSelect={() => selectProject(p.title)}>
-              {p.title}
+          {PROJECT_OPTIONS.map((title) => (
+            <Dropdown.Item key={title} icon={<Briefcase aria-hidden="true" />} active={project === title} onSelect={() => selectProject(title)}>
+              {title}
             </Dropdown.Item>
           ))}
-          <Dropdown.Item icon={<Briefcase aria-hidden="true" />} active={project === 'ChronoLoop Launch'} onSelect={() => selectProject('ChronoLoop Launch')}>
-            ChronoLoop Launch
-          </Dropdown.Item>
         </Dropdown.Content>
       </Dropdown.Root>
 

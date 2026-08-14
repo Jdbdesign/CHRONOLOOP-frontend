@@ -92,4 +92,11 @@ describe('TeamStatusPanel', () => {
     await userEvent.click(await screen.findByRole('menuitem', { name: 'ChronoLoop Launch' }))
     expect(screen.getByRole('button', { name: 'ChronoLoop Launch' })).toBeInTheDocument()
   })
+
+  it('capitalizes "App" in the Web 3 project option, matching index.html:5476 exactly', async () => {
+    render(<TeamStatusPanel />)
+    await userEvent.click(screen.getByRole('button', { name: 'Select Project' }))
+    expect(await screen.findByRole('menuitem', { name: 'Web 3 App for Fxtrade' })).toBeInTheDocument()
+    expect(screen.queryByRole('menuitem', { name: 'Web 3 app for Fxtrade' })).not.toBeInTheDocument()
+  })
 })
