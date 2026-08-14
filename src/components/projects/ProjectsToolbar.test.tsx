@@ -38,6 +38,6 @@ describe('ProjectsToolbar', () => {
   it('Filter panel Clear/Apply do not throw and do not require onSortChange or onSearchChange', async () => {
     renderToolbar()
     await userEvent.click(screen.getByRole('button', { name: /Filter/ }))
-    await userEvent.click(await screen.findByRole('menuitem', { name: 'Clear' }))
+    await userEvent.click(await screen.findByRole('button', { name: 'Clear' }))
   })
 })

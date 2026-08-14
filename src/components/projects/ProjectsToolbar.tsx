@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { ArrowUpDown, SlidersHorizontal, Search, Type, Calendar, BarChart2, Flag, Circle } from 'lucide-react'
-import * as RadixDropdown from '@radix-ui/react-dropdown-menu'
 import { Button } from '../ui/Button'
 import { Dropdown } from '../ui/Dropdown'
 import { useToastStore } from '../../store/toastStore'
@@ -87,22 +86,20 @@ export function ProjectsToolbar({ activeSort, onSortChange, searchQuery, onSearc
             </label>
           ))}
           <div className={styles.filterFooter}>
-            <RadixDropdown.Item
+            <button
+              type="button"
               className={styles.filterClear}
-              onSelect={() => {
+              onClick={() => {
                 setPriorityChecked({ high: false, medium: false, low: false })
                 setCategoryChecked(Object.fromEntries(CATEGORY_KEYS.map((k) => [k, false])))
                 showToast('Filters cleared', 'info', 1500)
               }}
             >
               Clear
-            </RadixDropdown.Item>
-            <RadixDropdown.Item
-              className={styles.filterApply}
-              onSelect={() => showToast('Filters applied', 'success', 1500)}
-            >
+            </button>
+            <button type="button" className={styles.filterApply} onClick={() => showToast('Filters applied', 'success', 1500)}>
               Apply
-            </RadixDropdown.Item>
+            </button>
           </div>
         </Dropdown.Content>
       </Dropdown.Root>
