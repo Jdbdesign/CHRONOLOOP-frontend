@@ -1,0 +1,14 @@
+.header { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; }
+.breadcrumb { font-size: 11px; color: var(--text-muted); margin-bottom: 3px; }
+.heading { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 600; color: var(--text-primary); }
+.actions { display: flex; align-items: center; gap: 10px; }
+
+.viewToggle { display: flex; background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 8px; overflow: hidden; padding: 2px; gap: 2px; }
+.viewBtn {
+  display: flex; align-items: center; gap: 5px; padding: 5px 12px; border-radius: 6px; border: none;
+  background: transparent; color: var(--text-muted); font-size: 12px; font-weight: 500;
+  font-family: 'DM Sans', sans-serif; cursor: pointer; transition: background var(--duration-fast), color var(--duration-fast);
+}
+.viewBtn svg { width: 13px; height: 13px; }
+.viewBtn[data-active='true'] { background: var(--accent-blue); color: #fff; }
+.viewBtn[data-active='false']:hover { color: var(--text-primary); background: var(--bg-card-hover); }
