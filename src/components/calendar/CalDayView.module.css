@@ -1,0 +1,160 @@
+.dayWrap {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.dayHero {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 0 16px;
+  border-bottom: 1px solid var(--border-subtle);
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
+
+.dayBignum {
+  font-family: 'Syne', sans-serif;
+  font-size: 52px;
+  font-weight: 800;
+  color: var(--text-primary);
+  line-height: 1;
+}
+
+.dayBignumToday {
+  color: var(--accent-blue);
+}
+
+.dayInfoCol {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.dayWname {
+  font-family: 'Syne', sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.dayFulldate {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.dayBadgebar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+}
+
+.dayBadge {
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.dayScroll {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  min-height: 0;
+}
+
+.dayScroll::-webkit-scrollbar {
+  width: 4px;
+}
+
+.dayScroll::-webkit-scrollbar-thumb {
+  background: var(--border-default);
+  border-radius: 2px;
+}
+
+.dayTgutter {
+  width: 60px;
+  flex-shrink: 0;
+  border-right: 1px solid var(--border-subtle);
+}
+
+.dayTlbl {
+  height: 66px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+  padding: 6px 10px 0;
+  font-size: 10px;
+  color: var(--text-muted);
+  font-family: 'DM Mono', monospace;
+}
+
+.daySlots {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.dayHslot {
+  height: 66px;
+  border-bottom: 1px solid var(--border-subtle);
+  flex-shrink: 0;
+  transition: background var(--duration-fast);
+}
+
+.dayHslot:hover {
+  background: rgba(74, 144, 255, 0.03);
+}
+
+.dayHslot:last-child {
+  border-bottom: none;
+}
+
+.dayEv {
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  border-radius: 9px;
+  padding: 9px 13px;
+  font-size: 11px;
+  color: #fff;
+  cursor: pointer;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  overflow: hidden;
+  transition: opacity var(--duration-fast), transform var(--duration-fast), box-shadow var(--duration-fast);
+  border-left: 3px solid rgba(255, 255, 255, 0.35);
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.3);
+}
+
+.dayEv:hover {
+  opacity: 0.9;
+  transform: translateX(3px);
+  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.4);
+  z-index: 3;
+}
+
+.dayEvTitle {
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 12px;
+}
+
+.dayEvMeta {
+  font-size: 10px;
+  opacity: 0.8;
+}
+
+.dayEvProj {
+  font-size: 10px;
+  opacity: 0.65;
+}
