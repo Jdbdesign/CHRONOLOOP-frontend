@@ -60,11 +60,13 @@ export function ProjectsPage() {
           onSearchChange={setSearchQuery}
         />
       </ProjectStatsRow>
-      {view === 'grid' ? (
-        <ProjectsGridView projects={filteredProjects} onOpenDetail={openDetail} onDelete={handleDelete} />
-      ) : (
-        <ProjectsListView projects={filteredProjects} onOpenDetail={openDetail} />
-      )}
+      <div key={`${activeFilter}|${activeSort}|${searchQuery}`}>
+        {view === 'grid' ? (
+          <ProjectsGridView projects={filteredProjects} onOpenDetail={openDetail} onDelete={handleDelete} />
+        ) : (
+          <ProjectsListView projects={filteredProjects} onOpenDetail={openDetail} />
+        )}
+      </div>
       <NewProjectModal />
       <ProjectDetailPanel onDelete={handleDelete} />
     </div>

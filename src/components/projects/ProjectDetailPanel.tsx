@@ -66,7 +66,7 @@ export function ProjectDetailPanel({ onDelete }: ProjectDetailPanelProps) {
     return (
       <>
         <div className={styles.overlay} data-open={false} data-testid="project-detail-overlay" />
-        <div className={styles.panel} data-open={false} />
+        <div ref={panelRef} className={styles.panel} data-open={false} />
       </>
     )
   }
@@ -74,7 +74,7 @@ export function ProjectDetailPanel({ onDelete }: ProjectDetailPanelProps) {
   const handleDelete = () => {
     const id = project.id
     const name = project.name
-    close()
+    handleClose()
     onDelete(id, name)
   }
 

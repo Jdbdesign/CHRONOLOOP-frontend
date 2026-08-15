@@ -64,4 +64,18 @@ describe('ProjectsPage', () => {
     await userEvent.click(screen.getByRole('button', { name: /Create Project/ }))
     expect(screen.getByText('Fresh Launch')).toBeInTheDocument()
   })
+
+  it('remounts the results subtree (replaying card animations) when sort changes', async () => {
+    render(<ProjectsPage />)
+    const cardBefore = screen.getByRole('button', { name: 'Web 3 App for Fxtrade' })
+
+    await userEvent.click(screen.getByRole('button', { name: /Sort/ }))
+    await userEvent.click(screen.getByText('Progress'))
+
+    const cardAfter = screen.getByRole('button', { name: 'Web 3 App for Fxtrade' })
+    // Same project, but a fresh DOM node — proof the keyed subtree remounted
+    // (and with it, the fadeUp/progress-fill animations) rather than React
+    // reusing the existing ProjectCard instance across the sort change.
+    expect(cardAfter).not.toBe(cardBefore)
+  })
 })

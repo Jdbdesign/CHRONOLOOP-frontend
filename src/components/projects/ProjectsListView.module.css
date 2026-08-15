@@ -24,6 +24,11 @@
   display: flex;
   align-items: center;
   gap: 4px;
+  cursor: pointer;
+}
+
+.col:hover {
+  color: var(--text-secondary);
 }
 
 .col svg {
