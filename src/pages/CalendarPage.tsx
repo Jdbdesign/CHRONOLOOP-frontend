@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from 'react'
+import { useState, useRef, useMemo, useCallback } from 'react'
 import * as Popover from '@radix-ui/react-popover'
 import { useNavigate } from 'react-router-dom'
 import { useCalendarStore } from '../store/calendarStore'
@@ -45,6 +45,7 @@ export function CalendarPage() {
   const [popupEventId, setPopupEventId] = useState<string | null>(null)
   const [rangeStart, setRangeStart] = useState('')
   const [rangeEnd, setRangeEnd] = useState('')
+  const anchorRef = useRef<HTMLDivElement>(null)
 
   // Compute events
   const events = useMemo(
@@ -68,7 +69,17 @@ export function CalendarPage() {
     [setCurrentDate, setView],
   )
 
-  const handleEventClick = useCallback((evId: string) => {
+  const handleEventClick = useCallback((evId: string, triggerEl: HTMLElement) => {
+    // Position the virtual anchor at the clicked event's location
+    if (anchorRef.current) {
+      const rect = triggerEl.getBoundingClientRect()
+      const pageContainer = anchorRef.current.offsetParent as HTMLElement | null
+      const containerRect = pageContainer?.getBoundingClientRect() ?? { left: 0, top: 0 }
+      anchorRef.current.style.left = `${rect.left - containerRect.left}px`
+      anchorRef.current.style.top = `${rect.top - containerRect.top}px`
+      anchorRef.current.style.width = `${rect.width}px`
+      anchorRef.current.style.height = `${rect.height}px`
+    }
     setPopupEventId(evId)
   }, [])
 
@@ -135,7 +146,7 @@ export function CalendarPage() {
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 0, overflow: 'hidden', height: '100%' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 0, overflow: 'hidden', height: '100%', position: 'relative' }}>
       <CalendarPageHeader view={view} onViewChange={setView} onNewEvent={() => setIsModalOpen(true)} />
       <CalendarSubHeader
         periodTitle={periodTitle}
@@ -154,7 +165,7 @@ export function CalendarPage() {
       />
 
       <Popover.Root open={!!popupEvent} onOpenChange={(open) => { if (!open) handlePopupClose() }}>
-        <Popover.Anchor style={{ position: 'absolute', top: 0, left: 0 }} />
+        <Popover.Anchor ref={anchorRef} style={{ position: 'absolute', top: 0, left: 0, width: 0, height: 0, pointerEvents: 'none' }} />
         <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column', minHeight: 0, paddingTop: 12 }}>
           {renderView()}
         </div>

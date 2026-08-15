@@ -44,3 +44,25 @@ describe('CalendarPageHeader', () => {
     expect(defaultProps.onNewEvent).toHaveBeenCalled()
   })
 })
+
+describe('CalendarPageHeader cross-view consistency', () => {
+  const onViewChange = vi.fn()
+  const onNewEvent = vi.fn()
+
+  it('New Event button has the same className/variant across all views', () => {
+    const views = ['month', 'week', 'day', 'agenda'] as const
+    const classNames: string[] = []
+
+    views.forEach((view) => {
+      const { unmount } = render(
+        <CalendarPageHeader view={view} onViewChange={onViewChange} onNewEvent={onNewEvent} />,
+      )
+      const btn = screen.getByText('New Event').closest('button')!
+      classNames.push(btn.className)
+      unmount()
+    })
+
+    // All 4 views should produce the same button className
+    expect(new Set(classNames).size).toBe(1)
+  })
+})
