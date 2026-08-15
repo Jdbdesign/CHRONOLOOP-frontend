@@ -13,7 +13,7 @@ describe('SprintsBoardView', () => {
   it('places each sprint card in the column matching its status', () => {
     render(<SprintsBoardView sprints={MOCK_SPRINTS} onOpenDetail={() => {}} />)
     // s1 and s2 are both 'completed' -> Completed column has 2 cards
-    expect(screen.getByText('2').closest('[class*="colCount"]')).toBeInTheDocument()
+    expect(screen.getByText('2').closest('[class*="ColCount"]')).toBeInTheDocument()
   })
 
   it('shows a "No sprints" placeholder for an empty column', () => {
