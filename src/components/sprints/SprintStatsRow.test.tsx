@@ -33,6 +33,8 @@ describe('SprintStatsRow', () => {
         <div data-testid="toolbar-slot">toolbar</div>
       </SprintStatsRow>,
     )
-    expect(screen.getByTestId('toolbar-slot')).toBeInTheDocument()
+    const slot = screen.getByTestId('toolbar-slot')
+    const chip = screen.getByText('All').closest('div[data-active]')
+    expect(slot.parentElement).toBe(chip?.parentElement)
   })
 })
