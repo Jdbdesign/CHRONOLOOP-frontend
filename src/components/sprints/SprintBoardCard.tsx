@@ -19,9 +19,9 @@ export function SprintBoardCard({ sprint, onOpenDetail }: SprintBoardCardProps) 
       <div className={styles.goal}>{sprint.goal}</div>
       <div className={styles.footer}>
         <span className={styles.pts}><Zap aria-hidden="true" />{sprint.completedPoints}/{sprint.storyPoints} pts</span>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 0 }}>
+        <div className={styles.footerAvatars}>
           {sprint.team.slice(0, 2).map((m) => (
-            <Avatar key={m.i} name={m.i} fallbackStyle={{ background: m.c, fontSize: 8 }} style={{ width: 20, height: 20, borderColor: 'var(--bg-base)' }} />
+            <Avatar key={m.i} name={m.i} className={styles.avatar} fallbackStyle={{ background: m.c, fontSize: 8 }} style={{ width: 20, height: 20 }} />
           ))}
         </div>
       </div>

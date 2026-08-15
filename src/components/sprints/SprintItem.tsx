@@ -55,7 +55,7 @@ export function SprintItem({ sprint, onOpenDetail, onEdit, onMarkComplete, onDel
         </div>
         <div className={styles.team}>
           {visibleTeam.map((m) => (
-            <Avatar key={m.i} name={m.i} fallbackStyle={{ background: m.c, fontSize: 9 }} style={{ width: 24, height: 24, borderColor: 'var(--bg-card)' }} />
+            <Avatar key={m.i} name={m.i} className={styles.avatar} fallbackStyle={{ background: m.c, fontSize: 9 }} style={{ width: 24, height: 24 }} />
           ))}
           {overflowCount > 0 && <div className={styles.avatarMore}>+{overflowCount}</div>}
         </div>

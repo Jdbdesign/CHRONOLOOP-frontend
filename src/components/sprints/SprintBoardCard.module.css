@@ -124,3 +124,16 @@
   border-radius: 3px;
   transition: width 600ms var(--ease-out);
 }
+
+.footerAvatars {
+  display: flex;
+  align-items: center;
+}
+
+.avatar {
+  border: 1.5px solid var(--bg-base);
+}
+
+.footerAvatars > *:not(:first-child) {
+  margin-left: -6px;
+}

@@ -143,6 +143,14 @@
   flex-shrink: 0;
 }
 
+.avatar {
+  border: 1.5px solid var(--bg-card);
+}
+
+.team > *:not(:first-child) {
+  margin-left: -6px;
+}
+
 .avatarMore {
   width: 24px;
   height: 24px;
