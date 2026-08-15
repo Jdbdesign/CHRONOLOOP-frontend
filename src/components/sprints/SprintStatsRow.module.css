@@ -1,0 +1,13 @@
+.row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+.chip {
+  display: flex; align-items: center; gap: 7px; padding: 6px 14px; border-radius: 20px;
+  background: var(--bg-card); border: 1px solid var(--border-subtle); cursor: pointer;
+  transition: border-color var(--duration-fast), transform var(--duration-fast);
+}
+.chip:hover { border-color: var(--border-default); transform: translateY(-1px); }
+.chip[data-active='true'] { border-color: var(--accent-blue); background: var(--accent-blue-bg); }
+
+.dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.num { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; color: var(--text-primary); }
+.label { font-size: 11px; color: var(--text-secondary); }
