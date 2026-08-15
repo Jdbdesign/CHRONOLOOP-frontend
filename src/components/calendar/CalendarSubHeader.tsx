@@ -18,13 +18,6 @@ const FILTER_CHIPS: { id: CalendarFilter; label: string; dotColor?: string }[] =
   { id: 'meeting', label: 'Meetings', dotColor: '#FF8C42' },
 ]
 
-const LEGEND_ITEMS = [
-  { label: 'Tasks', color: '#4A90FF' },
-  { label: 'Projects', color: '#A855F7' },
-  { label: 'Sprints', color: '#00D4AA' },
-  { label: 'Meetings', color: '#FF8C42' },
-]
-
 export function CalendarSubHeader({ periodTitle, filter, onNavigate, onToday, onFilterChange }: Props) {
   return (
     <div className={styles.subHeader}>
@@ -52,29 +45,19 @@ export function CalendarSubHeader({ periodTitle, filter, onNavigate, onToday, on
         </button>
         <div className={styles.periodTitle}>{periodTitle}</div>
       </div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          {FILTER_CHIPS.map(({ id, label, dotColor }) => (
-            <button
-              key={id}
-              type="button"
-              className={`${styles.filterChip}${filter === id ? ` ${styles.filterChipActive}` : ''}`}
-              onClick={() => onFilterChange(id)}
-              aria-pressed={filter === id}
-            >
-              {dotColor && <span className={styles.chipDot} style={{ background: dotColor }} />}
-              {label}
-            </button>
-          ))}
-        </div>
-        <div className={styles.legend}>
-          {LEGEND_ITEMS.map(({ label, color }) => (
-            <span key={label} className={styles.legendItem}>
-              <span className={styles.legendDot} style={{ background: color }} />
-              {label}
-            </span>
-          ))}
-        </div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+        {FILTER_CHIPS.map(({ id, label, dotColor }) => (
+          <button
+            key={id}
+            type="button"
+            className={`${styles.filterChip}${filter === id ? ` ${styles.filterChipActive}` : ''}`}
+            onClick={() => onFilterChange(id)}
+            aria-pressed={filter === id}
+          >
+            {dotColor && <span className={styles.chipDot} style={{ background: dotColor }} />}
+            {label}
+          </button>
+        ))}
       </div>
     </div>
   )

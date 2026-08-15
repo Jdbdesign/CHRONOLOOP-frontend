@@ -90,7 +90,7 @@ describe('CalMonthView', () => {
     ]
     render(<CalMonthView {...defaultProps} events={events} onDayClick={onDayClick} onEventClick={onEventClick} />)
     await user.click(screen.getByText('Meeting X'))
-    expect(onEventClick).toHaveBeenCalledWith('ev1', expect.any(HTMLElement))
+    expect(onEventClick).toHaveBeenCalledWith('ev1')
     expect(onDayClick).not.toHaveBeenCalled()
   })
 

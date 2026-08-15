@@ -11,7 +11,7 @@ interface Props {
   currentDate: Date
   rangeStart: string
   rangeEnd: string
-  onEventClick: (evId: string, triggerEl: HTMLElement) => void
+  onEventClick: (evId: string) => void
   onNewEvent: () => void
 }
 
@@ -98,7 +98,7 @@ export function CalAgendaView({ events, currentDate, rangeStart, rangeEnd, onEve
                   key={ev.id + '-' + ds}
                   className={styles.agendaEv}
                   data-evid={ev.id}
-                  onClick={(e) => onEventClick(ev.id, e.currentTarget)}
+                  onClick={() => onEventClick(ev.id)}
                 >
                   <div className={styles.evBar} style={{ background: ev.color }} />
                   <div className={styles.evTime}>{calFmtTime(ev.time)}</div>

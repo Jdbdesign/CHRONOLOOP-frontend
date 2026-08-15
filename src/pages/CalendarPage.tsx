@@ -1,4 +1,5 @@
-import { useState, useRef, useMemo, useCallback, useEffect } from 'react'
+import { useState, useMemo, useCallback } from 'react'
+import * as Dialog from '@radix-ui/react-dialog'
 import { useNavigate } from 'react-router-dom'
 import { useCalendarStore } from '../store/calendarStore'
 import { useTasksStore } from '../store/tasksStore'
@@ -17,6 +18,7 @@ import { CalDayView } from '../components/calendar/CalDayView'
 import { CalAgendaView } from '../components/calendar/CalAgendaView'
 import { CalEventPopup } from '../components/calendar/CalEventPopup'
 import { NewEventModal } from '../components/calendar/modals/NewEventModal'
+import popupStyles from '../components/calendar/CalEventPopup.module.css'
 
 export function CalendarPage() {
   const navigate = useNavigate()
@@ -42,10 +44,8 @@ export function CalendarPage() {
   // Local UI state
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [popupEventId, setPopupEventId] = useState<string | null>(null)
-  const [popupPos, setPopupPos] = useState<{ top: number; left: number } | null>(null)
   const [rangeStart, setRangeStart] = useState('')
   const [rangeEnd, setRangeEnd] = useState('')
-  const popupRef = useRef<HTMLDivElement>(null)
 
   // Compute events
   const events = useMemo(
@@ -69,52 +69,13 @@ export function CalendarPage() {
     [setCurrentDate, setView],
   )
 
-  const handleEventClick = useCallback((evId: string, triggerEl: HTMLElement) => {
-    const rect = triggerEl.getBoundingClientRect()
-    // Position popup: try right of trigger, fall back left, clamp to viewport
-    const pw = 304
-    const ph = 320
-    let left = rect.right + 10
-    let top = rect.top
-    if (left + pw > window.innerWidth - 10) left = rect.left - pw - 10
-    if (top + ph > window.innerHeight - 10) top = window.innerHeight - ph - 10
-    if (left < 10) left = 10
-    if (top < 10) top = 10
-    setPopupPos({ top, left })
+  const handleEventClick = useCallback((evId: string) => {
     setPopupEventId(evId)
   }, [])
 
   const handlePopupClose = useCallback(() => {
     setPopupEventId(null)
-    setPopupPos(null)
   }, [])
-
-  // Close popup on outside click
-  useEffect(() => {
-    if (!popupEventId) return
-    const handler = (e: MouseEvent) => {
-      const target = e.target as HTMLElement
-      if (
-        popupRef.current &&
-        !popupRef.current.contains(target) &&
-        !target.closest('[data-evid]')
-      ) {
-        handlePopupClose()
-      }
-    }
-    document.addEventListener('mousedown', handler)
-    return () => document.removeEventListener('mousedown', handler)
-  }, [popupEventId, handlePopupClose])
-
-  // Close popup on Escape
-  useEffect(() => {
-    if (!popupEventId) return
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') handlePopupClose()
-    }
-    document.addEventListener('keydown', handler)
-    return () => document.removeEventListener('keydown', handler)
-  }, [popupEventId, handlePopupClose])
 
   const handlePopupNavigate = useCallback(
     (type: CalendarEventType) => {
@@ -197,18 +158,22 @@ export function CalendarPage() {
         {renderView()}
       </div>
 
-      {popupEvent && popupPos && (
-        <div
-          ref={popupRef}
-          style={{ position: 'fixed', top: popupPos.top, left: popupPos.left, zIndex: 450 }}
-        >
-          <CalEventPopup
-            event={popupEvent}
-            onClose={handlePopupClose}
-            onNavigate={handlePopupNavigate}
-          />
-        </div>
-      )}
+      {/* Event detail popup — centered Dialog */}
+      <Dialog.Root open={!!popupEvent} onOpenChange={(open) => { if (!open) handlePopupClose() }}>
+        <Dialog.Portal>
+          <Dialog.Overlay className={popupStyles.dialogOverlay} />
+          <Dialog.Content className={popupStyles.dialogContent} aria-describedby={undefined}>
+            <Dialog.Title className="sr-only">Event Details</Dialog.Title>
+            {popupEvent && (
+              <CalEventPopup
+                event={popupEvent}
+                onClose={handlePopupClose}
+                onNavigate={handlePopupNavigate}
+              />
+            )}
+          </Dialog.Content>
+        </Dialog.Portal>
+      </Dialog.Root>
 
       <NewEventModal
         open={isModalOpen}

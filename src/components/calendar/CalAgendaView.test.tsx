@@ -58,7 +58,7 @@ describe('CalAgendaView', () => {
     ]
     render(<CalAgendaView {...defaultProps} events={events} onEventClick={onEventClick} />)
     await user.click(screen.getByText('Click Me'))
-    expect(onEventClick).toHaveBeenCalledWith('e1', expect.any(HTMLElement))
+    expect(onEventClick).toHaveBeenCalledWith('e1')
   })
 
   it('respects rangeStart and rangeEnd props', () => {

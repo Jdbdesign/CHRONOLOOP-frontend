@@ -62,7 +62,7 @@ describe('CalDayView', () => {
     ]
     render(<CalDayView {...defaultProps} events={events} onEventClick={onEventClick} />)
     await user.click(screen.getByText('Click Me'))
-    expect(onEventClick).toHaveBeenCalledWith('e1', expect.any(HTMLElement))
+    expect(onEventClick).toHaveBeenCalledWith('e1')
   })
 
   it('includes multi-day events that span the current day', () => {

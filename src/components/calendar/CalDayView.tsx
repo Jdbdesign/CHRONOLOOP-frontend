@@ -6,12 +6,17 @@ import styles from './CalDayView.module.css'
 interface Props {
   events: CalendarEvent[]
   currentDate: Date
-  onEventClick: (evId: string, triggerEl: HTMLElement) => void
+  onEventClick: (evId: string) => void
 }
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 const DAYNAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
 const HOURS = Array.from({ length: 15 }, (_, i) => i + 6) // 6am–8pm
+
+/** Events with duration >= 240min or isMultiDay get banner treatment */
+function isBannerEvent(ev: CalendarEvent): boolean {
+  return !!(ev.isMultiDay || (ev.duration && ev.duration >= 240))
+}
 
 function fmtHourLabel(h: number): string {
   if (h === 12) return '12pm'
@@ -32,6 +37,9 @@ export function CalDayView({ events, currentDate, onEventClick }: Props) {
       return ev.date === ds
     })
   }, [events, ds])
+
+  const bannerEvs = dayEvs.filter(isBannerEvent)
+  const timedEvs = dayEvs.filter((ev) => !isBannerEvent(ev))
 
   const taskCount = dayEvs.filter((e) => e.type === 'task').length
   const meetingCount = dayEvs.filter((e) => e.type === 'meeting').length
@@ -82,6 +90,25 @@ export function CalDayView({ events, currentDate, onEventClick }: Props) {
           )}
         </div>
       </div>
+
+      {/* All-day / long-duration banner section */}
+      {bannerEvs.length > 0 && (
+        <div className={styles.bannerSection}>
+          {bannerEvs.map((ev) => (
+            <div
+              key={ev.id}
+              className={styles.bannerEv}
+              style={{ background: ev.color }}
+              data-evid={ev.id}
+              onClick={() => onEventClick(ev.id)}
+            >
+              <span className={styles.bannerEvTitle}>{ev.title}</span>
+              {ev.project && <span className={styles.bannerEvProj}>{ev.project}</span>}
+            </div>
+          ))}
+        </div>
+      )}
+
       <div className={styles.dayScroll}>
         <div className={styles.dayTgutter}>
           {HOURS.map((h) => (
@@ -94,7 +121,7 @@ export function CalDayView({ events, currentDate, onEventClick }: Props) {
           {HOURS.map((h) => (
             <div key={h} className={styles.dayHslot} />
           ))}
-          {dayEvs.map((ev) => {
+          {timedEvs.map((ev) => {
             const [hh, mm] = (ev.time || '09:00').split(':').map(Number)
             if (hh < 6 || hh > 20) return null
             const top = (hh - 6) * 66 + (mm / 60) * 66
@@ -108,7 +135,7 @@ export function CalDayView({ events, currentDate, onEventClick }: Props) {
                 data-evid={ev.id}
                 onClick={(e) => {
                   e.stopPropagation()
-                  onEventClick(ev.id, e.currentTarget)
+                  onEventClick(ev.id)
                 }}
               >
                 <div className={styles.dayEvTitle}>{ev.title}</div>

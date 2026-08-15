@@ -50,7 +50,7 @@ describe('CalWeekView', () => {
     ]
     render(<CalWeekView {...defaultProps} events={events} onEventClick={onEventClick} />)
     await user.click(screen.getByText('Click Me'))
-    expect(onEventClick).toHaveBeenCalledWith('e1', expect.any(HTMLElement))
+    expect(onEventClick).toHaveBeenCalledWith('e1')
   })
 
   it('does not render events outside 7am-8pm range', () => {

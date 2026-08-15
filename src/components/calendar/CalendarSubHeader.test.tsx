@@ -74,13 +74,9 @@ describe('CalendarSubHeader', () => {
     expect(defaultProps.onFilterChange).toHaveBeenCalledWith('sprint')
   })
 
-  it('renders the 4 legend items', () => {
+  it('does not render a separate legend section (removed — chips serve as legend)', () => {
     render(<CalendarSubHeader {...defaultProps} />)
-    // Legend items duplicate the labels (Tasks, Projects, Sprints, Meetings)
-    // They appear both in filter chips and legend, so getAllByText
-    expect(screen.getAllByText('Tasks')).toHaveLength(2)
-    expect(screen.getAllByText('Projects')).toHaveLength(2)
-    expect(screen.getAllByText('Sprints')).toHaveLength(2)
-    expect(screen.getAllByText('Meetings')).toHaveLength(2)
+    // Filter chips with dots serve as the legend; no separate legend section
+    expect(screen.getAllByText('Tasks')).toHaveLength(1)
   })
 })

@@ -1,4 +1,5 @@
 import { CalendarRange } from 'lucide-react'
+import { Button } from '../ui/Button'
 import styles from './CalendarAgendaBar.module.css'
 
 interface Props {
@@ -39,9 +40,9 @@ export function CalendarAgendaBar({
         onChange={(e) => onRangeEndChange(e.target.value)}
         aria-label="Agenda end date"
       />
-      <button type="button" className="btn-secondary" style={{ height: 32 }} onClick={onReset}>
+      <Button variant="secondary" style={{ height: 32 }} onClick={onReset}>
         Reset
-      </button>
+      </Button>
     </div>
   )
 }

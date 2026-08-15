@@ -48,3 +48,16 @@
   width: 13px;
   height: 13px;
 }
+
+.breadcrumb {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-bottom: 3px;
+}
+
+.heading {
+  font-family: 'Syne', sans-serif;
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--text-primary);
+}

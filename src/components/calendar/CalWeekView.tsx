@@ -7,11 +7,16 @@ import styles from './CalWeekView.module.css'
 interface Props {
   events: CalendarEvent[]
   currentDate: Date
-  onEventClick: (evId: string, triggerEl: HTMLElement) => void
+  onEventClick: (evId: string) => void
 }
 
 const DNAMES = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 const HOURS = Array.from({ length: 14 }, (_, i) => i + 7) // 7am–8pm
+
+/** Events with duration >= 240min or isMultiDay get banner treatment */
+function isBannerEvent(ev: CalendarEvent): boolean {
+  return !!(ev.isMultiDay || (ev.duration && ev.duration >= 240))
+}
 
 function fmtHourLabel(h: number): string {
   if (h === 12) return '12pm'
@@ -24,25 +29,31 @@ export function CalWeekView({ events, currentDate, onEventClick }: Props) {
   const todayStr = calToISO(new Date())
   const days = useMemo(() => DNAMES.map((_, i) => addDays(ws, i)), [ws])
 
-  const weekEvMap = useMemo(() => {
-    const map: Record<string, CalendarEvent[]> = {}
+  const { bannerMap, timedMap } = useMemo(() => {
+    const bMap: Record<string, CalendarEvent[]> = {}
+    const tMap: Record<string, CalendarEvent[]> = {}
     days.forEach((d) => {
-      map[calToISO(d)] = []
+      const ds = calToISO(d)
+      bMap[ds] = []
+      tMap[ds] = []
     })
     events.forEach((ev) => {
+      const target = isBannerEvent(ev) ? bMap : tMap
       if (ev.isMultiDay) {
         days.forEach((d) => {
           const ds = calToISO(d)
-          if (ds >= (ev.startDate || ev.date) && ds <= (ev.endDate || ev.date) && map[ds] !== undefined) {
-            map[ds].push(ev)
+          if (ds >= (ev.startDate || ev.date) && ds <= (ev.endDate || ev.date) && target[ds] !== undefined) {
+            target[ds].push(ev)
           }
         })
-      } else if (map[ev.date] !== undefined) {
-        map[ev.date].push(ev)
+      } else if (target[ev.date] !== undefined) {
+        target[ev.date].push(ev)
       }
     })
-    return map
+    return { bannerMap: bMap, timedMap: tMap }
   }, [events, days])
+
+  const hasBanners = days.some((d) => (bannerMap[calToISO(d)] || []).length > 0)
 
   return (
     <div className={styles.weekWrap}>
@@ -60,6 +71,33 @@ export function CalWeekView({ events, currentDate, onEventClick }: Props) {
           )
         })}
       </div>
+
+      {/* All-day / long-duration banner section */}
+      {hasBanners && (
+        <div className={styles.bannerSection} style={{ gridTemplateColumns: '52px repeat(7,1fr)' }}>
+          <div style={{ borderRight: '1px solid var(--border-subtle)' }} />
+          {days.map((d) => {
+            const ds = calToISO(d)
+            const banners = bannerMap[ds] || []
+            return (
+              <div key={ds} className={styles.bannerCol}>
+                {banners.map((ev) => (
+                  <div
+                    key={ev.id + '-' + ds}
+                    className={styles.bannerEv}
+                    style={{ background: ev.color }}
+                    data-evid={ev.id}
+                    onClick={() => onEventClick(ev.id)}
+                  >
+                    {ev.title}
+                  </div>
+                ))}
+              </div>
+            )
+          })}
+        </div>
+      )}
+
       <div className={styles.weekScroll}>
         <div className={styles.timeCol}>
           {HOURS.map((h) => (
@@ -71,7 +109,7 @@ export function CalWeekView({ events, currentDate, onEventClick }: Props) {
         <div className={styles.weekColsGrid} style={{ gridTemplateColumns: 'repeat(7,1fr)', flex: 1 }}>
           {days.map((d) => {
             const ds = calToISO(d)
-            const dayEvs = weekEvMap[ds] || []
+            const dayEvs = timedMap[ds] || []
             const isToday = ds === todayStr
             return (
               <div
@@ -96,7 +134,7 @@ export function CalWeekView({ events, currentDate, onEventClick }: Props) {
                       data-evid={ev.id}
                       onClick={(e) => {
                         e.stopPropagation()
-                        onEventClick(ev.id, e.currentTarget)
+                        onEventClick(ev.id)
                       }}
                     >
                       <div className={styles.weekEvTitle}>{ev.title}</div>

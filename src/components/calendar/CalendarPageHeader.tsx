@@ -20,8 +20,8 @@ export function CalendarPageHeader({ view, onViewChange, onNewEvent }: Props) {
   return (
     <div className={styles.header}>
       <div>
-        <div className="page-breadcrumb">ChronoLoop / Calendar</div>
-        <div className="page-heading">Calendar</div>
+        <div className={styles.breadcrumb}>ChronoLoop / Calendar</div>
+        <div className={styles.heading}>Calendar</div>
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
         <div className={styles.viewSwitcher}>

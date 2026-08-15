@@ -7,7 +7,7 @@ interface Props {
   events: CalendarEvent[]
   currentDate: Date
   onDayClick: (isoDate: string) => void
-  onEventClick: (evId: string, triggerEl: HTMLElement) => void
+  onEventClick: (evId: string) => void
 }
 
 const DAY_NAMES = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
@@ -97,7 +97,7 @@ export function CalMonthView({ events, currentDate, onDayClick, onEventClick }: 
                   data-evid={ev.id}
                   onClick={(e) => {
                     e.stopPropagation()
-                    onEventClick(ev.id, e.currentTarget)
+                    onEventClick(ev.id)
                   }}
                 >
                   <div className={styles.pillDot} />
