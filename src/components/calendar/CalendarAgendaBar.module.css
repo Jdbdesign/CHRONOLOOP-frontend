@@ -1,0 +1,34 @@
+.bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0 12px;
+  border-bottom: 1px solid var(--border-subtle);
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
+
+.label {
+  font-size: 12px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.rangeInput {
+  height: 32px;
+  padding: 0 12px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 7px;
+  color: var(--text-primary);
+  font-size: 12px;
+  font-family: 'DM Sans', sans-serif;
+  transition: border-color var(--duration-fast);
+  cursor: pointer;
+  color-scheme: dark;
+}
+
+.rangeInput:focus {
+  outline: none;
+  border-color: var(--accent-blue);
+}
