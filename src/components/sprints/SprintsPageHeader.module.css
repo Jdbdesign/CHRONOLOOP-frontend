@@ -1,0 +1,26 @@
+.header { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; }
+.breadcrumb { font-size: 11px; color: var(--text-muted); margin-bottom: 3px; }
+.heading { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 600; color: var(--text-primary); }
+.actions { display: flex; align-items: center; gap: 10px; }
+
+.viewToggle { display: flex; background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 8px; overflow: hidden; padding: 2px; gap: 2px; }
+.viewBtn {
+  display: flex; align-items: center; gap: 5px; padding: 5px 12px; border-radius: 6px; border: none;
+  background: transparent; color: var(--text-muted); font-size: 12px; font-weight: 500;
+  font-family: 'DM Sans', sans-serif; cursor: pointer; transition: background var(--duration-fast), color var(--duration-fast);
+}
+.viewBtn svg { width: 13px; height: 13px; }
+.viewBtn[data-active='true'] { background: var(--accent-blue); color: #fff; }
+.viewBtn[data-active='false']:hover { color: var(--text-primary); background: var(--bg-card-hover); }
+
+.filterPanel { min-width: 220px; padding: 0; }
+.filterSectionTitle { font-size: 10px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; padding: 8px 12px 4px; }
+.filterCheckItem { display: flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 6px; cursor: pointer; }
+.filterCheckItem:hover { background: var(--bg-card-hover); }
+.filterCheckItem input { accent-color: var(--accent-blue); cursor: pointer; width: 13px; height: 13px; }
+.filterCheckItem span { font-size: 12px; color: var(--text-secondary); }
+.filterFooter { display: flex; gap: 8px; padding: 8px 8px 4px; border-top: 1px solid var(--border-subtle); margin-top: 4px; }
+.filterClear { flex: 1; padding: 7px; border-radius: 7px; background: transparent; border: 1px solid var(--border-subtle); color: var(--text-secondary); font-size: 12px; cursor: pointer; font-family: 'DM Sans'; transition: background var(--duration-fast); }
+.filterClear:hover { background: var(--bg-card-hover); }
+.filterApply { flex: 1; padding: 7px; border-radius: 7px; background: var(--accent-blue); border: none; color: #fff; font-size: 12px; font-weight: 500; cursor: pointer; font-family: 'DM Sans'; transition: opacity var(--duration-fast); }
+.filterApply:hover { opacity: 0.88; }
