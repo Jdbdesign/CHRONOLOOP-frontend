@@ -1,0 +1,6 @@
+.statusBadge { display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 5px; font-size: 10px; font-weight: 600; white-space: nowrap; }
+.statusBadge svg { width: 10px; height: 10px; }
+.active    { background: rgba(74,144,255,0.12);  color: var(--accent-blue);   border: 1px solid rgba(74,144,255,0.2); }
+.completed { background: rgba(34,197,94,0.12);   color: var(--accent-green);  border: 1px solid rgba(34,197,94,0.2); }
+.planning  { background: rgba(234,179,8,0.12);   color: var(--accent-yellow); border: 1px solid rgba(234,179,8,0.2); }
+.upcoming  { background: rgba(168,85,247,0.12);  color: var(--accent-purple); border: 1px solid rgba(168,85,247,0.2); }
