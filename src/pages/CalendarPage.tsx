@@ -1,5 +1,4 @@
-import { useState, useRef, useMemo, useCallback } from 'react'
-import * as Popover from '@radix-ui/react-popover'
+import { useState, useRef, useMemo, useCallback, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useCalendarStore } from '../store/calendarStore'
 import { useTasksStore } from '../store/tasksStore'
@@ -43,9 +42,10 @@ export function CalendarPage() {
   // Local UI state
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [popupEventId, setPopupEventId] = useState<string | null>(null)
+  const [popupPos, setPopupPos] = useState<{ top: number; left: number } | null>(null)
   const [rangeStart, setRangeStart] = useState('')
   const [rangeEnd, setRangeEnd] = useState('')
-  const anchorRef = useRef<HTMLDivElement>(null)
+  const popupRef = useRef<HTMLDivElement>(null)
 
   // Compute events
   const events = useMemo(
@@ -70,22 +70,51 @@ export function CalendarPage() {
   )
 
   const handleEventClick = useCallback((evId: string, triggerEl: HTMLElement) => {
-    // Position the virtual anchor at the clicked event's location
-    if (anchorRef.current) {
-      const rect = triggerEl.getBoundingClientRect()
-      const pageContainer = anchorRef.current.offsetParent as HTMLElement | null
-      const containerRect = pageContainer?.getBoundingClientRect() ?? { left: 0, top: 0 }
-      anchorRef.current.style.left = `${rect.left - containerRect.left}px`
-      anchorRef.current.style.top = `${rect.top - containerRect.top}px`
-      anchorRef.current.style.width = `${rect.width}px`
-      anchorRef.current.style.height = `${rect.height}px`
-    }
+    const rect = triggerEl.getBoundingClientRect()
+    // Position popup: try right of trigger, fall back left, clamp to viewport
+    const pw = 304
+    const ph = 320
+    let left = rect.right + 10
+    let top = rect.top
+    if (left + pw > window.innerWidth - 10) left = rect.left - pw - 10
+    if (top + ph > window.innerHeight - 10) top = window.innerHeight - ph - 10
+    if (left < 10) left = 10
+    if (top < 10) top = 10
+    setPopupPos({ top, left })
     setPopupEventId(evId)
   }, [])
 
   const handlePopupClose = useCallback(() => {
     setPopupEventId(null)
+    setPopupPos(null)
   }, [])
+
+  // Close popup on outside click
+  useEffect(() => {
+    if (!popupEventId) return
+    const handler = (e: MouseEvent) => {
+      const target = e.target as HTMLElement
+      if (
+        popupRef.current &&
+        !popupRef.current.contains(target) &&
+        !target.closest('[data-evid]')
+      ) {
+        handlePopupClose()
+      }
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [popupEventId, handlePopupClose])
+
+  // Close popup on Escape
+  useEffect(() => {
+    if (!popupEventId) return
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') handlePopupClose()
+    }
+    document.addEventListener('keydown', handler)
+    return () => document.removeEventListener('keydown', handler)
+  }, [popupEventId, handlePopupClose])
 
   const handlePopupNavigate = useCallback(
     (type: CalendarEventType) => {
@@ -146,7 +175,7 @@ export function CalendarPage() {
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 0, overflow: 'hidden', height: '100%', position: 'relative' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 0, overflow: 'hidden', height: '100%' }}>
       <CalendarPageHeader view={view} onViewChange={setView} onNewEvent={() => setIsModalOpen(true)} />
       <CalendarSubHeader
         periodTitle={periodTitle}
@@ -164,29 +193,22 @@ export function CalendarPage() {
         onReset={handleResetRange}
       />
 
-      <Popover.Root open={!!popupEvent} onOpenChange={(open) => { if (!open) handlePopupClose() }}>
-        <Popover.Anchor ref={anchorRef} style={{ position: 'absolute', top: 0, left: 0, width: 0, height: 0, pointerEvents: 'none' }} />
-        <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column', minHeight: 0, paddingTop: 12 }}>
-          {renderView()}
+      <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column', minHeight: 0, paddingTop: 12 }}>
+        {renderView()}
+      </div>
+
+      {popupEvent && popupPos && (
+        <div
+          ref={popupRef}
+          style={{ position: 'fixed', top: popupPos.top, left: popupPos.left, zIndex: 450 }}
+        >
+          <CalEventPopup
+            event={popupEvent}
+            onClose={handlePopupClose}
+            onNavigate={handlePopupNavigate}
+          />
         </div>
-        {popupEvent && (
-          <Popover.Portal>
-            <Popover.Content
-              side="right"
-              sideOffset={10}
-              collisionPadding={10}
-              avoidCollisions
-              style={{ zIndex: 450 }}
-            >
-              <CalEventPopup
-                event={popupEvent}
-                onClose={handlePopupClose}
-                onNavigate={handlePopupNavigate}
-              />
-            </Popover.Content>
-          </Popover.Portal>
-        )}
-      </Popover.Root>
+      )}
 
       <NewEventModal
         open={isModalOpen}
