@@ -1,5 +1,6 @@
 import { CalendarDays, LayoutGrid, Calendar, List, Plus } from 'lucide-react'
 import type { CalendarView } from '../../types/calendar'
+import { Button } from '../ui/Button'
 import styles from './CalendarPageHeader.module.css'
 
 interface Props {
@@ -37,9 +38,9 @@ export function CalendarPageHeader({ view, onViewChange, onNewEvent }: Props) {
             </button>
           ))}
         </div>
-        <button type="button" className="btn-primary" onClick={onNewEvent}>
+        <Button variant="primary" onClick={onNewEvent}>
           <Plus size={14} /> New Event
-        </button>
+        </Button>
       </div>
     </div>
   )

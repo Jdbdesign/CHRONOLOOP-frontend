@@ -105,20 +105,21 @@
   display: flex;
   align-items: center;
   gap: 14px;
-  font-size: 11px;
+  font-size: 10px;
   color: var(--text-muted);
   padding-left: 10px;
   border-left: 1px solid var(--border-subtle);
+  opacity: 0.7;
 }
 
 .legendItem {
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 4px;
 }
 
 .legendDot {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
 }

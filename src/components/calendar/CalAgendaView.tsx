@@ -3,6 +3,7 @@ import { CalendarX, Plus } from 'lucide-react'
 import { addDays } from 'date-fns'
 import type { CalendarEvent } from '../../types/calendar'
 import { calToISO, calFmtTime, getAgendaDefaultRange, TYPE_COLORS, TYPE_TEXT_COLORS } from '../../lib/calendarHelpers'
+import { Button } from '../ui/Button'
 import styles from './CalAgendaView.module.css'
 
 interface Props {
@@ -63,9 +64,9 @@ export function CalAgendaView({ events, currentDate, rangeStart, rangeEnd, onEve
           <CalendarX width={44} height={44} />
           <div className={styles.emptyTitle}>No events in this range</div>
           <div className={styles.emptySub}>Try adjusting the date range or adding a new event</div>
-          <button type="button" className="btn-primary" style={{ marginTop: 8 }} onClick={onNewEvent}>
+          <Button variant="primary" style={{ marginTop: 8 }} onClick={onNewEvent}>
             <Plus size={14} /> New Event
-          </button>
+          </Button>
         </div>
       </div>
     )
