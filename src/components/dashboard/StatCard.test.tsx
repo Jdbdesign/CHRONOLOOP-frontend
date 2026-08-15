@@ -28,4 +28,26 @@ describe('StatCard', () => {
     render(<StatCard label="To-do" icon={<ClipboardList aria-hidden="true" />} target={45} delta="up" deltaText="x" index={0} />)
     expect(screen.getByText('To-do').closest('[tabindex]')).toHaveAttribute('tabindex', '0')
   })
+
+  it('accepts an optional iconBackground override without affecting the default background when omitted', () => {
+    const { container, rerender } = render(
+      <StatCard label="To-do" icon={<ClipboardList aria-hidden="true" />} target={45} delta="up" deltaText="x" index={0} />,
+    )
+    const defaultWrap = container.querySelector('[class*="iconWrap"]') as HTMLElement
+    expect(defaultWrap.style.background).toBe('')
+
+    rerender(
+      <StatCard
+        label="Active Sprint"
+        icon={<ClipboardList aria-hidden="true" />}
+        target={1}
+        delta="up"
+        deltaText="Currently running"
+        index={1}
+        iconBackground="rgba(74,144,255,0.12)"
+      />,
+    )
+    const overriddenWrap = container.querySelector('[class*="iconWrap"]') as HTMLElement
+    expect(overriddenWrap.style.background).toBe('rgba(74, 144, 255, 0.12)')
+  })
 })

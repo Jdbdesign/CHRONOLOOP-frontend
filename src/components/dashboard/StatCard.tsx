@@ -1,5 +1,5 @@
 // src/components/dashboard/StatCard.tsx
-import type { ReactNode } from 'react'
+import type { CSSProperties, ReactNode } from 'react'
 import { Card } from '../ui/Card'
 import { useCountUp } from '../../hooks/useCountUp'
 import styles from './StatCard.module.css'
@@ -12,10 +12,12 @@ interface StatCardProps {
   deltaText: string
   index: number
   overdue?: boolean
+  iconBackground?: string
 }
 
-export function StatCard({ label, icon, target, delta, deltaText, index, overdue }: StatCardProps) {
+export function StatCard({ label, icon, target, delta, deltaText, index, overdue, iconBackground }: StatCardProps) {
   const value = useCountUp(target)
+  const iconWrapStyle: CSSProperties | undefined = iconBackground ? { background: iconBackground } : undefined
 
   return (
     <Card
@@ -26,7 +28,7 @@ export function StatCard({ label, icon, target, delta, deltaText, index, overdue
     >
       <div className={styles.top}>
         <span className={styles.label}>{label}</span>
-        <div className={[styles.iconWrap, overdue && styles.overdue].filter(Boolean).join(' ')}>{icon}</div>
+        <div className={[styles.iconWrap, overdue && styles.overdue].filter(Boolean).join(' ')} style={iconWrapStyle}>{icon}</div>
       </div>
       <div className={styles.value}>{value}</div>
       <div className={[styles.delta, styles[delta]].join(' ')}>
