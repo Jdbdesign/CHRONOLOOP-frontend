@@ -1,0 +1,141 @@
+.agendaWrap {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+  padding-right: 4px;
+}
+
+.agendaWrap::-webkit-scrollbar {
+  width: 4px;
+}
+
+.agendaWrap::-webkit-scrollbar-thumb {
+  background: var(--border-default);
+  border-radius: 2px;
+}
+
+.dateHdr {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 0 8px;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--bg-base);
+}
+
+.dateHdrToday .dtext {
+  color: var(--accent-blue);
+}
+
+.dtext {
+  font-family: 'Syne', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.dline {
+  flex: 1;
+  height: 1px;
+  background: var(--border-subtle);
+}
+
+.dcount {
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+.agendaEv {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 14px;
+  border-radius: 9px;
+  cursor: pointer;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  margin-bottom: 6px;
+  transition: border-color var(--duration-fast), transform var(--duration-fast), box-shadow var(--duration-fast);
+}
+
+.agendaEv:hover {
+  border-color: var(--border-default);
+  transform: translateX(4px);
+  box-shadow: 0 3px 14px rgba(0, 0, 0, 0.2);
+}
+
+.evBar {
+  width: 4px;
+  border-radius: 2px;
+  align-self: stretch;
+  flex-shrink: 0;
+  min-height: 30px;
+}
+
+.evTime {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-family: 'DM Mono', monospace;
+  white-space: nowrap;
+  min-width: 44px;
+}
+
+.evTitle {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.evType {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 10px;
+  flex-shrink: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.evProj {
+  font-size: 11px;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 150px;
+  flex-shrink: 0;
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 60px 20px;
+  text-align: center;
+}
+
+.empty svg {
+  color: var(--text-muted);
+}
+
+.emptyTitle {
+  font-family: 'Syne', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.emptySub {
+  font-size: 12px;
+  color: var(--text-muted);
+  max-width: 260px;
+  line-height: 1.5;
+}

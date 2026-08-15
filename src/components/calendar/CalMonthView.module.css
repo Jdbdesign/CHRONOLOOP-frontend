@@ -1,0 +1,163 @@
+.monthWrap {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.dayHeadersRow {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  border-bottom: 1px solid var(--border-subtle);
+  flex-shrink: 0;
+  background: var(--bg-card);
+}
+
+.dayColHdr {
+  padding: 9px 0;
+  text-align: center;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-family: 'DM Mono', monospace;
+  border-right: 1px solid var(--border-subtle);
+}
+
+.dayColHdr:last-child {
+  border-right: none;
+}
+
+.monthGrid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+  background: var(--bg-base);
+}
+
+.monthGrid::-webkit-scrollbar {
+  width: 4px;
+}
+
+.monthGrid::-webkit-scrollbar-thumb {
+  background: var(--border-default);
+  border-radius: 2px;
+}
+
+.dayCell {
+  border-right: 1px solid var(--border-subtle);
+  border-bottom: 1px solid var(--border-subtle);
+  padding: 8px 7px 6px;
+  min-height: 108px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  cursor: pointer;
+  transition: background var(--duration-fast);
+  position: relative;
+  overflow: hidden;
+}
+
+.dayCell:nth-child(7n) {
+  border-right: none;
+}
+
+.dayCell:hover {
+  background: var(--bg-card);
+}
+
+.otherMonth .dayNum {
+  opacity: 0.3;
+}
+
+.todayCell {
+  background: rgba(74, 144, 255, 0.04);
+}
+
+.todayCell .dayNum {
+  background: var(--accent-blue);
+  color: #fff;
+  font-weight: 700;
+  border-radius: 50%;
+}
+
+.weekendCell .dayNum {
+  color: var(--text-muted);
+}
+
+.dayNum {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  line-height: 1;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-bottom: 1px;
+  transition: background var(--duration-fast), color var(--duration-fast);
+}
+
+.evPill {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 6px 2px 5px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 500;
+  color: #fff;
+  cursor: pointer;
+  overflow: hidden;
+  white-space: nowrap;
+  transition: opacity var(--duration-fast), transform var(--duration-fast);
+  max-width: 100%;
+  flex-shrink: 0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.evPill:hover {
+  opacity: 0.88;
+  transform: translateX(1px);
+}
+
+.pillDot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.65);
+  flex-shrink: 0;
+}
+
+.pillText {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+  min-width: 0;
+}
+
+.moreBtn {
+  font-size: 10px;
+  color: var(--accent-blue);
+  cursor: pointer;
+  padding: 1px 5px;
+  border-radius: 3px;
+  transition: background var(--duration-fast);
+  font-weight: 500;
+  align-self: flex-start;
+  background: none;
+  border: none;
+  font-family: 'DM Sans', sans-serif;
+}
+
+.moreBtn:hover {
+  background: var(--accent-blue-bg);
+}
