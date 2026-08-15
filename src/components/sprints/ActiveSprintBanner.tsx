@@ -32,9 +32,9 @@ export function ActiveSprintBanner() {
             <span className={styles.bannerMetaItem}><Calendar aria-hidden="true" />{sprint.startDate} — <span className={styles.metaAccent}>{sprint.endDate}</span></span>
             <span className={styles.bannerMetaItem}><Clock aria-hidden="true" /><span className={styles.metaAccent}>{sprint.daysLeft} days</span> remaining</span>
             <span className={styles.bannerMetaItem}><Briefcase aria-hidden="true" />{sprint.project}</span>
-            <span className={styles.bannerMetaItem} style={{ gap: 0 }}>
+            <span className={styles.teamAvatars}>
               {sprint.team.map((m) => (
-                <Avatar key={m.i} name={m.i} fallbackStyle={{ background: m.c, fontSize: 8 }} style={{ width: 20, height: 20, borderColor: 'var(--bg-card)' }} />
+                <Avatar key={m.i} name={m.i} className={styles.teamAvatar} fallbackStyle={{ background: m.c, fontSize: 8 }} style={{ width: 20, height: 20 }} />
               ))}
             </span>
           </div>

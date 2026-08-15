@@ -42,6 +42,10 @@
 .burndownTitle { font-size: 10px; color: var(--text-muted); margin-bottom: 6px; font-weight: 500; }
 .burndownSvg { width: 160px; height: 36px; }
 
+.teamAvatars { display: flex; align-items: center; gap: 0; }
+.teamAvatar { border: 1.5px solid var(--bg-card); }
+.teamAvatars > *:not(:first-child) { margin-left: -6px; }
+
 @media (max-width: 900px) {
   .bannerInner { grid-template-columns: 1fr; }
 }
