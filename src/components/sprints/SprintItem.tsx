@@ -22,7 +22,9 @@ export function SprintItem({ sprint, onOpenDetail, onEdit, onMarkComplete, onDel
   return (
     <div
       className={styles.item}
+      role="button"
       tabIndex={0}
+      aria-label={sprint.name}
       onClick={() => onOpenDetail(sprint.id)}
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {
