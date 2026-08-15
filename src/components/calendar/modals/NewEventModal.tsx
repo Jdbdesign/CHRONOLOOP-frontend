@@ -63,7 +63,7 @@ export function NewEventModal({ open, onClose, onSave }: Props) {
   }
 
   return (
-    <Modal open={open} onClose={handleClose} title="New Calendar Event" subtitle="Schedule a task, meeting, sprint, or project milestone">
+    <Modal open={open} onOpenChange={(isOpen) => { if (!isOpen) handleClose() }} title="New Calendar Event" subtitle="Schedule a task, meeting, sprint, or project milestone">
       <NewEventForm key={session} onSubmit={onSave} onCancel={handleClose} showToast={showToast} />
     </Modal>
   )

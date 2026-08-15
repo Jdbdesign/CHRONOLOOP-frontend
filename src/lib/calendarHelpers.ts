@@ -1,4 +1,4 @@
-import { parse, format, addMonths, addDays, startOfMonth, endOfMonth } from 'date-fns'
+import { parse, addMonths, addDays, startOfMonth, endOfMonth } from 'date-fns'
 import type { CalendarEvent, CalendarEventType, CalendarFilter, CalendarView } from '../types/calendar'
 import type { Task } from '../types/task'
 import type { Project } from '../types/project'
