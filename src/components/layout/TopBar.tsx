@@ -20,6 +20,7 @@ const TEAM_AVATARS: TeamAvatar[] = [
 export function TopBar() {
   const fullName = useSettingsStore((s) => `${s.profile.firstName} ${s.profile.lastName}`)
   const toggleDrawer = useDrawerStore((s) => s.toggle)
+  const isDrawerOpen = useDrawerStore((s) => s.isOpen)
   const [searchExpanded, setSearchExpanded] = useState(false)
 
   return (
@@ -29,6 +30,7 @@ export function TopBar() {
         className={styles.hamburger}
         onClick={toggleDrawer}
         aria-label="Open navigation"
+        aria-expanded={isDrawerOpen}
       >
         <Menu size={20} aria-hidden="true" />
       </button>
