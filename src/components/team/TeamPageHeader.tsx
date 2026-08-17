@@ -26,7 +26,7 @@ export function TeamPageHeader({ searchQuery, onSearchChange, sortMode, onSortCh
     <div className={styles.header}>
       <div>
         <div className={styles.breadcrumb}>Overview / Team</div>
-        <div className={styles.heading}>Team</div>
+        <h1 className={styles.heading}>Team</h1>
       </div>
       <div className={styles.actions}>
         <div className={styles.searchWrap}>
