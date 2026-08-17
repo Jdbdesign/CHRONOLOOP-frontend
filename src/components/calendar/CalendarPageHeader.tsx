@@ -21,7 +21,7 @@ export function CalendarPageHeader({ view, onViewChange, onNewEvent }: Props) {
     <div className={styles.header}>
       <div>
         <div className={styles.breadcrumb}>ChronoLoop / Calendar</div>
-        <div className={styles.heading}>Calendar</div>
+        <h1 className={styles.heading}>Calendar</h1>
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
         <div className={styles.viewSwitcher}>

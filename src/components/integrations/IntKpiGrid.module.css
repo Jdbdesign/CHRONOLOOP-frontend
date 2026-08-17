@@ -1,0 +1,12 @@
+.grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.card { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 10px; padding: 16px 18px; display: flex; flex-direction: column; gap: 8px; position: relative; overflow: hidden; }
+.card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; border-radius: 10px 10px 0 0; }
+.card:nth-child(1)::before { background: var(--accent-blue); }
+.card:nth-child(2)::before { background: var(--accent-teal); }
+.card:nth-child(3)::before { background: var(--accent-orange); }
+.card:nth-child(4)::before { background: var(--accent-purple); }
+.label { font-size: 11px; color: var(--text-secondary); font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em; }
+.value { font-family: 'DM Mono', monospace; font-size: 26px; font-weight: 700; color: var(--text-primary); line-height: 1; }
+.sub { font-size: 11px; color: var(--text-muted); display: flex; align-items: center; gap: 4px; }
+.up { color: var(--accent-green); }
+.down { color: var(--accent-red); }

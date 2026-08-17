@@ -24,7 +24,7 @@ export function ReportsPageHeader() {
     <div className={styles.header}>
       <div>
         <div className={styles.breadcrumb}>Overview / Reports</div>
-        <div className={styles.heading}>Reports</div>
+        <h1 className={styles.heading}>Reports</h1>
       </div>
       <div className={styles.actions}>
         <div className={styles.rangeTabs}>

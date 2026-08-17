@@ -1,0 +1,4 @@
+.header { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.breadcrumb { font-size: 11px; color: var(--text-muted); margin-bottom: 3px; }
+.heading { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 600; color: var(--text-primary); }
+.actions { display: flex; align-items: center; gap: 10px; }
