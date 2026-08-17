@@ -1,5 +1,6 @@
 // src/components/layout/TopBar.tsx
 import { Search, Share2, Bell, ChevronDown } from 'lucide-react'
+import { useSettingsStore } from '../../store/settingsStore'
 import styles from './TopBar.module.css'
 
 interface TeamAvatar {
@@ -15,6 +16,7 @@ const TEAM_AVATARS: TeamAvatar[] = [
 ]
 
 export function TopBar() {
+  const fullName = useSettingsStore((s) => `${s.profile.firstName} ${s.profile.lastName}`)
   return (
     <header className={styles.topbar}>
       <div className={styles.searchWrap}>
@@ -46,9 +48,9 @@ export function TopBar() {
           <span className={styles.notifBadge}>2</span>
         </button>
 
-        <button type="button" className={styles.userAvatarBtn} aria-label="Jacob Solayinka, account menu">
+        <button type="button" className={styles.userAvatarBtn} aria-label={`${fullName}, account menu`}>
           <div className={styles.avatarMd}>
-            <img className={styles.avatarImg} src="/avatars/Ellipse 1.png" alt="Jacob Solayinka" />
+            <img className={styles.avatarImg} src="/avatars/Ellipse 1.png" alt={fullName} />
           </div>
           <ChevronDown size={14} aria-hidden="true" />
         </button>

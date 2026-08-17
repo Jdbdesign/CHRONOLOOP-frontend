@@ -4,12 +4,16 @@ import { SettingsCard } from '../shared/SettingsCard'
 import { ToggleRow } from '../shared/ToggleRow'
 import { Button } from '../../ui/Button'
 import { useToastStore } from '../../../store/toastStore'
-import { SESSIONS, LOGIN_ACTIVITY } from '../../../data/mockSettingsData'
+import { useSettingsStore } from '../../../store/settingsStore'
+import { LOGIN_ACTIVITY } from '../../../data/mockSettingsData'
 
 const DEVICE_ICONS: Record<string, typeof Monitor> = { monitor: Monitor, smartphone: Smartphone, tablet: Tablet, laptop: Laptop }
 
 export function SecurityTab() {
   const showToast = useToastStore((s) => s.showToast)
+  const sessions = useSettingsStore((s) => s.sessions)
+  const revokeSession = useSettingsStore((s) => s.revokeSession)
+  const revokeAllSessions = useSettingsStore((s) => s.revokeAllSessions)
   const [pwdStrength, setPwdStrength] = useState(0)
 
   return (
@@ -35,14 +39,14 @@ export function SecurityTab() {
         <ToggleRow label="Require 2FA for new logins" description="Always prompt for 2FA on unrecognized devices" checked={false} onChange={() => {}} disabled />
       </SettingsCard>
 
-      <SettingsCard title="Active Sessions" subtitle="Devices currently signed in to your account" headerRight={<Button variant="secondary" style={{ height: 28, fontSize: 11, padding: '0 10px' }} onClick={() => showToast('All other sessions revoked', 'success', 2000)}><LogOut size={11} /> Revoke All</Button>}>
-        {SESSIONS.map((s, i) => {
+      <SettingsCard title="Active Sessions" subtitle="Devices currently signed in to your account" headerRight={<Button variant="secondary" style={{ height: 28, fontSize: 11, padding: '0 10px' }} onClick={() => { revokeAllSessions(); showToast('All other sessions revoked', 'success', 2000) }}><LogOut size={11} /> Revoke All</Button>}>
+        {sessions.map((s, i) => {
           const Icon = DEVICE_ICONS[s.icon] || Monitor
           return (
             <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 0', borderBottom: '1px solid var(--border-subtle)' }}>
               <div style={{ width: 32, height: 32, borderRadius: 8, background: 'var(--bg-input)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)' }}><Icon size={15} /></div>
               <div style={{ flex: 1 }}><div style={{ fontSize: 12, fontWeight: 500, color: 'var(--text-primary)' }}>{s.device}</div><div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 1 }}>{s.meta} {s.current && <span style={{ background: 'rgba(74,144,255,0.12)', color: 'var(--accent-blue)', fontSize: 9, fontWeight: 600, padding: '1px 6px', borderRadius: 8, marginLeft: 6 }}>Current</span>}</div></div>
-              {!s.current && <button type="button" style={{ fontSize: 11, color: 'var(--accent-red)', background: 'transparent', border: 'none', cursor: 'pointer', fontFamily: "'DM Sans'" }} onClick={() => showToast('Session revoked', 'success', 1800)}>Revoke</button>}
+              {!s.current && <button type="button" style={{ fontSize: 11, color: 'var(--accent-red)', background: 'transparent', border: 'none', cursor: 'pointer', fontFamily: "'DM Sans'" }} onClick={() => { revokeSession(i); showToast('Session revoked', 'success', 1800) }}>Revoke</button>}
             </div>
           )
         })}

@@ -5,21 +5,21 @@ import { ToggleRow } from '../shared/ToggleRow'
 import { RadioCardGroup } from '../shared/RadioCardGroup'
 import { useToastStore } from '../../../store/toastStore'
 import { useThemeStore } from '../../../store/themeStore'
-
-const COLORS = ['#4A90FF', '#A855F7', '#00D4AA', '#FF8C42', '#EC4899', '#EAB308', '#22C55E', '#06B6D4']
+import { useSettingsStore } from '../../../store/settingsStore'
 
 export function AppearanceTab() {
   const showToast = useToastStore((s) => s.showToast)
   const theme = useThemeStore((s) => s.theme)
   const setTheme = useThemeStore((s) => s.setTheme)
+  const accentColor = useSettingsStore((s) => s.accentColor)
+  const setAccentColor = useSettingsStore((s) => s.setAccentColor)
   const [density, setDensity] = useState('comfortable')
   const [fontSize, setFontSize] = useState('medium')
-  const [accentColor, setAccentColor] = useState('#4A90FF')
   const [toggles, setToggles] = useState({ labels: true, animate: true, reduceMotion: false })
 
   const handleTheme = (val: string) => {
     if (val === 'dark' || val === 'light') setTheme(val)
-    else { /* system — themeStore only supports dark/light, default to dark */ setTheme('dark') }
+    else { setTheme('dark') }
     showToast(`Theme updated to ${val.charAt(0).toUpperCase() + val.slice(1)}`, 'success', 1800)
   }
 
@@ -37,10 +37,10 @@ export function AppearanceTab() {
         />
       </SettingsCard>
 
-      <SettingsCard title="Accent Color" subtitle="Pick your preferred highlight color">
+      <SettingsCard title="Accent Color" subtitle="Pick your preferred highlight color — applied across the app">
         <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-          {COLORS.map((c) => (
-            <div key={c} onClick={() => setAccentColor(c)} style={{ width: 28, height: 28, borderRadius: '50%', background: c, cursor: 'pointer', border: accentColor === c ? '2.5px solid #fff' : '2.5px solid transparent', boxShadow: accentColor === c ? `0 0 0 2px ${c}` : 'none', transition: 'all 0.15s' }} title={c} />
+          {['#4A90FF', '#A855F7', '#00D4AA', '#FF8C42', '#EC4899', '#EAB308', '#22C55E', '#06B6D4'].map((c) => (
+            <div key={c} onClick={() => { setAccentColor(c); showToast('Accent color updated', 'success', 1500) }} style={{ width: 28, height: 28, borderRadius: '50%', background: c, cursor: 'pointer', border: accentColor === c ? '2.5px solid #fff' : '2.5px solid transparent', boxShadow: accentColor === c ? `0 0 0 2px ${c}` : 'none', transition: 'all 0.15s' }} title={c} />
           ))}
         </div>
       </SettingsCard>
@@ -53,7 +53,7 @@ export function AppearanceTab() {
             { id: 'spacious', icon: <LayoutGrid size={17} />, label: 'Spacious' },
           ]}
           value={density}
-          onChange={setDensity}
+          onChange={(v) => { setDensity(v); showToast('Density and font size changes require a frontend refactor to take effect', 'info', 3000) }}
         />
       </SettingsCard>
 
@@ -65,12 +65,12 @@ export function AppearanceTab() {
             { id: 'large', icon: <span style={{ fontSize: 17, fontWeight: 700 }}>Aa</span>, label: 'Large' },
           ]}
           value={fontSize}
-          onChange={setFontSize}
+          onChange={(v) => { setFontSize(v); showToast('Density and font size changes require a frontend refactor to take effect', 'info', 3000) }}
         />
       </SettingsCard>
 
       <SettingsCard title="Sidebar Behavior" subtitle="How the navigation sidebar is displayed">
-        <ToggleRow label="Show sidebar labels" description="Display text next to navigation icons" checked={toggles.labels} onChange={(v) => setToggles((p) => ({ ...p, labels: v }))} />
+        <ToggleRow label="Show sidebar labels" description="Display text next to navigation icons" checked={toggles.labels} onChange={(v) => { setToggles((p) => ({ ...p, labels: v })); showToast('Sidebar behavior changes require a frontend refactor to take effect', 'info', 3000) }} />
         <ToggleRow label="Animate sidebar transitions" description="Slide-in effects when switching pages" checked={toggles.animate} onChange={(v) => setToggles((p) => ({ ...p, animate: v }))} />
         <ToggleRow label="Reduce motion" description="Minimize animations for accessibility" checked={toggles.reduceMotion} onChange={(v) => setToggles((p) => ({ ...p, reduceMotion: v }))} />
       </SettingsCard>
