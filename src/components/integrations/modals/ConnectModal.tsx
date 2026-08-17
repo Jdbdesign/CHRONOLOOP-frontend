@@ -1,9 +1,22 @@
 import { Check, CheckCircle } from 'lucide-react'
+import * as LucideIcons from 'lucide-react'
 import { Modal } from '../../ui/Modal'
 import { Button } from '../../ui/Button'
 import { useToastStore } from '../../../store/toastStore'
 import { useIntegrationsStore } from '../../../store/integrationsStore'
 import { INT_APP_DATA, INT_APPS } from '../../../data/mockIntegrations'
+import type { IntFeature } from '../../../data/mockIntegrations'
+
+function FeatureIcon({ feature }: { feature: IntFeature }) {
+  // Try to resolve the lucide icon by name (pascal-cased)
+  const pascalName = feature.icon
+    .split('-')
+    .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
+    .join('')
+  const Icon = (LucideIcons as Record<string, unknown>)[pascalName] as React.ComponentType<{ size?: number; style?: React.CSSProperties }> | undefined
+  if (Icon) return <Icon size={15} style={{ color: feature.color }} />
+  return <span style={{ color: feature.color, fontSize: 14 }}>{'\u2022'}</span>
+}
 
 interface Props { appId: string | null; onClose: () => void }
 
@@ -29,7 +42,7 @@ export function ConnectModal({ appId, onClose }: Props) {
           {data.features.map((f) => (
             <div key={f.title} style={{ display: 'flex', gap: 10, marginBottom: 10, alignItems: 'flex-start' }}>
               <div style={{ width: 32, height: 32, borderRadius: 8, background: f.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                <span style={{ color: f.color, fontSize: 14 }}>\u2022</span>
+                <FeatureIcon feature={f} />
               </div>
               <div><div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)' }}>{f.title}</div><div style={{ fontSize: 11, color: 'var(--text-secondary)', marginTop: 2 }}>{f.desc}</div></div>
             </div>
