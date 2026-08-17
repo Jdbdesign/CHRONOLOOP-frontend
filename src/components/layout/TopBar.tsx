@@ -1,6 +1,8 @@
 // src/components/layout/TopBar.tsx
-import { Search, Share2, Bell, ChevronDown } from 'lucide-react'
+import { useState } from 'react'
+import { Search, Share2, Bell, ChevronDown, Menu, X } from 'lucide-react'
 import { useSettingsStore } from '../../store/settingsStore'
+import { useDrawerStore } from '../../store/drawerStore'
 import styles from './TopBar.module.css'
 
 interface TeamAvatar {
@@ -17,17 +19,44 @@ const TEAM_AVATARS: TeamAvatar[] = [
 
 export function TopBar() {
   const fullName = useSettingsStore((s) => `${s.profile.firstName} ${s.profile.lastName}`)
+  const toggleDrawer = useDrawerStore((s) => s.toggle)
+  const [searchExpanded, setSearchExpanded] = useState(false)
+
   return (
     <header className={styles.topbar}>
-      <div className={styles.searchWrap}>
-        <Search className={styles.searchIcon} aria-hidden="true" />
+      <button
+        type="button"
+        className={styles.hamburger}
+        onClick={toggleDrawer}
+        aria-label="Open navigation"
+      >
+        <Menu size={20} aria-hidden="true" />
+      </button>
+
+      <div className={`${styles.searchWrap}${searchExpanded ? ` ${styles.searchExpanded}` : ''}`}>
+        <Search
+          className={styles.searchIcon}
+          aria-hidden="true"
+          onClick={() => setSearchExpanded(true)}
+        />
         <input
           className={styles.searchInput}
           type="search"
           placeholder="Search"
           autoComplete="off"
           aria-label="Search"
+          onBlur={() => setSearchExpanded(false)}
         />
+        {searchExpanded && (
+          <button
+            type="button"
+            className={styles.searchClose}
+            onMouseDown={(e) => { e.preventDefault(); setSearchExpanded(false) }}
+            aria-label="Close search"
+          >
+            <X size={16} />
+          </button>
+        )}
       </div>
 
       <div className={styles.topbarRight}>

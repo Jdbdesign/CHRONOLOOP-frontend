@@ -36,8 +36,43 @@
   border-radius: 3px;
 }
 
-@media (max-width: 1024px) {
+.drawerOverlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 199;
+  backdrop-filter: blur(2px);
+  opacity: 0;
+  transition: opacity 300ms var(--ease-out);
+}
+
+.drawerOverlayOpen {
+  opacity: 1;
+}
+
+/* Tablet + Mobile: single column, drawer off-canvas */
+@media (max-width: 1023px) {
   .appLayout {
-    grid-template-columns: 60px 1fr;
+    grid-template-columns: 1fr;
+  }
+
+  .drawerOverlay {
+    display: block;
+    pointer-events: none;
+  }
+
+  .drawerOverlayOpen {
+    pointer-events: auto;
+  }
+
+  .contentScroll {
+    padding: 14px 20px 18px;
+  }
+}
+
+@media (max-width: 639px) {
+  .contentScroll {
+    padding: 12px 16px 16px;
   }
 }
