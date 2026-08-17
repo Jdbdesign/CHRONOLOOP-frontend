@@ -8,7 +8,7 @@ interface Props {
 
 export function RptBurndownChart({ onHover, onLeave }: Props) {
   const data = RPT_DATA.burndown
-  const svgW = 560, svgH = 160, padL = 32, padR = 12, padT = 10, padB = 28
+  const svgW = 875, svgH = 160, padL = 40, padR = 16, padT = 10, padB = 28
   const cW = svgW - padL - padR, cH = svgH - padT - padB
   const maxPts = 80, days = 13
   const xOf = (d: number) => padL + (d / days) * cW
