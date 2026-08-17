@@ -9,14 +9,17 @@ import { AddTaskModal } from '../components/tasks/modals/AddTaskModal'
 import { useTasksStore } from '../store/tasksStore'
 import { useTaskDetailStore } from '../store/taskDetailStore'
 import { useDeleteWithUndo } from '../hooks/useDeleteWithUndo'
+import { useInert } from '../hooks/useInert'
 import { PRIORITY_ORDER } from '../lib/taskFormatters'
 import styles from './TasksPage.module.css'
 
 export function TasksPage() {
   const tasks = useTasksStore((s) => s.tasks)
   const removeTask = useTasksStore((s) => s.removeTask)
-  const restoreTask = useTasksStore((s) => s.restoreTask)
   const openDetail = useTaskDetailStore((s) => s.open)
+  const panelOpen = useTaskDetailStore((s) => !!s.openTaskId)
+  const contentRef = useInert<HTMLDivElement>(panelOpen)
+  const restoreTask = useTasksStore((s) => s.restoreTask)
   const { deleteWithUndo } = useDeleteWithUndo(removeTask, restoreTask)
 
   const [view, setView] = useState<'list' | 'board'>('list')
@@ -49,21 +52,23 @@ export function TasksPage() {
 
   return (
     <div className={styles.page}>
-      <TasksPageHeader view={view} onViewChange={setView} />
-      <TaskStatsRow activeFilter={activeFilter} onFilterChange={setActiveFilter}>
-        <TasksToolbar
-          activeSort={activeSort}
-          onSortChange={setActiveSort}
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-        />
-      </TaskStatsRow>
-      {view === 'list' ? (
-        <TaskListView tasks={filteredTasks} onOpenDetail={openDetail} onDelete={handleDelete} />
-      ) : (
-        <TaskBoardView tasks={filteredTasks} onOpenDetail={openDetail} />
-      )}
-      <AddTaskModal />
+      <div ref={contentRef}>
+        <TasksPageHeader view={view} onViewChange={setView} />
+        <TaskStatsRow activeFilter={activeFilter} onFilterChange={setActiveFilter}>
+          <TasksToolbar
+            activeSort={activeSort}
+            onSortChange={setActiveSort}
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+          />
+        </TaskStatsRow>
+        {view === 'list' ? (
+          <TaskListView tasks={filteredTasks} onOpenDetail={openDetail} onDelete={handleDelete} />
+        ) : (
+          <TaskBoardView tasks={filteredTasks} onOpenDetail={openDetail} />
+        )}
+        <AddTaskModal />
+      </div>
       <TaskDetailPanel onDelete={handleDelete} />
     </div>
   )

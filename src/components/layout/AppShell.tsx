@@ -3,12 +3,14 @@ import { Outlet, useLocation } from 'react-router-dom'
 import { Sidebar } from './Sidebar'
 import { TopBar } from './TopBar'
 import { useDrawerStore } from '../../store/drawerStore'
+import { useInert } from '../../hooks/useInert'
 import styles from './AppShell.module.css'
 
 export function AppShell() {
   const isDrawerOpen = useDrawerStore((s) => s.isOpen)
   const closeDrawer = useDrawerStore((s) => s.close)
   const location = useLocation()
+  const mainRef = useInert<HTMLElement>(isDrawerOpen)
 
   // Close drawer on route change
   useEffect(() => {
@@ -31,7 +33,7 @@ export function AppShell() {
         aria-hidden="true"
       />
       <Sidebar isDrawerOpen={isDrawerOpen} />
-      <main className={styles.mainContent}>
+      <main ref={mainRef} className={styles.mainContent}>
         <TopBar />
         <div className={styles.contentScroll}>
           <Outlet />

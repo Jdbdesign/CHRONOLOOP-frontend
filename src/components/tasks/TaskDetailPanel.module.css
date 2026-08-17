@@ -23,3 +23,21 @@
 .inProgress { background: rgba(234,179,8,0.1); color: var(--accent-yellow); border: 1px solid rgba(234,179,8,0.25); }
 .done { background: rgba(34,197,94,0.1); color: var(--accent-green); border: 1px solid rgba(34,197,94,0.25); }
 .overdue { background: rgba(255,77,77,0.1); color: var(--accent-red); border: 1px solid rgba(255,77,77,0.25); }
+
+/* Mobile: full-screen panel */
+@media (max-width: 639px) {
+  .panel {
+    width: 100%;
+    max-width: 100%;
+    border-left: none;
+    box-shadow: none;
+  }
+}
+
+/* Tablet: wider panel */
+@media (min-width: 640px) and (max-width: 1023px) {
+  .panel {
+    width: 85vw;
+    max-width: 500px;
+  }
+}

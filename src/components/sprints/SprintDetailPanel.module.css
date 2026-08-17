@@ -53,3 +53,21 @@
 .velocityBar { width: 100%; border-radius: 3px 3px 0 0; }
 .velocityBarLabel { font-size: 9px; color: var(--text-muted); font-family: 'DM Mono', monospace; }
 .velocityBarNum { font-size: 9px; color: var(--text-primary); font-weight: 700; font-family: 'DM Mono', monospace; }
+
+/* Mobile: full-screen panel */
+@media (max-width: 639px) {
+  .panel {
+    width: 100%;
+    max-width: 100%;
+    border-left: none;
+    box-shadow: none;
+  }
+}
+
+/* Tablet: wider panel */
+@media (min-width: 640px) and (max-width: 1023px) {
+  .panel {
+    width: 85vw;
+    max-width: 500px;
+  }
+}

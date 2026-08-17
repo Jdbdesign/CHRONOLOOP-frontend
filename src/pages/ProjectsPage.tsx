@@ -10,11 +10,14 @@ import { useProjectsStore } from '../store/projectsStore'
 import { useProjectDetailStore } from '../store/projectDetailStore'
 import { useProjectModalStore } from '../store/projectModalStore'
 import { useToastStore } from '../store/toastStore'
+import { useInert } from '../hooks/useInert'
 import styles from './ProjectsPage.module.css'
 
 export function ProjectsPage() {
   const projects = useProjectsStore((s) => s.projects)
   const removeProject = useProjectsStore((s) => s.removeProject)
+  const panelOpen = useProjectDetailStore((s) => !!s.openProjectId)
+  const contentRef = useInert<HTMLDivElement>(panelOpen)
   const openDetail = useProjectDetailStore((s) => s.open)
   const openNewProject = useProjectModalStore((s) => s.open)
   const showToast = useToastStore((s) => s.showToast)
@@ -51,23 +54,25 @@ export function ProjectsPage() {
 
   return (
     <div className={styles.page}>
-      <ProjectsPageHeader view={view} onViewChange={setView} onNewProject={openNewProject} />
-      <ProjectStatsRow activeFilter={activeFilter} onFilterChange={setActiveFilter}>
-        <ProjectsToolbar
-          activeSort={activeSort}
-          onSortChange={setActiveSort}
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-        />
-      </ProjectStatsRow>
-      <div key={`${activeFilter}|${activeSort}|${searchQuery}`}>
-        {view === 'grid' ? (
-          <ProjectsGridView projects={filteredProjects} onOpenDetail={openDetail} onDelete={handleDelete} />
-        ) : (
-          <ProjectsListView projects={filteredProjects} onOpenDetail={openDetail} />
-        )}
+      <div ref={contentRef}>
+        <ProjectsPageHeader view={view} onViewChange={setView} onNewProject={openNewProject} />
+        <ProjectStatsRow activeFilter={activeFilter} onFilterChange={setActiveFilter}>
+          <ProjectsToolbar
+            activeSort={activeSort}
+            onSortChange={setActiveSort}
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+          />
+        </ProjectStatsRow>
+        <div key={`${activeFilter}|${activeSort}|${searchQuery}`}>
+          {view === 'grid' ? (
+            <ProjectsGridView projects={filteredProjects} onOpenDetail={openDetail} onDelete={handleDelete} />
+          ) : (
+            <ProjectsListView projects={filteredProjects} onOpenDetail={openDetail} />
+          )}
+        </div>
+        <NewProjectModal />
       </div>
-      <NewProjectModal />
       <ProjectDetailPanel onDelete={handleDelete} />
     </div>
   )

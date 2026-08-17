@@ -44,3 +44,21 @@
 .milestoneText { font-size: 12px; color: var(--text-primary); flex: 1; }
 .milestoneText.done { text-decoration: line-through; color: var(--text-muted); }
 .milestoneDate { font-size: 10px; color: var(--text-muted); white-space: nowrap; }
+
+/* Mobile: full-screen panel */
+@media (max-width: 639px) {
+  .panel {
+    width: 100%;
+    max-width: 100%;
+    border-left: none;
+    box-shadow: none;
+  }
+}
+
+/* Tablet: wider panel */
+@media (min-width: 640px) and (max-width: 1023px) {
+  .panel {
+    width: 85vw;
+    max-width: 500px;
+  }
+}
