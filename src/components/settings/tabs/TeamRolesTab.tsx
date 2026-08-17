@@ -18,6 +18,8 @@ export function TeamRolesTab() {
   const pendingInvites = useSettingsStore((s) => s.pendingInvites)
   const addInvite = useSettingsStore((s) => s.addInvite)
   const revokeInvite = useSettingsStore((s) => s.revokeInvite)
+  const profileName = useSettingsStore((s) => `${s.profile.firstName} ${s.profile.lastName}`)
+  const profileEmail = useSettingsStore((s) => s.profile.email)
   const [inviteEmail, setInviteEmail] = useState('')
   const [inviteRole, setInviteRole] = useState('Member')
 
@@ -35,7 +37,7 @@ export function TeamRolesTab() {
           <tbody>
             {/* Owner row — Jacob Solayinka */}
             <tr style={{ borderBottom: '1px solid var(--border-subtle)' }}>
-              <td style={{ padding: '10px 10px 10px 0' }}><div style={{ display: 'flex', alignItems: 'center', gap: 10 }}><div style={{ width: 30, height: 30, borderRadius: '50%', overflow: 'hidden', flexShrink: 0 }}><img src="/avatars/Ellipse 1.png" alt="Jacob Solayinka" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /></div><div><div style={{ fontSize: 12, fontWeight: 500, color: 'var(--text-primary)' }}>Jacob Solayinka</div><div style={{ fontSize: 10, color: 'var(--text-muted)' }}>jacobsolayinka19@gmail.com</div></div></div></td>
+              <td style={{ padding: '10px 10px 10px 0' }}><div style={{ display: 'flex', alignItems: 'center', gap: 10 }}><div style={{ width: 30, height: 30, borderRadius: '50%', overflow: 'hidden', flexShrink: 0 }}><img src="/avatars/Ellipse 1.png" alt={profileName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /></div><div><div style={{ fontSize: 12, fontWeight: 500, color: 'var(--text-primary)' }}>{profileName}</div><div style={{ fontSize: 10, color: 'var(--text-muted)' }}>{profileEmail}</div></div></div></td>
               <td style={{ padding: '10px' }}><span style={{ fontSize: 10, fontWeight: 600, padding: '2px 8px', borderRadius: 6, background: 'rgba(168,85,247,0.12)', color: ROLE_COLORS.Owner }}>Owner</span></td>
               <td style={{ padding: '10px' }}><span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12 }}><span style={{ width: 7, height: 7, borderRadius: '50%', background: 'var(--accent-green)' }} />Online</span></td>
               <td style={{ padding: '10px', fontFamily: "'DM Mono', monospace", fontSize: 11 }}>Now</td>
