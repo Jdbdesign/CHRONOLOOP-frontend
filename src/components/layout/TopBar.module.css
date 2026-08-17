@@ -172,3 +172,132 @@
   overflow: hidden;
   flex-shrink: 0;
 }
+
+/* Hamburger button — hidden on desktop */
+.hamburger {
+  display: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  transition: background var(--duration-fast), color var(--duration-fast);
+  flex-shrink: 0;
+}
+
+.hamburger:hover {
+  background: var(--bg-card-hover);
+  color: var(--text-primary);
+}
+
+/* Search close button (mobile expanded mode) */
+.searchClose {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+}
+
+.searchClose:hover {
+  background: var(--bg-card-hover);
+  color: var(--text-primary);
+}
+
+/* Tablet: show hamburger, hide decorative items */
+@media (max-width: 1023px) {
+  .topbar {
+    padding: 8px 20px;
+  }
+
+  .hamburger {
+    display: flex;
+  }
+
+  .avatarCluster {
+    display: none;
+  }
+
+  .shareBtn {
+    display: none;
+  }
+}
+
+/* Mobile: collapse search to icon trigger, expand on tap */
+@media (max-width: 639px) {
+  .topbar {
+    padding: 8px 12px;
+    gap: 8px;
+  }
+
+  .searchWrap {
+    max-width: 44px;
+    overflow: hidden;
+    border-radius: 8px;
+    cursor: pointer;
+    flex: 0 0 44px;
+  }
+
+  .searchIcon {
+    pointer-events: auto;
+    cursor: pointer;
+    left: 14px;
+  }
+
+  .searchInput {
+    opacity: 0;
+    width: 0;
+    padding: 0;
+    pointer-events: none;
+    border: none;
+  }
+
+  /* Expanded state — full-width overlay */
+  .searchExpanded {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    max-width: none;
+    flex: 1;
+    z-index: 10;
+    background: var(--bg-base);
+    display: flex;
+    align-items: center;
+    padding: 0 12px;
+    overflow: visible;
+    border-radius: 0;
+    cursor: auto;
+  }
+
+  .searchExpanded .searchInput {
+    opacity: 1;
+    width: 100%;
+    padding: 0 40px 0 34px;
+    pointer-events: auto;
+    border: 1px solid var(--border-subtle);
+  }
+
+  .searchExpanded .searchClose {
+    display: flex;
+  }
+
+  .userAvatarBtn span,
+  .userAvatarBtn svg:last-child {
+    display: none;
+  }
+}

@@ -38,12 +38,16 @@ const NAV_ITEMS: NavItemDef[] = [
   { to: '/settings', label: 'Settings', icon: Settings },
 ]
 
-export function Sidebar() {
+interface Props {
+  isDrawerOpen?: boolean
+}
+
+export function Sidebar({ isDrawerOpen }: Props) {
   const theme = useThemeStore((state) => state.theme)
   const setTheme = useThemeStore((state) => state.setTheme)
 
   return (
-    <aside className={styles.sidebar}>
+    <aside className={`${styles.sidebar}${isDrawerOpen ? ` ${styles.sidebarOpen}` : ''}`}>
       <div className={styles.logo}>
         <BrandLogo className={styles.brandLogo} />
       </div>
