@@ -5,6 +5,7 @@ import { Button } from '../ui/Button'
 import { Dropdown } from '../ui/Dropdown'
 import { useTaskModalStore } from '../../store/taskModalStore'
 import { useToastStore } from '../../store/toastStore'
+import { useSettingsStore } from '../../store/settingsStore'
 import styles from './DashboardHeader.module.css'
 
 const YEARS = ['2022', '2023', '2024', '2025']
@@ -22,6 +23,7 @@ const FILTER_DEFAULTS = {
 export function DashboardHeader() {
   const openCreateTask = useTaskModalStore((s) => s.openCreate)
   const showToast = useToastStore((s) => s.showToast)
+  const firstName = useSettingsStore((s) => s.profile.firstName)
   const [year, setYear] = useState('2024')
   const [filters, setFilters] = useState(FILTER_DEFAULTS)
   const [filterOpen, setFilterOpen] = useState(false)
@@ -49,7 +51,7 @@ export function DashboardHeader() {
   return (
     <div className={styles.row}>
       <div className={styles.greeting}>
-        <div className={styles.hello}>Hello Jacobs,</div>
+        <div className={styles.hello}>Hello {firstName},</div>
         <div className={styles.welcome}>Welcome Back,</div>
       </div>
 

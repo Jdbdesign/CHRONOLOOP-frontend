@@ -1,0 +1,12 @@
+.row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border-subtle); }
+.row:last-child { border-bottom: none; }
+.info { flex: 1; min-width: 0; }
+.label { font-size: 12px; font-weight: 500; color: var(--text-primary); }
+.desc { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+.toggle { position: relative; width: 36px; height: 20px; flex-shrink: 0; }
+.toggle input { opacity: 0; width: 0; height: 0; }
+.slider { position: absolute; inset: 0; background: var(--border-default); border-radius: 10px; cursor: pointer; transition: background var(--duration-fast); }
+.slider::before { content: ''; position: absolute; width: 16px; height: 16px; left: 2px; bottom: 2px; background: #fff; border-radius: 50%; transition: transform var(--duration-fast); }
+.toggle input:checked + .slider { background: var(--accent-blue); }
+.toggle input:checked + .slider::before { transform: translateX(16px); }
+.toggle input:disabled + .slider { opacity: 0.4; cursor: not-allowed; }
