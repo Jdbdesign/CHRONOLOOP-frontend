@@ -14,4 +14,12 @@ describe('TeamMemberGrid', () => {
     render(<TeamMemberGrid members={[]} view="grid" onOpenDetail={vi.fn()} />)
     expect(screen.getByText('No members found')).toBeInTheDocument()
   })
+
+  it('renders compact rows in list view', () => {
+    render(<TeamMemberGrid members={TEAM_MEMBERS} view="list" onOpenDetail={vi.fn()} />)
+    expect(screen.getByText('Aspen Herwitz')).toBeInTheDocument()
+    expect(screen.getByText('Marcus Webb')).toBeInTheDocument()
+    // List rows show active tasks count
+    expect(screen.getAllByText(/tasks/).length).toBeGreaterThanOrEqual(8)
+  })
 })

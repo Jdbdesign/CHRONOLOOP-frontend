@@ -57,6 +57,31 @@
   gap: 6px;
 }
 
+.headerBtn {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background var(--duration-fast), color var(--duration-fast);
+  flex-shrink: 0;
+}
+
+.headerBtn:hover {
+  background: var(--bg-card-hover);
+  color: var(--text-primary);
+}
+
+.headerBtn svg {
+  width: 16px;
+  height: 16px;
+}
+
 .body {
   flex: 1;
   overflow-y: auto;

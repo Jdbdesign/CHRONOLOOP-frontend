@@ -41,11 +41,11 @@ export function TeamDetailPanel({ onQuickView }: Props) {
         <div className={styles.header}>
           <span className={styles.headerTitle}>Member Profile</span>
           <div className={styles.headerActions}>
-            <button type="button" className="task-action-btn" title="Quick View" onClick={() => { if (member) onQuickView(member.id) }}>
-              <ExternalLink size={14} />
+            <button type="button" className={styles.headerBtn} title="Quick View" aria-label="Quick View" onClick={() => { if (member) onQuickView(member.id) }}>
+              <ExternalLink size={16} aria-hidden="true" />
             </button>
-            <button type="button" className="detail-panel-close" title="Close" onClick={close}>
-              <X size={14} />
+            <button type="button" className={styles.headerBtn} title="Close" aria-label="Close" onClick={close}>
+              <X size={16} aria-hidden="true" />
             </button>
           </div>
         </div>
