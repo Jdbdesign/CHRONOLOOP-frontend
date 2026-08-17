@@ -9,7 +9,7 @@ import ddStyles from '../ui/Dropdown.module.css'
 describe('DashboardHeader', () => {
   it('renders the greeting text', () => {
     render(<DashboardHeader />)
-    expect(screen.getByText('Hello Jacobs,')).toBeInTheDocument()
+    expect(screen.getByText('Hello Jacob,')).toBeInTheDocument()
     expect(screen.getByText('Welcome Back,')).toBeInTheDocument()
   })
 
