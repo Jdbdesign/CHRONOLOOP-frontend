@@ -13,12 +13,15 @@ import { useSprintsStore } from '../store/sprintsStore'
 import { useSprintDetailStore } from '../store/sprintDetailStore'
 import { useSprintModalStore } from '../store/sprintModalStore'
 import { useToastStore } from '../store/toastStore'
+import { useInert } from '../hooks/useInert'
 import { sprintSortComparator } from '../lib/sprintFormatters'
 import styles from './SprintsPage.module.css'
 
 export function SprintsPage() {
   const sprints = useSprintsStore((s) => s.sprints)
   const removeSprint = useSprintsStore((s) => s.removeSprint)
+  const panelOpen = useSprintDetailStore((s) => !!s.openSprintId)
+  const contentRef = useInert<HTMLDivElement>(panelOpen)
   const markComplete = useSprintsStore((s) => s.markComplete)
   const openDetail = useSprintDetailStore((s) => s.open)
   const openNewSprint = useSprintModalStore((s) => s.openNew)
@@ -58,35 +61,37 @@ export function SprintsPage() {
 
   return (
     <div className={styles.page}>
-      <SprintsPageHeader
-        view={view}
-        onViewChange={setView}
-        onApplyStatusFilters={setDropdownFilters}
-        onNewSprint={openNewSprint}
-      />
-      <SprintKpiGrid />
-      <div key={`banner|${queryKey}`}>
-        <ActiveSprintBanner />
+      <div ref={contentRef}>
+        <SprintsPageHeader
+          view={view}
+          onViewChange={setView}
+          onApplyStatusFilters={setDropdownFilters}
+          onNewSprint={openNewSprint}
+        />
+        <SprintKpiGrid />
+        <div key={`banner|${queryKey}`}>
+          <ActiveSprintBanner />
+        </div>
+        <SprintStatsRow activeFilter={activeFilter} onFilterChange={setActiveFilter}>
+          <SprintsToolbar activeSort={activeSort} onSortChange={setActiveSort} searchQuery={searchQuery} onSearchChange={setSearchQuery} />
+        </SprintStatsRow>
+        <div key={`results|${queryKey}`}>
+          {view === 'list' ? (
+            <SprintsListView
+              sprints={filteredSprints}
+              onOpenDetail={openDetail}
+              onEdit={openEditSprint}
+              onMarkComplete={handleMarkComplete}
+              onDelete={handleDelete}
+              onNewSprint={openNewSprint}
+            />
+          ) : (
+            <SprintsBoardView sprints={filteredSprints} onOpenDetail={openDetail} />
+          )}
+        </div>
+        <NewSprintModal />
+        <EditSprintModal />
       </div>
-      <SprintStatsRow activeFilter={activeFilter} onFilterChange={setActiveFilter}>
-        <SprintsToolbar activeSort={activeSort} onSortChange={setActiveSort} searchQuery={searchQuery} onSearchChange={setSearchQuery} />
-      </SprintStatsRow>
-      <div key={`results|${queryKey}`}>
-        {view === 'list' ? (
-          <SprintsListView
-            sprints={filteredSprints}
-            onOpenDetail={openDetail}
-            onEdit={openEditSprint}
-            onMarkComplete={handleMarkComplete}
-            onDelete={handleDelete}
-            onNewSprint={openNewSprint}
-          />
-        ) : (
-          <SprintsBoardView sprints={filteredSprints} onOpenDetail={openDetail} />
-        )}
-      </div>
-      <NewSprintModal />
-      <EditSprintModal />
       <SprintDetailPanel onEdit={openEditSprint} onDelete={handleDelete} />
     </div>
   )

@@ -1,6 +1,7 @@
 import { useState, useMemo, useCallback } from 'react'
 import { useTeamStore } from '../store/teamStore'
 import { useTeamDetailStore } from '../store/teamDetailStore'
+import { useInert } from '../hooks/useInert'
 import { TeamPageHeader } from '../components/team/TeamPageHeader'
 import { TeamKpiGrid } from '../components/team/TeamKpiGrid'
 import { TeamDeptTabs } from '../components/team/TeamDeptTabs'
@@ -15,6 +16,8 @@ import { MemberProfileModal } from '../components/team/modals/MemberProfileModal
 export function TeamPage() {
   const members = useTeamStore((s) => s.members)
   const openDetail = useTeamDetailStore((s) => s.open)
+  const panelOpen = useTeamDetailStore((s) => !!s.openMemberId)
+  const contentRef = useInert<HTMLDivElement>(panelOpen)
 
   const [activeFilter, setActiveFilter] = useState('all')
   const [sortMode, setSortMode] = useState('name')
@@ -63,26 +66,28 @@ export function TeamPage() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 14, overflow: 'auto', height: '100%' }}>
-      <TeamPageHeader
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-        sortMode={sortMode}
-        onSortChange={setSortMode}
-        onInvite={() => setIsInviteOpen(true)}
-      />
-      <TeamKpiGrid members={members} />
-      <TeamDeptTabs
-        activeFilter={activeFilter}
-        onFilterChange={setActiveFilter}
-        view={view}
-        onViewChange={setView}
-        memberCounts={memberCounts}
-      />
-      <TeamMemberGrid members={filteredSorted} view={view} onOpenDetail={handleOpenDetail} />
-      <TeamWorkloadPanel members={filteredSorted} />
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, alignItems: 'start' }}>
-        <TeamActivityFeed members={members} />
-        <TeamPerfLeaderboard members={members} />
+      <div ref={contentRef} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+        <TeamPageHeader
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          sortMode={sortMode}
+          onSortChange={setSortMode}
+          onInvite={() => setIsInviteOpen(true)}
+        />
+        <TeamKpiGrid members={members} />
+        <TeamDeptTabs
+          activeFilter={activeFilter}
+          onFilterChange={setActiveFilter}
+          view={view}
+          onViewChange={setView}
+          memberCounts={memberCounts}
+        />
+        <TeamMemberGrid members={filteredSorted} view={view} onOpenDetail={handleOpenDetail} />
+        <TeamWorkloadPanel members={filteredSorted} />
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, alignItems: 'start' }}>
+          <TeamActivityFeed members={members} />
+          <TeamPerfLeaderboard members={members} />
+        </div>
       </div>
 
       <TeamDetailPanel onQuickView={handleQuickView} />
