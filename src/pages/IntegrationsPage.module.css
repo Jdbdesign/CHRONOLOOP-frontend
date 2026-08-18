@@ -1,0 +1,32 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  overflow: auto;
+  height: 100%;
+}
+
+.twoCol {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 14px;
+  align-items: start;
+}
+
+.mainCol {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.sideCol {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+@media (max-width: 1023px) {
+  .twoCol {
+    grid-template-columns: 1fr;
+  }
+}

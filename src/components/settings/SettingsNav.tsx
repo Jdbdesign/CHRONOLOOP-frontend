@@ -1,3 +1,4 @@
+import type { ChangeEvent } from 'react'
 import { User, Building2, Bell, Palette, ShieldCheck, CreditCard, Users } from 'lucide-react'
 import styles from './SettingsNav.module.css'
 
@@ -22,18 +23,44 @@ const NAV_ITEMS: { group: string; items: { id: SettingsTab; icon: typeof User; l
 ]
 
 export function SettingsNav({ active, onChange }: Props) {
+  const handleSelect = (e: ChangeEvent<HTMLSelectElement>) => {
+    onChange(e.target.value as SettingsTab)
+  }
+
   return (
-    <nav className={styles.nav}>
-      {NAV_ITEMS.map(({ group, items }) => (
-        <div key={group}>
-          <div className={styles.groupLabel}>{group}</div>
-          {items.map(({ id, icon: Icon, label }) => (
-            <button key={id} type="button" className={`${styles.item}${active === id ? ` ${styles.active}` : ''}`} onClick={() => onChange(id)}>
-              <Icon /> <span>{label}</span>
-            </button>
+    <>
+      {/* Desktop/tablet sidebar nav */}
+      <nav className={styles.nav}>
+        {NAV_ITEMS.map(({ group, items }) => (
+          <div key={group}>
+            <div className={styles.groupLabel}>{group}</div>
+            {items.map(({ id, icon: Icon, label }) => (
+              <button key={id} type="button" className={`${styles.item}${active === id ? ` ${styles.active}` : ''}`} onClick={() => onChange(id)}>
+                <Icon /> <span>{label}</span>
+              </button>
+            ))}
+          </div>
+        ))}
+      </nav>
+
+      {/* Mobile select nav */}
+      <div className={styles.mobileNav}>
+        <label htmlFor="settings-nav-select" className={styles.mobileLabel}>Section</label>
+        <select
+          id="settings-nav-select"
+          className={styles.mobileSelect}
+          value={active}
+          onChange={handleSelect}
+        >
+          {NAV_ITEMS.map(({ group, items }) => (
+            <optgroup key={group} label={group}>
+              {items.map(({ id, label }) => (
+                <option key={id} value={id}>{label}</option>
+              ))}
+            </optgroup>
           ))}
-        </div>
-      ))}
-    </nav>
+        </select>
+      </div>
+    </>
   )
 }

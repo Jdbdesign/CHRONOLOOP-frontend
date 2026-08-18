@@ -6,6 +6,7 @@ import { IntSyncSettings, IntActivityPanel, IntApiKeysPanel, IntUsagePanel, IntW
 import { ConnectModal } from '../components/integrations/modals/ConnectModal'
 import { ManageModal } from '../components/integrations/modals/ManageModal'
 import { NewApiKeyModal } from '../components/integrations/modals/NewApiKeyModal'
+import styles from './IntegrationsPage.module.css'
 
 export function IntegrationsPage() {
   const [connectAppId, setConnectAppId] = useState<string | null>(null)
@@ -16,19 +17,19 @@ export function IntegrationsPage() {
   const handleManage = useCallback((id: string) => setManageAppId(id), [])
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 16, overflow: 'auto', height: '100%' }}>
+    <div className={styles.page}>
       <IntPageHeader onNewKey={() => setIsNewKeyOpen(true)} />
       <IntKpiGrid />
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: 14, alignItems: 'start' }}>
+      <div className={styles.twoCol}>
         {/* Left column */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+        <div className={styles.mainCol}>
           <IntAppCatalogue onConnect={handleConnect} onManage={handleManage} />
           <IntSyncSettings />
         </div>
 
         {/* Right sidebar */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+        <div className={styles.sideCol}>
           <IntActivityPanel />
           <IntApiKeysPanel />
           <IntUsagePanel />

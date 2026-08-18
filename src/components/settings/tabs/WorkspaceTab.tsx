@@ -1,5 +1,6 @@
 import { Archive, Send, Trash2, Copy } from 'lucide-react'
 import { SettingsCard } from '../shared/SettingsCard'
+import { SettingsFormRow } from '../shared/SettingsFormRow'
 import { Button } from '../../ui/Button'
 import { useToastStore } from '../../../store/toastStore'
 
@@ -28,18 +29,18 @@ export function WorkspaceTab() {
       </SettingsCard>
 
       <SettingsCard title="Workspace Preferences" subtitle="Default settings applied across your workspace">
-        <div style={{ display: 'flex', gap: 12, marginBottom: 12 }}>
-          <div style={{ flex: 1 }}><label style={labelStyle}>Default Currency</label><select style={{ ...inputStyle, cursor: 'pointer' }} defaultValue="USD — US Dollar"><option>USD — US Dollar</option><option>EUR — Euro</option><option>GBP — British Pound</option><option>NGN — Nigerian Naira</option></select></div>
-          <div style={{ flex: 1 }}><label style={labelStyle}>Fiscal Year Start</label><select style={{ ...inputStyle, cursor: 'pointer' }} defaultValue="January"><option>January</option><option>April</option><option>July</option><option>October</option></select></div>
-        </div>
-        <div style={{ display: 'flex', gap: 12, marginBottom: 12 }}>
-          <div style={{ flex: 1 }}><label style={labelStyle}>Week Starts On</label><select style={{ ...inputStyle, cursor: 'pointer' }} defaultValue="Monday"><option>Sunday</option><option>Monday</option><option>Saturday</option></select></div>
-          <div style={{ flex: 1 }}><label style={labelStyle}>Sprint Duration</label><select style={{ ...inputStyle, cursor: 'pointer' }} defaultValue="2 weeks"><option>1 week</option><option>2 weeks</option><option>3 weeks</option><option>4 weeks</option></select></div>
-        </div>
-        <div style={{ display: 'flex', gap: 12 }}>
-          <div style={{ flex: 1 }}><label style={labelStyle}>Working Hours From</label><input type="time" style={{ ...inputStyle, colorScheme: 'dark' }} defaultValue="09:00" /></div>
-          <div style={{ flex: 1 }}><label style={labelStyle}>Working Hours To</label><input type="time" style={{ ...inputStyle, colorScheme: 'dark' }} defaultValue="18:00" /></div>
-        </div>
+        <SettingsFormRow style={{ marginBottom: 12 }}>
+          <div><label style={labelStyle}>Default Currency</label><select style={{ ...inputStyle, cursor: 'pointer' }} defaultValue="USD — US Dollar"><option>USD — US Dollar</option><option>EUR — Euro</option><option>GBP — British Pound</option><option>NGN — Nigerian Naira</option></select></div>
+          <div><label style={labelStyle}>Fiscal Year Start</label><select style={{ ...inputStyle, cursor: 'pointer' }} defaultValue="January"><option>January</option><option>April</option><option>July</option><option>October</option></select></div>
+        </SettingsFormRow>
+        <SettingsFormRow style={{ marginBottom: 12 }}>
+          <div><label style={labelStyle}>Week Starts On</label><select style={{ ...inputStyle, cursor: 'pointer' }} defaultValue="Monday"><option>Sunday</option><option>Monday</option><option>Saturday</option></select></div>
+          <div><label style={labelStyle}>Sprint Duration</label><select style={{ ...inputStyle, cursor: 'pointer' }} defaultValue="2 weeks"><option>1 week</option><option>2 weeks</option><option>3 weeks</option><option>4 weeks</option></select></div>
+        </SettingsFormRow>
+        <SettingsFormRow>
+          <div><label style={labelStyle}>Working Hours From</label><input type="time" style={{ ...inputStyle, colorScheme: 'dark' }} defaultValue="09:00" /></div>
+          <div><label style={labelStyle}>Working Hours To</label><input type="time" style={{ ...inputStyle, colorScheme: 'dark' }} defaultValue="18:00" /></div>
+        </SettingsFormRow>
       </SettingsCard>
 
       <SettingsCard title={'\u26A0\uFE0F Danger Zone'} danger>
