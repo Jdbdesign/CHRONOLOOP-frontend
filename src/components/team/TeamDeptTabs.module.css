@@ -94,3 +94,15 @@
   color: var(--text-primary);
   background: var(--bg-card-hover);
 }
+
+@media (max-width: 639px) {
+  .row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .viewToggle {
+    align-self: flex-end;
+  }
+}

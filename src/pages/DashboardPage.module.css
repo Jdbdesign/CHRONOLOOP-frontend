@@ -1,6 +1,10 @@
 .page { display: flex; flex-direction: column; gap: 12px; }
 .middleRow { display: flex; gap: 16px; align-items: stretch; }
 
+@media (max-width: 1023px) {
+  .middleRow { flex-direction: column; }
+}
+
 .visuallyHidden {
   position: absolute; width: 1px; height: 1px;
   padding: 0; margin: -1px; overflow: hidden;
