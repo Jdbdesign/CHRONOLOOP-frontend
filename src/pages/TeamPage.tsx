@@ -12,6 +12,7 @@ import { TeamPerfLeaderboard } from '../components/team/TeamPerfLeaderboard'
 import { TeamDetailPanel } from '../components/team/TeamDetailPanel'
 import { InviteModal } from '../components/team/modals/InviteModal'
 import { MemberProfileModal } from '../components/team/modals/MemberProfileModal'
+import styles from './TeamPage.module.css'
 
 export function TeamPage() {
   const members = useTeamStore((s) => s.members)
@@ -84,7 +85,7 @@ export function TeamPage() {
         />
         <TeamMemberGrid members={filteredSorted} view={view} onOpenDetail={handleOpenDetail} />
         <TeamWorkloadPanel members={filteredSorted} />
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, alignItems: 'start' }}>
+        <div className={styles.bottomRow}>
           <TeamActivityFeed members={members} />
           <TeamPerfLeaderboard members={members} />
         </div>
