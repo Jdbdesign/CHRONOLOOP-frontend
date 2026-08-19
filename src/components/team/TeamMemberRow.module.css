@@ -160,3 +160,20 @@
   background: var(--border-default);
   color: var(--text-primary);
 }
+
+.menuBtn:focus-visible {
+  opacity: 1;
+}
+
+@media (max-width: 1023px) and (pointer: coarse) {
+  .menuBtn {
+    opacity: 1;
+    position: relative;
+  }
+
+  .menuBtn::before {
+    content: '';
+    position: absolute;
+    inset: -8px;
+  }
+}

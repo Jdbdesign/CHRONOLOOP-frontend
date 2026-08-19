@@ -55,4 +55,8 @@
     position: absolute;
     inset: -9px;
   }
+
+  .actions {
+    gap: 18px;
+  }
 }

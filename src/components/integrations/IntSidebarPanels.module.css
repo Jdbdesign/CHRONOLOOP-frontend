@@ -64,4 +64,8 @@
   .toggle input:checked + .slider::before {
     transform: translateX(20px);
   }
+
+  .slider {
+    border-radius: 12px;
+  }
 }
