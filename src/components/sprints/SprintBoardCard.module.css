@@ -64,6 +64,11 @@
   border-color: var(--border-default);
 }
 
+.card:active {
+  transform: scale(0.97);
+  opacity: 0.85;
+}
+
 .num {
   font-family: 'DM Mono', monospace;
   font-size: 9px;
@@ -136,4 +141,16 @@
 
 .footerAvatars > *:not(:first-child) {
   margin-left: -6px;
+}
+
+/* Tablet: 2-column grid */
+@media (max-width: 1023px) {
+  .boardView { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* Mobile: single column, tab-switched */
+@media (max-width: 639px) {
+  .boardView { grid-template-columns: 1fr; }
+  .boardCol { display: none; }
+  .boardColActive { display: block; }
 }

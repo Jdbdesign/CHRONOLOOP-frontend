@@ -4,6 +4,7 @@
   width: 100%; text-align: left;
 }
 .card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.3); transform: translateY(-2px); border-color: var(--border-default); }
+.card:active { transform: scale(0.97); opacity: 0.85; }
 
 .tags { margin-bottom: 10px; }
 .title { font-size: 12px; font-weight: 500; color: var(--text-primary); line-height: 1.4; margin-bottom: 8px; }

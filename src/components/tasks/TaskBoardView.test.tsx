@@ -9,16 +9,21 @@ import styles from './TaskBoardView.module.css'
 
 describe('TaskBoardView', () => {
   it('renders all four status columns with correct counts', () => {
-    render(<TaskBoardView tasks={MOCK_TASKS} onOpenDetail={vi.fn()} />)
+    const { container } = render(<TaskBoardView tasks={MOCK_TASKS} onOpenDetail={vi.fn()} />)
+    const board = container.querySelector(`.${styles.board}`)!
     const todoCount = MOCK_TASKS.filter((t) => t.status === 'todo').length
-    expect(screen.getByText('To Do')).toBeInTheDocument()
-    expect(screen.getByText(String(todoCount))).toBeInTheDocument()
+    // Column headers inside the board grid
+    expect(board.querySelector(`.${styles.colTitleText}`)!.textContent).toBe('To Do')
+    const counts = board.querySelectorAll(`.${styles.colCount}`)
+    expect(counts[0].textContent).toBe(String(todoCount))
   })
 
   it('renders each column label from STATUS_CONFIG rather than a hardcoded copy', () => {
-    render(<TaskBoardView tasks={MOCK_TASKS} onOpenDetail={vi.fn()} />)
+    const { container } = render(<TaskBoardView tasks={MOCK_TASKS} onOpenDetail={vi.fn()} />)
+    const board = container.querySelector(`.${styles.board}`)!
+    const labels = Array.from(board.querySelectorAll(`.${styles.colTitleText}`)).map((el) => el.textContent)
     for (const status of ['todo', 'in-progress', 'done', 'overdue'] as const) {
-      expect(screen.getByText(STATUS_CONFIG[status].label)).toBeInTheDocument()
+      expect(labels).toContain(STATUS_CONFIG[status].label)
     }
   })
 

@@ -13,3 +13,15 @@
 
 .cards { padding: 10px; display: flex; flex-direction: column; gap: 8px; min-height: 80px; }
 .empty { text-align: center; color: var(--text-muted); font-size: 11px; padding: 20px 0; }
+
+/* Tablet: 2-column grid */
+@media (max-width: 1023px) {
+  .board { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* Mobile: single column, tab-switched */
+@media (max-width: 639px) {
+  .board { grid-template-columns: 1fr; }
+  .col { display: none; }
+  .colActive { display: block; }
+}

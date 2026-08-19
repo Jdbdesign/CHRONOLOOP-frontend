@@ -2,18 +2,24 @@ import { describe, it, expect } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { SprintsBoardView } from './SprintsBoardView'
 import { MOCK_SPRINTS } from '../../data/mockSprints'
+import styles from './SprintBoardCard.module.css'
 
 describe('SprintsBoardView', () => {
   it('renders 4 columns in the fixed order active, planning, upcoming, completed', () => {
-    render(<SprintsBoardView sprints={MOCK_SPRINTS} onOpenDetail={() => {}} />)
-    const titles = screen.getAllByText(/^(Active|Planning|Upcoming|Completed)$/).map((el) => el.textContent)
+    const { container } = render(<SprintsBoardView sprints={MOCK_SPRINTS} onOpenDetail={() => {}} />)
+    const board = container.querySelector(`.${styles.boardView}`)!
+    const titles = Array.from(board.querySelectorAll(`.${styles.boardColTitle}`)).map(
+      (el) => el.querySelector('span:nth-child(2)')!.textContent
+    )
     expect(titles).toEqual(['Active', 'Planning', 'Upcoming', 'Completed'])
   })
 
   it('places each sprint card in the column matching its status', () => {
-    render(<SprintsBoardView sprints={MOCK_SPRINTS} onOpenDetail={() => {}} />)
-    // s1 and s2 are both 'completed' -> Completed column has 2 cards
-    expect(screen.getByText('2').closest('[class*="ColCount"]')).toBeInTheDocument()
+    const { container } = render(<SprintsBoardView sprints={MOCK_SPRINTS} onOpenDetail={() => {}} />)
+    const board = container.querySelector(`.${styles.boardView}`)!
+    const counts = Array.from(board.querySelectorAll(`.${styles.boardColCount}`)).map((el) => el.textContent)
+    // At least one column should show count "2" (completed has 2 sprints in mock data)
+    expect(counts).toContain('2')
   })
 
   it('shows a "No sprints" placeholder for an empty column', () => {
