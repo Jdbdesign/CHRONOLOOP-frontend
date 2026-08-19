@@ -36,3 +36,14 @@ Settings forms currently have no concept of "unsaved changes." Switching tabs (w
 - Board views have no drag-and-drop — if DnD is added later, the mobile tab-switcher pattern will need revisiting (can't drag between columns when only one is visible). Consider a "move to column" action menu on each card as the mobile DnD equivalent.
 - Yellow tab contrast (`#EAB308` background with white text) was confirmed acceptable in browser walkthrough — no change needed, but worth re-checking if the color palette changes
 - Both board view tests were updated to scope queries within the board grid container (`.board` / `.boardView`) rather than using global `getByText`, since the tab bar renders duplicate labels in the DOM. Future tests for board components should follow this pattern.
+
+---
+
+## Phase R.6 Notes
+
+- `useIsMobile` hook (`src/hooks/useIsMobile.ts`) uses `useSyncExternalStore` + `matchMedia` — reusable anywhere a component needs to know if the viewport is mobile. Returns boolean, updates on resize/rotation.
+- `matchMedia` mock added to `src/test/setup.ts` (returns `matches: false` / desktop mode). Any future hooks that use `matchMedia` will work in tests without additional setup.
+- Week view is **hidden on mobile** (redirect to Day). If a future feature needs Week-like multi-day visibility on mobile (e.g., a 3-day view), it would need its own component — don't try to force the 7-column WeekView to work at <640px.
+- Month view dots at mobile use `pointer-events: none` — tapping a cell always navigates to Day view. If individual-event quick-actions are needed on mobile month view in the future, consider a long-press or a different interaction pattern rather than making 7px dots tappable.
+- CalendarPageHeader uses a belt-and-suspenders approach for the Week redirect: header intercept (prevents setting 'week' on mobile) + CalendarPage useEffect (catches resize/rotation). Both pieces are needed — don't remove one thinking the other covers it.
+- CalWeekView has inline `style={{ gridTemplateColumns: '...' }}` on its header and banner sections. Since we redirect away from Week on mobile, this wasn't a problem. If Week view ever needs tablet-responsive treatment, those inline styles will need extraction to CSS classes (CSS media queries can't override inline styles without `!important`).

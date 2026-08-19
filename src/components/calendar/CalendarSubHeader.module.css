@@ -126,3 +126,32 @@
   border-radius: 50%;
   opacity: 0.8;
 }
+
+/* Mobile: stack nav and filters, shrink period title */
+@media (max-width: 639px) {
+  .subHeader {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    padding: 10px 0;
+  }
+
+  .navRow {
+    justify-content: space-between;
+  }
+
+  .periodTitle {
+    font-size: 14px;
+    min-width: 0;
+  }
+
+  .filterChip {
+    padding: 3px 9px;
+    font-size: 10px;
+  }
+
+  .chipDot {
+    width: 6px;
+    height: 6px;
+  }
+}

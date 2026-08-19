@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from 'react'
+import { useState, useMemo, useCallback, useEffect } from 'react'
 import * as Dialog from '@radix-ui/react-dialog'
 import { useNavigate } from 'react-router-dom'
 import { useCalendarStore } from '../store/calendarStore'
@@ -19,6 +19,7 @@ import { CalAgendaView } from '../components/calendar/CalAgendaView'
 import { CalEventPopup } from '../components/calendar/CalEventPopup'
 import { NewEventModal } from '../components/calendar/modals/NewEventModal'
 import popupStyles from '../components/calendar/CalEventPopup.module.css'
+import { useIsMobile } from '../hooks/useIsMobile'
 
 export function CalendarPage() {
   const navigate = useNavigate()
@@ -40,6 +41,15 @@ export function CalendarPage() {
   const tasks = useTasksStore((s) => s.tasks)
   const projects = useProjectsStore((s) => s.projects)
   const sprints = useSprintsStore((s) => s.sprints)
+
+  // Mobile detection for week-view redirect
+  const isMobile = useIsMobile()
+
+  useEffect(() => {
+    if (isMobile && view === 'week') {
+      setView('day')
+    }
+  }, [isMobile, view, setView])
 
   // Local UI state
   const [isModalOpen, setIsModalOpen] = useState(false)

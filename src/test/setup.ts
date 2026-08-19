@@ -2,6 +2,21 @@ import '@testing-library/jest-dom/vitest'
 import { afterEach } from 'vitest'
 import { cleanup } from '@testing-library/react'
 
+// jsdom doesn't implement matchMedia. Provide a minimal mock that always
+// returns false (desktop) so responsive hooks like useIsMobile work in tests.
+if (!window.matchMedia) {
+  window.matchMedia = (query: string) => ({
+    matches: false,
+    media: query,
+    onchange: null,
+    addListener: () => {},
+    removeListener: () => {},
+    addEventListener: () => {},
+    removeEventListener: () => {},
+    dispatchEvent: () => false,
+  }) as MediaQueryList
+}
+
 // jsdom doesn't implement the Pointer Events capture API. Radix UI primitives
 // (e.g. Toast's swipe-to-dismiss gesture) call these on pointer interactions,
 // so clicking anything inside them throws "hasPointerCapture is not a

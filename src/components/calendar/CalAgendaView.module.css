@@ -139,3 +139,28 @@
   max-width: 260px;
   line-height: 1.5;
 }
+
+/* Mobile: hide project column, tighter spacing */
+@media (max-width: 639px) {
+  .agendaEv {
+    gap: 8px;
+    padding: 9px 10px;
+  }
+
+  .evProj {
+    display: none;
+  }
+
+  .evTitle {
+    font-size: 12px;
+  }
+
+  .evType {
+    font-size: 9px;
+    padding: 2px 7px;
+  }
+
+  .dateHdr {
+    padding: 10px 0 6px;
+  }
+}

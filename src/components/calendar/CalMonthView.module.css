@@ -161,3 +161,48 @@
 .moreBtn:hover {
   background: var(--accent-blue-bg);
 }
+
+/* Mobile: pills collapse to dots, cells shrink */
+@media (max-width: 639px) {
+  .dayCell {
+    min-height: 64px;
+    padding: 5px 4px 4px;
+    gap: 2px;
+  }
+
+  .dayNum {
+    font-size: 11px;
+    width: 20px;
+    height: 20px;
+    margin-bottom: 2px;
+  }
+
+  .evPill {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    padding: 0;
+    gap: 0;
+    box-shadow: none;
+    pointer-events: none;
+    flex-shrink: 0;
+  }
+
+  .evPill:hover {
+    opacity: 1;
+    transform: none;
+  }
+
+  .pillDot { display: none; }
+  .pillText { display: none; }
+
+  .moreBtn {
+    font-size: 9px;
+    padding: 0 2px;
+  }
+
+  .dayColHdr {
+    padding: 6px 0;
+    font-size: 9px;
+  }
+}

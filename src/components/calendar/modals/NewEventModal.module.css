@@ -130,3 +130,14 @@
   padding-top: 14px;
   border-top: 1px solid var(--border-subtle);
 }
+
+/* Mobile: type grid 2x2, form rows stack */
+@media (max-width: 639px) {
+  .typeGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .formRow {
+    flex-direction: column;
+  }
+}

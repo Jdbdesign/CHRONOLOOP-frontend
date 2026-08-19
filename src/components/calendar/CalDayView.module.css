@@ -196,3 +196,50 @@
   opacity: 0.7;
   white-space: nowrap;
 }
+
+/* Mobile: compact hero, narrower gutter */
+@media (max-width: 639px) {
+  .dayBignum {
+    font-size: 36px;
+  }
+
+  .dayHero {
+    gap: 12px;
+    padding: 10px 0 12px;
+  }
+
+  .dayBadgebar {
+    margin-left: 0;
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .dayBadge {
+    font-size: 10px;
+    padding: 2px 8px;
+  }
+
+  .dayTgutter {
+    width: 44px;
+  }
+
+  .dayTlbl {
+    padding: 6px 6px 0;
+    font-size: 9px;
+  }
+
+  .dayEv {
+    left: 6px;
+    right: 6px;
+    padding: 7px 10px;
+  }
+
+  .dayEvTitle {
+    font-size: 11px;
+  }
+
+  .bannerEv {
+    padding: 4px 10px;
+    font-size: 10px;
+  }
+}

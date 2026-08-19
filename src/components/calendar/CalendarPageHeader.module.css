@@ -7,6 +7,12 @@
   padding-bottom: 14px;
 }
 
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
 .viewSwitcher {
   display: flex;
   background: var(--bg-card);
@@ -49,6 +55,12 @@
   height: 13px;
 }
 
+.viewLabel {}
+
+.newEventLabel {}
+
+.weekBtn {}
+
 .breadcrumb {
   font-size: 11px;
   color: var(--text-muted);
@@ -60,4 +72,28 @@
   font-size: 22px;
   font-weight: 600;
   color: var(--text-primary);
+}
+
+@media (max-width: 1023px) {
+  .viewLabel { display: none; }
+  .viewBtn { padding: 5px 10px; }
+}
+
+@media (max-width: 639px) {
+  .header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .weekBtn { display: none; }
+
+  .heading { font-size: 18px; }
+
+  .newEventLabel { display: none; }
 }
