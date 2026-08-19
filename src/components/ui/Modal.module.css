@@ -78,3 +78,10 @@
     border: none;
   }
 }
+
+@media (max-width: 1023px) and (pointer: coarse) {
+  .closeBtn {
+    min-width: 44px;
+    min-height: 44px;
+  }
+}

@@ -62,3 +62,14 @@
   transition: all var(--duration-fast);
 }
 .ghost:hover:not(:disabled) { color: var(--text-primary); border-color: var(--border-default); }
+
+@media (max-width: 1023px) and (pointer: coarse) {
+  .primary,
+  .secondary {
+    min-height: 44px;
+  }
+
+  .danger {
+    min-height: 44px;
+  }
+}
