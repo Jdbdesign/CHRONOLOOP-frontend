@@ -10,3 +10,20 @@
 .toggle input:checked + .slider { background: var(--accent-blue); }
 .toggle input:checked + .slider::before { transform: translateX(16px); }
 .toggle input:disabled + .slider { opacity: 0.4; cursor: not-allowed; }
+
+/* Touch targets: 44×24 for toggle switches */
+@media (max-width: 1023px) and (pointer: coarse) {
+  .toggle {
+    width: 44px;
+    height: 24px;
+  }
+
+  .toggle .slider::before {
+    width: 20px;
+    height: 20px;
+  }
+
+  .toggle input:checked + .slider::before {
+    transform: translateX(20px);
+  }
+}

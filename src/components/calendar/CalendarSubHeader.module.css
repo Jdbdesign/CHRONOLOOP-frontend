@@ -155,3 +155,16 @@
     height: 6px;
   }
 }
+
+/* Touch targets: 44px hit area for nav buttons via invisible pseudo-element */
+@media (max-width: 1023px) and (pointer: coarse) {
+  .navBtn {
+    position: relative;
+  }
+
+  .navBtn::before {
+    content: '';
+    position: absolute;
+    inset: -7px;
+  }
+}

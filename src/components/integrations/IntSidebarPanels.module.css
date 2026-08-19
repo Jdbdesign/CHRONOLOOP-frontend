@@ -43,3 +43,25 @@
 .syncRow:last-child { border-bottom: none; }
 .syncName { font-size: 12px; font-weight: 500; color: var(--text-primary); }
 .syncDetail { font-size: 10px; color: var(--text-muted); margin-top: 2px; }
+
+/* Touch targets: 44px for key buttons, 44×24 for toggle switches */
+@media (max-width: 1023px) and (pointer: coarse) {
+  .keyBtn {
+    width: 44px;
+    height: 44px;
+  }
+
+  .toggle {
+    width: 44px;
+    height: 24px;
+  }
+
+  .toggle .slider::before {
+    width: 20px;
+    height: 20px;
+  }
+
+  .toggle input:checked + .slider::before {
+    transform: translateX(20px);
+  }
+}
