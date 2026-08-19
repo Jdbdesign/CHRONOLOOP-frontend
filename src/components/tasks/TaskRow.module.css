@@ -37,12 +37,22 @@
 
 @media (max-width: 1023px) and (pointer: coarse) {
   .checkbox {
-    width: 44px;
-    height: 44px;
+    position: relative;
+  }
+
+  .checkbox::before {
+    content: '';
+    position: absolute;
+    inset: -14px;
   }
 
   .actionBtn {
-    width: 44px;
-    height: 44px;
+    position: relative;
+  }
+
+  .actionBtn::before {
+    content: '';
+    position: absolute;
+    inset: -9px;
   }
 }
