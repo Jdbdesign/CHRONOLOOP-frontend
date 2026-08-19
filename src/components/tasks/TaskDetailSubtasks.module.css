@@ -17,3 +17,10 @@
 .input::placeholder { color: var(--text-muted); }
 .input:focus { outline: none; border-color: var(--accent-blue); }
 .addBtn { height: 32px; padding: 0 10px; flex-shrink: 0; background: var(--accent-blue); color: #fff; border: none; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+
+@media (max-width: 1023px) and (pointer: coarse) {
+  .check {
+    width: 44px;
+    height: 44px;
+  }
+}

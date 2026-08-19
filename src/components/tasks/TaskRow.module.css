@@ -34,3 +34,15 @@
 .actionBtn:hover { background: var(--border-default); color: var(--text-primary); }
 .actionBtn svg { width: 13px; height: 13px; }
 .deleteBtn { color: var(--accent-red); }
+
+@media (max-width: 1023px) and (pointer: coarse) {
+  .checkbox {
+    width: 44px;
+    height: 44px;
+  }
+
+  .actionBtn {
+    width: 44px;
+    height: 44px;
+  }
+}
