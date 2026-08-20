@@ -173,7 +173,16 @@
   transform: translate(-50%, -50%);
   z-index: 450;
   outline: none;
-  animation: ddFadeIn 160ms var(--ease-out);
+  animation: dialogContentFadeIn 160ms var(--ease-out);
+}
+
+@keyframes dialogContentFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 /* Mobile: full-screen dialog */
