@@ -65,8 +65,8 @@ describe('calendarStore', () => {
     expect(useCalendarStore.getState().currentDate.getDate()).toBe(15)
   })
 
-  it('addUserEvent adds a new event to userEvents', () => {
-    useCalendarStore.getState().addUserEvent({
+  it('addUserEvent adds a new event to userEvents', async () => {
+    await useCalendarStore.getState().addUserEvent({
       type: 'meeting',
       title: 'Team Sync',
       date: '2024-11-10',
@@ -84,8 +84,8 @@ describe('calendarStore', () => {
     expect(userEvents[0].isMultiDay).toBe(false)
   })
 
-  it('addUserEvent with endDate creates multi-day event', () => {
-    useCalendarStore.getState().addUserEvent({
+  it('addUserEvent with endDate creates multi-day event', async () => {
+    await useCalendarStore.getState().addUserEvent({
       type: 'project',
       title: 'Multi-day',
       date: '2024-11-10',

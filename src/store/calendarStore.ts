@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import type { CalendarEvent, CalendarFilter, CalendarView, NewCalendarEventInput } from '../types/calendar'
 import { calNavigate } from '../lib/calendarHelpers'
+import * as calendarService from '../services/calendarService'
 
 interface CalendarState {
   view: CalendarView
@@ -12,14 +13,7 @@ interface CalendarState {
   navigate: (dir: 1 | -1) => void
   goToday: () => void
   setCurrentDate: (d: Date) => void
-  addUserEvent: (input: NewCalendarEventInput) => void
-}
-
-const TYPE_COLORS: Record<string, string> = {
-  task: '#4A90FF',
-  project: '#A855F7',
-  sprint: '#00D4AA',
-  meeting: '#FF8C42',
+  addUserEvent: (input: NewCalendarEventInput) => Promise<void>
 }
 
 export const useCalendarStore = create<CalendarState>((set, get) => ({
@@ -37,27 +31,8 @@ export const useCalendarStore = create<CalendarState>((set, get) => ({
   goToday: () => set({ currentDate: new Date() }),
   setCurrentDate: (d) => set({ currentDate: d }),
 
-  addUserEvent: (input) => {
-    set((state) => {
-      const newEvent: CalendarEvent = {
-        id: 'user-' + Date.now(),
-        type: input.type,
-        title: input.title,
-        date: input.date,
-        startDate: input.date,
-        endDate: input.endDate || input.date,
-        time: input.time,
-        duration: 60,
-        project: input.project,
-        assignee: input.assignee,
-        priority: input.priority,
-        status: 'todo',
-        color: TYPE_COLORS[input.type] || '#4A90FF',
-        progress: 0,
-        notes: input.notes,
-        isMultiDay: !!(input.endDate && input.endDate !== input.date),
-      }
-      return { userEvents: [...state.userEvents, newEvent] }
-    })
+  addUserEvent: async (input) => {
+    const newEvent = await calendarService.buildNewCalendarEvent(input)
+    set((state) => ({ userEvents: [...state.userEvents, newEvent] }))
   },
 }))
