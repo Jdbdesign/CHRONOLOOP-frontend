@@ -15,6 +15,7 @@
 - **Zero behavior change to computed values.** Preserve existing quirks/bugs verbatim — including the `dueDays: 30` hardcoding bug in `projectService.buildNewProject` and `daysLeft: 30` in `sprintService.buildNewSprint` (both are documented, known bugs the spec says B3/B4 fix later, not B0).
 - **Services return `Promise<T>`, wrapped in `Promise.resolve(...)` for now.** This matches the spec's own B0 target (`taskService.create(input): Promise<Task>`, §4) so each domain's F-phase only swaps `Promise.resolve(mockLogic())` for `await fetch(...)` inside the service function — the store call site never changes shape again. Store mutating actions become `async` and `await` their service call before `set()`. Audited cost: the 7 store unit-test files call actions directly (`useStore.getState().addTask(...)`) with no `await` today, so each direct call needs `await` added and its `it()` callback made `async` — mechanical, done explicitly per task below. Component tests were also audited (`grep` across the suite): every test file using `fireEvent.click` also uses `@testing-library/user-event`, whose `.click()` already awaits internally, so the one-hop `Promise.resolve().then(set)` reliably flushes before the next assertion — no component test changes are expected (confirmed by the full regression run in Task 7).
   - **Exception: `taskService.removeTaskAt`/`restoreTaskAt` (Task 1) stay synchronous.** `useDeleteWithUndo` needs the removed `{ task, index }` back synchronously to render the "Undo" toast at the moment of deletion. Making this async would either delay the toast until the promise resolves (a real behavior change, violating the constraint above) or require an optimistic-delete redesign (remove locally now, fire the delete in the background, undo = re-insert locally + cancel/undo server-side) — a genuine feature decision, out of scope for B0. Revisit explicitly in F1 when task deletion gets a real endpoint. `removeProject`/`removeSprint`/`removeWebhook` have no synchronous consumer like this and go async with the rest of their domains.
+- **Post-`await` commits go through a functional `set((state) => ...)`, never a flat `set({...})` built from a pre-`await` snapshot — but only where that costs nothing.** Once a service call is genuinely async (an `await` boundary exists), a flat `set({ field: computedFromStaleSnapshot })` after it is a lost-update race: a concurrent mutation landing during the gap gets silently overwritten. Where the recomputation is purely structural — a filter-by-id/index (`removeSprint`, `removeWebhook`, `revokeSession`, `revokeAllSessions`, `revokeInvite`) or a replace using a value the caller already supplied as an external argument (`setMemberRole`'s `role`, `updateProfile`/`updateWorkspace`'s `updates`) — recompute it against fresh `state` inside the functional updater instead of reusing the pre-`await` result; this duplicates no business logic, since the service still owns computing *what* the change is, the store just re-applies the *same already-known* change against whatever `state` looks like at commit time. Where the new value is genuinely self-referential — computed FROM the current value of the exact field being changed, not from an external input (`toggleWebhookAt`, `toggleSyncRuleAt`, `connectAppStatus`/`disconnectAppStatus`'s field writes, `toggleNotificationFlag`) — leave the existing snapshot-then-set pattern as-is for B0: a safe fix there would mean duplicating the toggle logic itself in the store, defeating the point of the service, and there is no concurrent-call UI path anywhere in the app today that could trigger it. This was found via Task 2's review (an `Important`, plan-mandated finding on `removeProject`) and retrofitted into Task 1's `updateTaskById`; it's stated once here so Tasks 3, 5, and 6 don't have to rediscover it independently.
 - **`VITE_USE_MOCK_DATA` is deferred, not dropped.** It has nothing to branch on until a domain has both a mock and a real implementation — a single always-true branch today is dead weight. It lands in each domain's own F-phase alongside that domain's first real `fetch` call, per the spec's §4 pairing of the flag with the mock→real swap. Tracked here so it isn't silently forgotten; Task 7's phase notes restate this commitment.
 - **No `teamService.ts` in this plan.** `teamStore` ([src/store/teamStore.ts](../../../src/store/teamStore.ts)) has zero mutating actions today — it only seeds `members` from `TEAM_MEMBERS` at module load. There is no mutation logic to relocate. A service file is created for this domain only when it gets its first real mutation (e.g. a role/status change) or when B6/F6 needs `list()` for async hydration.
 - **`removeProject`/`removeSprint`/`removeWebhook` etc. are extracted too, even though they're one-line filters.** Every mutation needs a service-layer seam eventually (each becomes a real `DELETE`/`PATCH` call in its B-phase), so route all of them through the service for consistency — the one exception is single-primitive passthrough setters with zero transformation (`setDigestFrequency`, `setAccentColor`'s data field, `resendInvite`'s intentional no-op): those stay inline in the store, since there's no logic to relocate and wrapping them in a function would be pure ceremony.
@@ -472,9 +473,8 @@ export const useSprintsStore = create<SprintsState>((set, get) => ({
     }))
   },
   removeSprint: async (id) => {
-    const { sprints } = get()
-    const next = await sprintService.withoutSprint(sprints, id)
-    set({ sprints: next })
+    await sprintService.withoutSprint(get().sprints, id)
+    set((state) => ({ sprints: state.sprints.filter((s) => s.id !== id) }))
   },
   markComplete: async (id) => {
     const { sprints } = get()
@@ -638,6 +638,7 @@ git commit -m "feat: Phase B0 — extract calendar event creation into calendarS
 **Interfaces:**
 - Consumes: `IntApp`, `IntWebhook`, `IntSyncRule`, `IntApiKey` from `../data/mockIntegrations`.
 - Produces: `NewApiKeyInput` (type), `connectAppStatus(apps, id): Promise<IntApp[]>`, `disconnectAppStatus(apps, id): Promise<IntApp[]>`, `toggleWebhookAt(webhooks, index): Promise<IntWebhook[]>`, `removeWebhookAt(webhooks, index): Promise<IntWebhook[]>`, `toggleSyncRuleAt(rules, index): Promise<IntSyncRule[]>`, `buildNewApiKey(input): Promise<IntApiKey>` — all `Promise.resolve()`-wrapped, per the async Global Constraint.
+- Post-`await` commit pattern (see the Global Constraint on this): `removeWebhook` commits via a fresh-state functional `set()` since its removal is a trivial structural filter-by-index. `connectApp`, `disconnectApp`, `toggleWebhook`, and `toggleSyncRule` keep the plain `set({ field: result })` shape — their new values are self-referential (computed from the field's own current value: a status flip, a boolean toggle), so a concurrency-safe fix there would mean duplicating that toggle logic in the store. Leave these four as originally written; this is a deliberate, documented B0 scope boundary, not a gap to fix in this task.
 
 - [ ] **Step 1: Run the existing test file to confirm the baseline is green**
 
@@ -737,8 +738,8 @@ export const useIntegrationsStore = create<IntegrationsState>((set, get) => ({
   },
 
   removeWebhook: async (index) => {
-    const webhooks = await integrationsService.removeWebhookAt(get().webhooks, index)
-    set({ webhooks })
+    await integrationsService.removeWebhookAt(get().webhooks, index)
+    set((state) => ({ webhooks: state.webhooks.filter((_, i) => i !== index) }))
   },
 
   toggleSyncRule: async (index) => {
@@ -787,6 +788,7 @@ git commit -m "feat: Phase B0 — extract integrations mutation logic into integ
 - Produces (types): `ProfileState`, `WorkspaceState`, `NotificationToggles`, `SettingsSessionEntry`.
 - Produces (functions, all returning `Promise<T>`, `Promise.resolve()`-wrapped per the async Global Constraint): `mergeProfile(profile, updates)`, `mergeWorkspace(workspace, updates)`, `toggleNotificationFlag(notifications, key)`, `withoutSessionAt(sessions, index)`, `keepOnlyCurrentSession(sessions)`, `setRoleOverride(roleOverrides, memberId, role)`, `buildNewInvite(email, role)`, `withoutInvite(invites, email)`.
 - `setDigestFrequency`, `setAccentColor`'s data assignment, and `resendInvite` stay inline in the store per Global Constraints (trivial passthrough / intentional no-op) — and stay synchronous, since they never call a service function.
+- Post-`await` commit pattern (see the Global Constraint on this): `updateProfile`, `updateWorkspace`, `revokeSession`, `revokeAllSessions`, `setMemberRole`, and `revokeInvite` all commit via a fresh-state functional `set()` — each is either a trivial structural filter (by index or by `email`/`.current`) or a merge of a caller-supplied external input (`updates`, `role`), so recomputing it against fresh state duplicates no business logic. `toggleNotification` keeps the plain `set({ notifications: result })` shape — its new value is self-referential (`!notifications[key]`), so a concurrency-safe fix there would mean duplicating the toggle logic in the store. Leave it as originally written; this is a deliberate, documented B0 scope boundary, matching the same call made for Task 5's `toggleWebhook`/`toggleSyncRule`.
 
 - [ ] **Step 1: Search for any existing settingsStore-specific test file to confirm none exists**
 
@@ -957,8 +959,8 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
     timeFormat: '12-hour (AM/PM)',
   },
   updateProfile: async (updates) => {
-    const profile = await settingsService.mergeProfile(get().profile, updates)
-    set({ profile })
+    await settingsService.mergeProfile(get().profile, updates)
+    set((state) => ({ profile: { ...state.profile, ...updates } }))
   },
 
   workspace: {
@@ -973,8 +975,8 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
     workTo: '18:00',
   },
   updateWorkspace: async (updates) => {
-    const workspace = await settingsService.mergeWorkspace(get().workspace, updates)
-    set({ workspace })
+    await settingsService.mergeWorkspace(get().workspace, updates)
+    set((state) => ({ workspace: { ...state.workspace, ...updates } }))
   },
 
   notifications: {
@@ -1013,18 +1015,18 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
     { icon: 'laptop', device: 'MacBook Air — Firefox 125', meta: 'London, UK · 1 week ago' },
   ],
   revokeSession: async (index) => {
-    const sessions = await settingsService.withoutSessionAt(get().sessions, index)
-    set({ sessions })
+    await settingsService.withoutSessionAt(get().sessions, index)
+    set((state) => ({ sessions: state.sessions.filter((_, i) => i !== index) }))
   },
   revokeAllSessions: async () => {
-    const sessions = await settingsService.keepOnlyCurrentSession(get().sessions)
-    set({ sessions })
+    await settingsService.keepOnlyCurrentSession(get().sessions)
+    set((state) => ({ sessions: state.sessions.filter((session) => session.current) }))
   },
 
   roleOverrides: {},
   setMemberRole: async (memberId, role) => {
-    const roleOverrides = await settingsService.setRoleOverride(get().roleOverrides, memberId, role)
-    set({ roleOverrides })
+    await settingsService.setRoleOverride(get().roleOverrides, memberId, role)
+    set((state) => ({ roleOverrides: { ...state.roleOverrides, [memberId]: role } }))
   },
   pendingInvites: [...PENDING_INVITES],
   addInvite: async (email, role) => {
@@ -1032,8 +1034,8 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
     set((s) => ({ pendingInvites: [...s.pendingInvites, newInvite] }))
   },
   revokeInvite: async (email) => {
-    const pendingInvites = await settingsService.withoutInvite(get().pendingInvites, email)
-    set({ pendingInvites })
+    await settingsService.withoutInvite(get().pendingInvites, email)
+    set((state) => ({ pendingInvites: state.pendingInvites.filter((inv) => inv.email !== email) }))
   },
   resendInvite: () => {
     /* toast only — no real email system */
