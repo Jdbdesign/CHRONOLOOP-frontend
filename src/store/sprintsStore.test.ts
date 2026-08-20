@@ -7,12 +7,12 @@ describe('sprintsStore', () => {
     useSprintsStore.setState({ sprints: MOCK_SPRINTS })
   })
 
-  it('starts seeded with the 5 mock sprints', () => {
+  it('starts seeded with the 5 mock sprints', async () => {
     expect(useSprintsStore.getState().sprints).toHaveLength(5)
   })
 
-  it('addSprint prepends a new planning-status sprint with a computed number', () => {
-    useSprintsStore.getState().addSprint({
+  it('addSprint prepends a new planning-status sprint with a computed number', async () => {
+    await useSprintsStore.getState().addSprint({
       name: 'New Sprint', goal: '', startRaw: '2024-12-20', endRaw: '2025-01-02',
       storyPoints: 25, project: 'ChronoLoop Launch',
     })
@@ -25,15 +25,15 @@ describe('sprintsStore', () => {
     expect(first.team).toEqual([{ i: 'JA', c: '#4A90FF' }])
   })
 
-  it('addSprint defaults goal to "No goal defined." when blank, matching index.html:8459', () => {
-    useSprintsStore.getState().addSprint({
+  it('addSprint defaults goal to "No goal defined." when blank, matching index.html:8459', async () => {
+    await useSprintsStore.getState().addSprint({
       name: 'X', goal: '', startRaw: '', endRaw: '', storyPoints: 40, project: 'Web 3 App for Fxtrade',
     })
     expect(useSprintsStore.getState().sprints[0].goal).toBe('No goal defined.')
   })
 
-  it('updateSprint mutates fields in place and forces progress to 100 when status becomes completed', () => {
-    useSprintsStore.getState().updateSprint('s4', {
+  it('updateSprint mutates fields in place and forces progress to 100 when status becomes completed', async () => {
+    await useSprintsStore.getState().updateSprint('s4', {
       name: 'Testing & Hardening (updated)', goal: 'Updated goal', storyPoints: 50,
       status: 'completed', project: 'Web 3 App for Fxtrade', startRaw: '', endRaw: '',
     })
@@ -43,13 +43,13 @@ describe('sprintsStore', () => {
     expect(s4?.progress).toBe(100)
   })
 
-  it('removeSprint removes the sprint by id', () => {
-    useSprintsStore.getState().removeSprint('s5')
+  it('removeSprint removes the sprint by id', async () => {
+    await useSprintsStore.getState().removeSprint('s5')
     expect(useSprintsStore.getState().sprints.find((s) => s.id === 's5')).toBeUndefined()
   })
 
-  it('markComplete sets status to completed and progress to 100, matching index.html:8385', () => {
-    useSprintsStore.getState().markComplete('s3')
+  it('markComplete sets status to completed and progress to 100, matching index.html:8385', async () => {
+    await useSprintsStore.getState().markComplete('s3')
     const s3 = useSprintsStore.getState().sprints.find((s) => s.id === 's3')
     expect(s3?.status).toBe('completed')
     expect(s3?.progress).toBe(100)
