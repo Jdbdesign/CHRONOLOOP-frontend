@@ -17,6 +17,22 @@ interface TasksState {
   addComment: (id: number, text: string) => Promise<void>
 }
 
+// Helper to eliminate duplication: find task by id, await mutation, update state
+async function updateTaskById(
+  get: () => TasksState,
+  set: (partial: Partial<TasksState> | ((state: TasksState) => Partial<TasksState>)) => void,
+  id: number,
+  mutate: (task: Task) => Promise<Task>,
+): Promise<void> {
+  const { tasks } = get()
+  const target = tasks.find((task) => task.id === id)
+  if (!target) return
+  const updated = await mutate(target)
+  set((state) => ({
+    tasks: state.tasks.map((task) => (task.id === id ? updated : task)),
+  }))
+}
+
 export const useTasksStore = create<TasksState>((set, get) => ({
   tasks: MOCK_TASKS,
   todoKpiOverride: null,
@@ -29,15 +45,7 @@ export const useTasksStore = create<TasksState>((set, get) => ({
       todoKpiOverride: nextTasks.filter((t) => t.status === 'todo').length,
     })
   },
-  updateTask: async (id, input) => {
-    const { tasks } = get()
-    const target = tasks.find((task) => task.id === id)
-    if (!target) return
-    const edited = await taskService.applyTaskEdit(target, input)
-    set((state) => ({
-      tasks: state.tasks.map((task) => (task.id === id ? edited : task)),
-    }))
-  },
+  updateTask: (id, input) => updateTaskById(get, set, id, (task) => taskService.applyTaskEdit(task, input)),
   // Stays synchronous — see the flagged exception in Global Constraints /
   // taskService.removeTaskAt: useDeleteWithUndo needs the removed item back
   // immediately to render the "Undo" toast.
@@ -51,49 +59,9 @@ export const useTasksStore = create<TasksState>((set, get) => ({
   restoreTask: (task, index) => {
     set((state) => ({ tasks: taskService.restoreTaskAt(state.tasks, task, index) }))
   },
-  setTaskStatus: async (id, status) => {
-    const { tasks } = get()
-    const target = tasks.find((task) => task.id === id)
-    if (!target) return
-    const updated = await taskService.setTaskStatus(target, status)
-    set((state) => ({
-      tasks: state.tasks.map((task) => (task.id === id ? updated : task)),
-    }))
-  },
-  addSubtask: async (id, text) => {
-    const { tasks } = get()
-    const target = tasks.find((task) => task.id === id)
-    if (!target) return
-    const updated = await taskService.addSubtaskTo(target, text)
-    set((state) => ({
-      tasks: state.tasks.map((task) => (task.id === id ? updated : task)),
-    }))
-  },
-  toggleSubtask: async (id, index) => {
-    const { tasks } = get()
-    const target = tasks.find((task) => task.id === id)
-    if (!target) return
-    const updated = await taskService.toggleSubtaskAt(target, index)
-    set((state) => ({
-      tasks: state.tasks.map((task) => (task.id === id ? updated : task)),
-    }))
-  },
-  updateTaskDescription: async (id, description) => {
-    const { tasks } = get()
-    const target = tasks.find((task) => task.id === id)
-    if (!target) return
-    const updated = await taskService.setTaskDescription(target, description)
-    set((state) => ({
-      tasks: state.tasks.map((task) => (task.id === id ? updated : task)),
-    }))
-  },
-  addComment: async (id, text) => {
-    const { tasks } = get()
-    const target = tasks.find((task) => task.id === id)
-    if (!target) return
-    const updated = await taskService.addCommentTo(target, text)
-    set((state) => ({
-      tasks: state.tasks.map((task) => (task.id === id ? updated : task)),
-    }))
-  },
+  setTaskStatus: (id, status) => updateTaskById(get, set, id, (task) => taskService.setTaskStatus(task, status)),
+  addSubtask: (id, text) => updateTaskById(get, set, id, (task) => taskService.addSubtaskTo(task, text)),
+  toggleSubtask: (id, index) => updateTaskById(get, set, id, (task) => taskService.toggleSubtaskAt(task, index)),
+  updateTaskDescription: (id, description) => updateTaskById(get, set, id, (task) => taskService.setTaskDescription(task, description)),
+  addComment: (id, text) => updateTaskById(get, set, id, (task) => taskService.addCommentTo(task, text)),
 }))
