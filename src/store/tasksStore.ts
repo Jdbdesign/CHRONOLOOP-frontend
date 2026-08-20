@@ -1,121 +1,99 @@
 import { create } from 'zustand'
-import type { NewTaskInput, Task, TaskStatus } from '../types/task'
+import type { NewTaskInput, Task } from '../types/task'
 import { MOCK_TASKS } from '../data/mockTasks'
-
-const ASSIGNEE_COLOR: Record<string, string> = {
-  AS: 'linear-gradient(135deg,#4A90FF,#2563eb)',
-  RD: 'linear-gradient(135deg,#FF8C42,#ea580c)',
-  MV: 'linear-gradient(135deg,#A855F7,#7c3aed)',
-  RC: 'linear-gradient(135deg,#00D4AA,#059669)',
-}
+import * as taskService from '../services/taskService'
 
 interface TasksState {
   tasks: Task[]
   todoKpiOverride: number | null
-  addTask: (input: NewTaskInput) => void
-  updateTask: (id: number, input: NewTaskInput) => void
+  addTask: (input: NewTaskInput) => Promise<void>
+  updateTask: (id: number, input: NewTaskInput) => Promise<void>
   removeTask: (id: number) => { task: Task; index: number } | null
   restoreTask: (task: Task, index: number) => void
-  setTaskStatus: (id: number, status: 'todo' | 'done') => void
-  addSubtask: (id: number, text: string) => void
-  toggleSubtask: (id: number, index: number) => void
-  updateTaskDescription: (id: number, description: string) => void
-  addComment: (id: number, text: string) => void
+  setTaskStatus: (id: number, status: 'todo' | 'done') => Promise<void>
+  addSubtask: (id: number, text: string) => Promise<void>
+  toggleSubtask: (id: number, index: number) => Promise<void>
+  updateTaskDescription: (id: number, description: string) => Promise<void>
+  addComment: (id: number, text: string) => Promise<void>
 }
 
 export const useTasksStore = create<TasksState>((set, get) => ({
   tasks: MOCK_TASKS,
   todoKpiOverride: null,
-  addTask: (input) => {
+  addTask: async (input) => {
     const { tasks } = get()
-    const newId = tasks.length > 0 ? Math.max(...tasks.map((t) => t.id)) + 1 : 1
-    const newTask: Task = {
-      id: newId,
-      title: input.title,
-      project: input.project,
-      assignee: input.assignee,
-      aColor: ASSIGNEE_COLOR[input.assignee] ?? 'linear-gradient(135deg,#4A90FF,#2563eb)',
-      priority: input.priority,
-      status: 'todo',
-      due: input.due,
-      tags: [],
-      subtasks: [],
-      comments: [],
-      attachments: [],
-      description: input.description,
-    }
+    const newTask = await taskService.buildNewTask(tasks, input)
     const nextTasks = [...tasks, newTask]
     set({
       tasks: nextTasks,
       todoKpiOverride: nextTasks.filter((t) => t.status === 'todo').length,
     })
   },
-  updateTask: (id, input) => {
+  updateTask: async (id, input) => {
+    const { tasks } = get()
+    const target = tasks.find((task) => task.id === id)
+    if (!target) return
+    const edited = await taskService.applyTaskEdit(target, input)
     set((state) => ({
-      tasks: state.tasks.map((task) =>
-        task.id === id
-          ? {
-              ...task,
-              title: input.title,
-              project: input.project,
-              assignee: input.assignee,
-              aColor: ASSIGNEE_COLOR[input.assignee] ?? task.aColor,
-              due: input.due,
-              priority: input.priority,
-              description: input.description,
-            }
-          : task,
-      ),
+      tasks: state.tasks.map((task) => (task.id === id ? edited : task)),
     }))
   },
+  // Stays synchronous — see the flagged exception in Global Constraints /
+  // taskService.removeTaskAt: useDeleteWithUndo needs the removed item back
+  // immediately to render the "Undo" toast.
   removeTask: (id) => {
     const { tasks } = get()
-    const index = tasks.findIndex((t) => t.id === id)
-    if (index < 0) return null
-    const task = tasks[index]
-    set({ tasks: [...tasks.slice(0, index), ...tasks.slice(index + 1)] })
-    return { task, index }
+    const result = taskService.removeTaskAt(tasks, id)
+    if (!result) return null
+    set({ tasks: result.remaining })
+    return { task: result.task, index: result.index }
   },
   restoreTask: (task, index) => {
-    set((state) => {
-      const next = [...state.tasks]
-      next.splice(index, 0, task)
-      return { tasks: next }
-    })
+    set((state) => ({ tasks: taskService.restoreTaskAt(state.tasks, task, index) }))
   },
-  setTaskStatus: (id, status) => {
+  setTaskStatus: async (id, status) => {
+    const { tasks } = get()
+    const target = tasks.find((task) => task.id === id)
+    if (!target) return
+    const updated = await taskService.setTaskStatus(target, status)
     set((state) => ({
-      tasks: state.tasks.map((task) => (task.id === id ? { ...task, status: status as TaskStatus } : task)),
+      tasks: state.tasks.map((task) => (task.id === id ? updated : task)),
     }))
   },
-  addSubtask: (id, text) => {
+  addSubtask: async (id, text) => {
+    const { tasks } = get()
+    const target = tasks.find((task) => task.id === id)
+    if (!target) return
+    const updated = await taskService.addSubtaskTo(target, text)
     set((state) => ({
-      tasks: state.tasks.map((task) =>
-        task.id === id ? { ...task, subtasks: [...task.subtasks, { t: text, done: false }] } : task,
-      ),
+      tasks: state.tasks.map((task) => (task.id === id ? updated : task)),
     }))
   },
-  toggleSubtask: (id, index) => {
+  toggleSubtask: async (id, index) => {
+    const { tasks } = get()
+    const target = tasks.find((task) => task.id === id)
+    if (!target) return
+    const updated = await taskService.toggleSubtaskAt(target, index)
     set((state) => ({
-      tasks: state.tasks.map((task) =>
-        task.id === id
-          ? { ...task, subtasks: task.subtasks.map((s, i) => (i === index ? { ...s, done: !s.done } : s)) }
-          : task,
-      ),
+      tasks: state.tasks.map((task) => (task.id === id ? updated : task)),
     }))
   },
-  updateTaskDescription: (id, description) => {
+  updateTaskDescription: async (id, description) => {
+    const { tasks } = get()
+    const target = tasks.find((task) => task.id === id)
+    if (!target) return
+    const updated = await taskService.setTaskDescription(target, description)
     set((state) => ({
-      tasks: state.tasks.map((task) => (task.id === id ? { ...task, description } : task)),
+      tasks: state.tasks.map((task) => (task.id === id ? updated : task)),
     }))
   },
-  addComment: (id, text) => {
+  addComment: async (id, text) => {
+    const { tasks } = get()
+    const target = tasks.find((task) => task.id === id)
+    if (!target) return
+    const updated = await taskService.addCommentTo(target, text)
     set((state) => ({
-      tasks: state.tasks.map((task) =>
-        task.id === id
-          ? { ...task, comments: [...task.comments, { author: 'You', text, time: 'Just now' }] }
-          : task,
-      ),
+      tasks: state.tasks.map((task) => (task.id === id ? updated : task)),
     }))
   },
 }))

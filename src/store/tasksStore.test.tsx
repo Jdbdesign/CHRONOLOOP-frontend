@@ -13,9 +13,9 @@ describe('tasksStore', () => {
     expect(state.todoKpiOverride).toBeNull()
   })
 
-  it('addTask appends a task with a new id and sets the todo KPI override to the live todo count', () => {
+  it('addTask appends a task with a new id and sets the todo KPI override to the live todo count', async () => {
     const before = useTasksStore.getState().tasks.filter((t) => t.status === 'todo').length
-    useTasksStore.getState().addTask({
+    await useTasksStore.getState().addTask({
       title: 'Write release notes',
       project: 'ChronoLoop Launch',
       assignee: 'RC',
@@ -29,8 +29,8 @@ describe('tasksStore', () => {
     expect(state.todoKpiOverride).toBe(before + 1)
   })
 
-  it('assigns sequential ids one higher than the current max', () => {
-    useTasksStore.getState().addTask({
+  it('assigns sequential ids one higher than the current max', async () => {
+    await useTasksStore.getState().addTask({
       title: 'Second new task',
       project: 'ChronoLoop Launch',
       assignee: 'RC',
@@ -48,9 +48,9 @@ describe('tasksStore — Phase 3.2 extensions', () => {
     useTasksStore.setState({ tasks: MOCK_TASKS, todoKpiOverride: null })
   })
 
-  it('updateTask replaces the matching task\'s editable fields in place, preserving id/status/tags/subtasks/comments/attachments', () => {
+  it('updateTask replaces the matching task\'s editable fields in place, preserving id/status/tags/subtasks/comments/attachments', async () => {
     const before = useTasksStore.getState().tasks.find((t) => t.id === 1)!
-    useTasksStore.getState().updateTask(1, {
+    await useTasksStore.getState().updateTask(1, {
       title: 'Renamed task',
       project: 'ChronoLoop Launch',
       assignee: 'RC',
@@ -91,10 +91,10 @@ describe('tasksStore — Phase 3.2 extensions', () => {
     expect(useTasksStore.getState().removeTask(9999)).toBeNull()
   })
 
-  it('setTaskStatus toggles a task to done or back to todo, never to any other prior status', () => {
-    useTasksStore.getState().setTaskStatus(1, 'done')
+  it('setTaskStatus toggles a task to done or back to todo, never to any other prior status', async () => {
+    await useTasksStore.getState().setTaskStatus(1, 'done')
     expect(useTasksStore.getState().tasks.find((t) => t.id === 1)?.status).toBe('done')
-    useTasksStore.getState().setTaskStatus(1, 'todo')
+    await useTasksStore.getState().setTaskStatus(1, 'todo')
     expect(useTasksStore.getState().tasks.find((t) => t.id === 1)?.status).toBe('todo')
   })
 })
@@ -104,34 +104,34 @@ describe('tasksStore — Phase 3.3 extensions', () => {
     useTasksStore.setState({ tasks: MOCK_TASKS, todoKpiOverride: null })
   })
 
-  it('addSubtask appends a new, not-done subtask to the given task', () => {
+  it('addSubtask appends a new, not-done subtask to the given task', async () => {
     const before = useTasksStore.getState().tasks.find((t) => t.id === 3)!.subtasks.length
-    useTasksStore.getState().addSubtask(3, 'New subtask')
+    await useTasksStore.getState().addSubtask(3, 'New subtask')
     const after = useTasksStore.getState().tasks.find((t) => t.id === 3)!.subtasks
     expect(after).toHaveLength(before + 1)
     expect(after.at(-1)).toEqual({ t: 'New subtask', done: false })
   })
 
-  it('toggleSubtask flips the done flag at the given index, leaving other subtasks untouched', () => {
-    useTasksStore.getState().toggleSubtask(1, 2)
+  it('toggleSubtask flips the done flag at the given index, leaving other subtasks untouched', async () => {
+    await useTasksStore.getState().toggleSubtask(1, 2)
     const subtasks = useTasksStore.getState().tasks.find((t) => t.id === 1)!.subtasks
     expect(subtasks[2].done).toBe(true)
     expect(subtasks[0].done).toBe(true)
     expect(subtasks[1].done).toBe(true)
-    useTasksStore.getState().toggleSubtask(1, 2)
+    await useTasksStore.getState().toggleSubtask(1, 2)
     expect(useTasksStore.getState().tasks.find((t) => t.id === 1)!.subtasks[2].done).toBe(false)
   })
 
-  it('updateTaskDescription replaces only the description field', () => {
-    useTasksStore.getState().updateTaskDescription(2, 'Updated description text')
+  it('updateTaskDescription replaces only the description field', async () => {
+    await useTasksStore.getState().updateTaskDescription(2, 'Updated description text')
     const task = useTasksStore.getState().tasks.find((t) => t.id === 2)!
     expect(task.description).toBe('Updated description text')
     expect(task.title).toBe('Develop Landing Page for Eatz Website')
   })
 
-  it('addComment appends a comment authored by "You" with time "Just now"', () => {
+  it('addComment appends a comment authored by "You" with time "Just now"', async () => {
     const before = useTasksStore.getState().tasks.find((t) => t.id === 3)!.comments.length
-    useTasksStore.getState().addComment(3, 'Looks good')
+    await useTasksStore.getState().addComment(3, 'Looks good')
     const comments = useTasksStore.getState().tasks.find((t) => t.id === 3)!.comments
     expect(comments).toHaveLength(before + 1)
     expect(comments.at(-1)).toEqual({ author: 'You', text: 'Looks good', time: 'Just now' })
