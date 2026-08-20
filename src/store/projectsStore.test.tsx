@@ -11,8 +11,8 @@ describe('projectsStore', () => {
     expect(useProjectsStore.getState().projects).toHaveLength(10)
   })
 
-  it('addProject prepends a new active project with 0 progress and dueDays hardcoded to 30', () => {
-    useProjectsStore.getState().addProject({
+  it('addProject prepends a new active project with 0 progress and dueDays hardcoded to 30', async () => {
+    await useProjectsStore.getState().addProject({
       name: 'New Initiative',
       client: 'Acme',
       category: 'Development',
@@ -39,8 +39,8 @@ describe('projectsStore', () => {
     expect(projects[0].team).toEqual([{ i: 'JA', c: '#4A90FF', n: 'Jacobs A.' }])
   })
 
-  it('addProject falls back to "No client" and a placeholder description when left blank', () => {
-    useProjectsStore.getState().addProject({
+  it('addProject falls back to "No client" and a placeholder description when left blank', async () => {
+    await useProjectsStore.getState().addProject({
       name: 'Untitled', client: '', category: 'Design', priority: 'medium', dueDate: 'TBD', color: '#22C55E', desc: '',
     })
     const project = useProjectsStore.getState().projects[0]
@@ -48,8 +48,8 @@ describe('projectsStore', () => {
     expect(project.desc).toBe('No description provided.')
   })
 
-  it('removeProject removes the project with the given id and leaves the rest untouched', () => {
-    useProjectsStore.getState().removeProject('p3')
+  it('removeProject removes the project with the given id and leaves the rest untouched', async () => {
+    await useProjectsStore.getState().removeProject('p3')
     const projects = useProjectsStore.getState().projects
     expect(projects).toHaveLength(9)
     expect(projects.find((p) => p.id === 'p3')).toBeUndefined()
