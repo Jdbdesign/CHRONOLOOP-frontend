@@ -1,64 +1,26 @@
 import { create } from 'zustand'
 import type { PendingInvite } from '../data/mockSettingsData'
 import { PENDING_INVITES } from '../data/mockSettingsData'
-
-interface ProfileState {
-  firstName: string
-  lastName: string
-  jobTitle: string
-  department: string
-  bio: string
-  email: string
-  phone: string
-  linkedin: string
-  twitter: string
-  timezone: string
-  language: string
-  dateFormat: string
-  timeFormat: string
-}
-
-interface WorkspaceState {
-  name: string
-  url: string
-  description: string
-  currency: string
-  fiscalYear: string
-  weekStart: string
-  sprintDuration: string
-  workFrom: string
-  workTo: string
-}
-
-interface NotificationToggles {
-  all: boolean
-  dnd: boolean
-  emailAssigned: boolean
-  emailComments: boolean
-  emailDue1: boolean
-  emailDue3: boolean
-  emailSprint: boolean
-  emailProject: boolean
-  emailWeekly: boolean
-  appStatus: boolean
-  appNewMember: boolean
-  appIntegration: boolean
-  appOverdue: boolean
-  appMentions: boolean
-}
+import * as settingsService from '../services/settingsService'
+import type {
+  NotificationToggles,
+  ProfileState,
+  SettingsSessionEntry,
+  WorkspaceState,
+} from '../services/settingsService'
 
 interface SettingsState {
   // Profile
   profile: ProfileState
-  updateProfile: (updates: Partial<ProfileState>) => void
+  updateProfile: (updates: Partial<ProfileState>) => Promise<void>
 
   // Workspace
   workspace: WorkspaceState
-  updateWorkspace: (updates: Partial<WorkspaceState>) => void
+  updateWorkspace: (updates: Partial<WorkspaceState>) => Promise<void>
 
   // Notifications
   notifications: NotificationToggles
-  toggleNotification: (key: keyof NotificationToggles) => void
+  toggleNotification: (key: keyof NotificationToggles) => Promise<void>
   digestFrequency: string
   setDigestFrequency: (freq: string) => void
 
@@ -67,20 +29,20 @@ interface SettingsState {
   setAccentColor: (color: string) => void
 
   // Security — sessions
-  sessions: { icon: string; device: string; meta: string; current?: boolean }[]
-  revokeSession: (index: number) => void
-  revokeAllSessions: () => void
+  sessions: SettingsSessionEntry[]
+  revokeSession: (index: number) => Promise<void>
+  revokeAllSessions: () => Promise<void>
 
   // Team & Roles
   roleOverrides: Record<string, string>
-  setMemberRole: (memberId: string, role: string) => void
+  setMemberRole: (memberId: string, role: string) => Promise<void>
   pendingInvites: PendingInvite[]
-  addInvite: (email: string, role: string) => void
-  revokeInvite: (email: string) => void
+  addInvite: (email: string, role: string) => Promise<void>
+  revokeInvite: (email: string) => Promise<void>
   resendInvite: (email: string) => void
 }
 
-export const useSettingsStore = create<SettingsState>((set) => ({
+export const useSettingsStore = create<SettingsState>((set, get) => ({
   profile: {
     firstName: 'Jacob',
     lastName: 'Solayinka',
@@ -96,7 +58,10 @@ export const useSettingsStore = create<SettingsState>((set) => ({
     dateFormat: 'MM/DD/YYYY',
     timeFormat: '12-hour (AM/PM)',
   },
-  updateProfile: (updates) => set((s) => ({ profile: { ...s.profile, ...updates } })),
+  updateProfile: async (updates) => {
+    await settingsService.mergeProfile(get().profile, updates)
+    set((state) => ({ profile: { ...state.profile, ...updates } }))
+  },
 
   workspace: {
     name: 'ChronoLoop',
@@ -109,14 +74,31 @@ export const useSettingsStore = create<SettingsState>((set) => ({
     workFrom: '09:00',
     workTo: '18:00',
   },
-  updateWorkspace: (updates) => set((s) => ({ workspace: { ...s.workspace, ...updates } })),
+  updateWorkspace: async (updates) => {
+    await settingsService.mergeWorkspace(get().workspace, updates)
+    set((state) => ({ workspace: { ...state.workspace, ...updates } }))
+  },
 
   notifications: {
-    all: true, dnd: false,
-    emailAssigned: true, emailComments: true, emailDue1: true, emailDue3: false, emailSprint: true, emailProject: true, emailWeekly: true,
-    appStatus: true, appNewMember: true, appIntegration: true, appOverdue: true, appMentions: true,
+    all: true,
+    dnd: false,
+    emailAssigned: true,
+    emailComments: true,
+    emailDue1: true,
+    emailDue3: false,
+    emailSprint: true,
+    emailProject: true,
+    emailWeekly: true,
+    appStatus: true,
+    appNewMember: true,
+    appIntegration: true,
+    appOverdue: true,
+    appMentions: true,
   },
-  toggleNotification: (key) => set((s) => ({ notifications: { ...s.notifications, [key]: !s.notifications[key] } })),
+  toggleNotification: async (key) => {
+    const notifications = await settingsService.toggleNotificationFlag(get().notifications, key)
+    set({ notifications })
+  },
   digestFrequency: 'immediate',
   setDigestFrequency: (freq) => set({ digestFrequency: freq }),
 
@@ -132,15 +114,30 @@ export const useSettingsStore = create<SettingsState>((set) => ({
     { icon: 'tablet', device: 'iPad Air — Chrome', meta: 'Abuja, Nigeria · 3 days ago' },
     { icon: 'laptop', device: 'MacBook Air — Firefox 125', meta: 'London, UK · 1 week ago' },
   ],
-  revokeSession: (index) => set((s) => ({ sessions: s.sessions.filter((_, i) => i !== index) })),
-  revokeAllSessions: () => set((s) => ({ sessions: s.sessions.filter((sess) => sess.current) })),
+  revokeSession: async (index) => {
+    await settingsService.withoutSessionAt(get().sessions, index)
+    set((state) => ({ sessions: state.sessions.filter((_, i) => i !== index) }))
+  },
+  revokeAllSessions: async () => {
+    await settingsService.keepOnlyCurrentSession(get().sessions)
+    set((state) => ({ sessions: state.sessions.filter((session) => session.current) }))
+  },
 
   roleOverrides: {},
-  setMemberRole: (memberId, role) => set((s) => ({ roleOverrides: { ...s.roleOverrides, [memberId]: role } })),
+  setMemberRole: async (memberId, role) => {
+    await settingsService.setRoleOverride(get().roleOverrides, memberId, role)
+    set((state) => ({ roleOverrides: { ...state.roleOverrides, [memberId]: role } }))
+  },
   pendingInvites: [...PENDING_INVITES],
-  addInvite: (email, role) => set((s) => ({
-    pendingInvites: [...s.pendingInvites, { email, role, sent: 'Today', expires: 'In 7 days' }],
-  })),
-  revokeInvite: (email) => set((s) => ({ pendingInvites: s.pendingInvites.filter((inv) => inv.email !== email) })),
-  resendInvite: () => { /* toast only — no real email system */ },
+  addInvite: async (email, role) => {
+    const newInvite = await settingsService.buildNewInvite(email, role)
+    set((s) => ({ pendingInvites: [...s.pendingInvites, newInvite] }))
+  },
+  revokeInvite: async (email) => {
+    await settingsService.withoutInvite(get().pendingInvites, email)
+    set((state) => ({ pendingInvites: state.pendingInvites.filter((inv) => inv.email !== email) }))
+  },
+  resendInvite: () => {
+    /* toast only — no real email system */
+  },
 }))
