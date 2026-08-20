@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Upload } from 'lucide-react'
 import { SettingsCard } from '../shared/SettingsCard'
 import { SettingsFormRow } from '../shared/SettingsFormRow'
@@ -9,6 +10,16 @@ export function ProfileTab() {
   const showToast = useToastStore((s) => s.showToast)
   const profile = useSettingsStore((s) => s.profile)
   const updateProfile = useSettingsStore((s) => s.updateProfile)
+
+  // Local state for the 8 free-text fields below, committed to the store on blur
+  // rather than on every keystroke. updateProfile is async (Promise.resolve().then(set)),
+  // so binding value={profile.X} directly caused the controlled input's caret to jump to
+  // the end after every keystroke: React reconciles the DOM value from stale props before
+  // the async store update lands. Matches the local-FormState-then-commit pattern already
+  // used in AddTaskModal.tsx. No resync effect: nothing else in the app writes to `profile`
+  // besides this component (confirmed via grep for updateProfile call sites), so profile
+  // never changes out from under this component while mounted.
+  const [local, setLocal] = useState(profile)
 
   const inputStyle = { width: '100%', height: 38, padding: '0 12px', background: 'var(--bg-input)', border: '1px solid var(--border-subtle)', borderRadius: 8, color: 'var(--text-primary)', fontSize: 13, fontFamily: "'DM Sans', sans-serif" } as const
   const labelStyle = { display: 'block', fontSize: 11, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 6, textTransform: 'uppercase' as const, letterSpacing: '0.05em' }
@@ -31,24 +42,24 @@ export function ProfileTab() {
           </div>
         </div>
         <SettingsFormRow style={{ marginBottom: 12 }}>
-          <div><label style={labelStyle}>First Name</label><input style={inputStyle} value={profile.firstName} onChange={(e) => updateProfile({ firstName: e.target.value })} /></div>
-          <div><label style={labelStyle}>Last Name</label><input style={inputStyle} value={profile.lastName} onChange={(e) => updateProfile({ lastName: e.target.value })} /></div>
+          <div><label style={labelStyle}>First Name</label><input style={inputStyle} value={local.firstName} onChange={(e) => setLocal((prev) => ({ ...prev, firstName: e.target.value }))} onBlur={() => updateProfile({ firstName: local.firstName })} /></div>
+          <div><label style={labelStyle}>Last Name</label><input style={inputStyle} value={local.lastName} onChange={(e) => setLocal((prev) => ({ ...prev, lastName: e.target.value }))} onBlur={() => updateProfile({ lastName: local.lastName })} /></div>
         </SettingsFormRow>
         <SettingsFormRow style={{ marginBottom: 12 }}>
-          <div><label style={labelStyle}>Job Title</label><input style={inputStyle} value={profile.jobTitle} onChange={(e) => updateProfile({ jobTitle: e.target.value })} /></div>
+          <div><label style={labelStyle}>Job Title</label><input style={inputStyle} value={local.jobTitle} onChange={(e) => setLocal((prev) => ({ ...prev, jobTitle: e.target.value }))} onBlur={() => updateProfile({ jobTitle: local.jobTitle })} /></div>
           <div><label style={labelStyle}>Department</label><select style={selectStyle} value={profile.department} onChange={(e) => updateProfile({ department: e.target.value })}><option>Product</option><option>Engineering</option><option>Design</option><option>Marketing</option><option>Operations</option></select></div>
         </SettingsFormRow>
-        <div style={{ marginBottom: 12 }}><label style={labelStyle}>Bio</label><textarea style={{ ...inputStyle, height: 'auto', minHeight: 80, padding: '10px 12px', resize: 'vertical' }} value={profile.bio} onChange={(e) => updateProfile({ bio: e.target.value })} /></div>
+        <div style={{ marginBottom: 12 }}><label style={labelStyle}>Bio</label><textarea style={{ ...inputStyle, height: 'auto', minHeight: 80, padding: '10px 12px', resize: 'vertical' }} value={local.bio} onChange={(e) => setLocal((prev) => ({ ...prev, bio: e.target.value }))} onBlur={() => updateProfile({ bio: local.bio })} /></div>
       </SettingsCard>
 
       <SettingsCard title="Contact & Links" subtitle="How people can reach you">
         <SettingsFormRow style={{ marginBottom: 12 }}>
-          <div><label style={labelStyle}>Email Address</label><div style={{ position: 'relative' }}><input style={{ ...inputStyle, paddingRight: 90 }} value={profile.email} onChange={(e) => updateProfile({ email: e.target.value })} /><span style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', background: 'rgba(34,197,94,0.12)', color: 'var(--accent-green)', fontSize: 10, fontWeight: 600, padding: '2px 8px', borderRadius: 10 }}>Verified</span></div></div>
-          <div><label style={labelStyle}>Phone</label><input style={inputStyle} value={profile.phone} onChange={(e) => updateProfile({ phone: e.target.value })} placeholder="+1 (555) 000-0000" /></div>
+          <div><label style={labelStyle}>Email Address</label><div style={{ position: 'relative' }}><input style={{ ...inputStyle, paddingRight: 90 }} value={local.email} onChange={(e) => setLocal((prev) => ({ ...prev, email: e.target.value }))} onBlur={() => updateProfile({ email: local.email })} /><span style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', background: 'rgba(34,197,94,0.12)', color: 'var(--accent-green)', fontSize: 10, fontWeight: 600, padding: '2px 8px', borderRadius: 10 }}>Verified</span></div></div>
+          <div><label style={labelStyle}>Phone</label><input style={inputStyle} value={local.phone} onChange={(e) => setLocal((prev) => ({ ...prev, phone: e.target.value }))} onBlur={() => updateProfile({ phone: local.phone })} placeholder="+1 (555) 000-0000" /></div>
         </SettingsFormRow>
         <SettingsFormRow>
-          <div><label style={labelStyle}>LinkedIn</label><input style={inputStyle} value={profile.linkedin} onChange={(e) => updateProfile({ linkedin: e.target.value })} placeholder="linkedin.com/in/username" /></div>
-          <div><label style={labelStyle}>Twitter / X</label><input style={inputStyle} value={profile.twitter} onChange={(e) => updateProfile({ twitter: e.target.value })} placeholder="@username" /></div>
+          <div><label style={labelStyle}>LinkedIn</label><input style={inputStyle} value={local.linkedin} onChange={(e) => setLocal((prev) => ({ ...prev, linkedin: e.target.value }))} onBlur={() => updateProfile({ linkedin: local.linkedin })} placeholder="linkedin.com/in/username" /></div>
+          <div><label style={labelStyle}>Twitter / X</label><input style={inputStyle} value={local.twitter} onChange={(e) => setLocal((prev) => ({ ...prev, twitter: e.target.value }))} onBlur={() => updateProfile({ twitter: local.twitter })} placeholder="@username" /></div>
         </SettingsFormRow>
       </SettingsCard>
 

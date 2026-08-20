@@ -37,12 +37,10 @@ export const useTasksStore = create<TasksState>((set, get) => ({
   tasks: MOCK_TASKS,
   todoKpiOverride: null,
   addTask: async (input) => {
-    const { tasks } = get()
-    const newTask = await taskService.buildNewTask(tasks, input)
-    const nextTasks = [...tasks, newTask]
-    set({
-      tasks: nextTasks,
-      todoKpiOverride: nextTasks.filter((t) => t.status === 'todo').length,
+    const newTask = await taskService.buildNewTask(get().tasks, input)
+    set((state) => {
+      const nextTasks = [...state.tasks, newTask]
+      return { tasks: nextTasks, todoKpiOverride: nextTasks.filter((t) => t.status === 'todo').length }
     })
   },
   updateTask: (id, input) => updateTaskById(get, set, id, (task) => taskService.applyTaskEdit(task, input)),

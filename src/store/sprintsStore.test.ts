@@ -7,7 +7,7 @@ describe('sprintsStore', () => {
     useSprintsStore.setState({ sprints: MOCK_SPRINTS })
   })
 
-  it('starts seeded with the 5 mock sprints', async () => {
+  it('starts seeded with the 5 mock sprints', () => {
     expect(useSprintsStore.getState().sprints).toHaveLength(5)
   })
 
