@@ -4,7 +4,7 @@
 
 **Goal:** Introduce a `src/services/*.ts` layer per domain so every Zustand store's mutation logic (currently inlined `set()` callbacks touching `src/data/mock*.ts` arrays directly) is relocated into pure, testable functions — the seam that later phases (F1–F8) will swap from mock logic to real `fetch` calls, one file at a time.
 
-**Architecture:** For each of 6 domains (tasks, projects, sprints, calendar, integrations, settings — team is excluded, see Global Constraints), extract the store's current inline computation (id generation, field defaulting/merging, array add/remove/toggle) into named pure functions in `src/services/<domain>Service.ts`. The store keeps owning `set()`/`get()` and any UI-derived state (e.g. `todoKpiOverride`), but calls the service function to compute the new value instead of inlining the logic itself. No behavior changes; this is a refactor under existing test coverage, not new-feature TDD — the step pattern per task is **create service → confirm baseline tests still pass → refactor store to delegate → confirm tests still pass unmodified**, rather than red→green.
+**Architecture:** For each of 6 domains (tasks, projects, sprints, calendar, integrations, settings — team is excluded, see Global Constraints), extract the store's current inline computation (id generation, field defaulting/merging, array add/remove/toggle) into named `Promise<T>`-returning functions in `src/services/<domain>Service.ts` (see the async Global Constraint for why, and for the one flagged sync exception). The store keeps owning `set()`/`get()` and any UI-derived state (e.g. `todoKpiOverride`), but `await`s the service function to compute the new value instead of inlining the logic itself. No behavior change to computed values; this is a refactor under existing test coverage, not new-feature TDD — the step pattern per task is **create service → confirm baseline tests still pass → refactor store to delegate → add `await` to the store's own direct-call test file → confirm assertions still pass unchanged**, rather than red→green.
 
 **Tech Stack:** TypeScript, Zustand 5, Vitest 4, pnpm.
 
@@ -13,8 +13,9 @@
 ## Global Constraints
 
 - **Zero behavior change to computed values.** Preserve existing quirks/bugs verbatim — including the `dueDays: 30` hardcoding bug in `projectService.buildNewProject` and `daysLeft: 30` in `sprintService.buildNewSprint` (both are documented, known bugs the spec says B3/B4 fix later, not B0).
-- **Services stay synchronous in B0.** Per the confirmed architecture decision: making services return real Promises now would force every mutating store action to become `async`, which breaks every synchronous test assertion across all 7 store test files, `useDeleteWithUndo.test.tsx`, and an unknown subset of the 33 component tests that click a mutating action and assert the DOM synchronously — none of which is actually asynchronous yet. That cost is deferred to each domain's own F-phase, when a real `fetch` call is introduced and loading states genuinely become necessary. **Do not add `async`/`Promise` return types to any service function or store action in this plan.**
-- **`VITE_USE_MOCK_DATA` is deferred, not scaffolded.** It has nothing to branch on until a domain has both a mock and a real implementation (F-phase). Introducing it now with a single always-true branch is dead weight — do not add it in this plan.
+- **Services return `Promise<T>`, wrapped in `Promise.resolve(...)` for now.** This matches the spec's own B0 target (`taskService.create(input): Promise<Task>`, §4) so each domain's F-phase only swaps `Promise.resolve(mockLogic())` for `await fetch(...)` inside the service function — the store call site never changes shape again. Store mutating actions become `async` and `await` their service call before `set()`. Audited cost: the 7 store unit-test files call actions directly (`useStore.getState().addTask(...)`) with no `await` today, so each direct call needs `await` added and its `it()` callback made `async` — mechanical, done explicitly per task below. Component tests were also audited (`grep` across the suite): every test file using `fireEvent.click` also uses `@testing-library/user-event`, whose `.click()` already awaits internally, so the one-hop `Promise.resolve().then(set)` reliably flushes before the next assertion — no component test changes are expected (confirmed by the full regression run in Task 7).
+  - **Exception: `taskService.removeTaskAt`/`restoreTaskAt` (Task 1) stay synchronous.** `useDeleteWithUndo` needs the removed `{ task, index }` back synchronously to render the "Undo" toast at the moment of deletion. Making this async would either delay the toast until the promise resolves (a real behavior change, violating the constraint above) or require an optimistic-delete redesign (remove locally now, fire the delete in the background, undo = re-insert locally + cancel/undo server-side) — a genuine feature decision, out of scope for B0. Revisit explicitly in F1 when task deletion gets a real endpoint. `removeProject`/`removeSprint`/`removeWebhook` have no synchronous consumer like this and go async with the rest of their domains.
+- **`VITE_USE_MOCK_DATA` is deferred, not dropped.** It has nothing to branch on until a domain has both a mock and a real implementation — a single always-true branch today is dead weight. It lands in each domain's own F-phase alongside that domain's first real `fetch` call, per the spec's §4 pairing of the flag with the mock→real swap. Tracked here so it isn't silently forgotten; Task 7's phase notes restate this commitment.
 - **No `teamService.ts` in this plan.** `teamStore` ([src/store/teamStore.ts](../../../src/store/teamStore.ts)) has zero mutating actions today — it only seeds `members` from `TEAM_MEMBERS` at module load. There is no mutation logic to relocate. A service file is created for this domain only when it gets its first real mutation (e.g. a role/status change) or when B6/F6 needs `list()` for async hydration.
 - **`removeProject`/`removeSprint`/`removeWebhook` etc. are extracted too, even though they're one-line filters.** Every mutation needs a service-layer seam eventually (each becomes a real `DELETE`/`PATCH` call in its B-phase), so route all of them through the service for consistency — the one exception is single-primitive passthrough setters with zero transformation (`setDigestFrequency`, `setAccentColor`'s data field, `resendInvite`'s intentional no-op): those stay inline in the store, since there's no logic to relocate and wrapping them in a function would be pure ceremony.
 - **Windows dev machine, pnpm.** Use `pnpm vitest run <path>` for targeted test runs and `pnpm test` / `pnpm typecheck` / `pnpm lint` for full-suite checks, matching `package.json` scripts.
@@ -27,11 +28,11 @@
 **Files:**
 - Create: `src/services/taskService.ts`
 - Modify: `src/store/tasksStore.ts`
-- Test (unmodified, used to verify): `src/store/tasksStore.test.tsx`
+- Test (modified: add await to async action calls): `src/store/tasksStore.test.tsx`
 
 **Interfaces:**
 - Consumes: `NewTaskInput`, `Task`, `TaskStatus` from `../types/task` (unchanged).
-- Produces (for the store to call): `buildNewTask(existingTasks, input)`, `applyTaskEdit(task, input)`, `setTaskStatus(task, status)`, `addSubtaskTo(task, text)`, `toggleSubtaskAt(task, index)`, `setTaskDescription(task, description)`, `addCommentTo(task, text)`, `removeTaskAt(tasks, id)`, `restoreTaskAt(tasks, task, index)`.
+- Produces (for the store to call): `buildNewTask(existingTasks, input): Promise<Task>`, `applyTaskEdit(task, input): Promise<Task>`, `setTaskStatus(task, status): Promise<Task>`, `addSubtaskTo(task, text): Promise<Task>`, `toggleSubtaskAt(task, index): Promise<Task>`, `setTaskDescription(task, description): Promise<Task>`, `addCommentTo(task, text): Promise<Task>` — all `Promise.resolve()`-wrapped, per the async Global Constraint. `removeTaskAt(tasks, id)` and `restoreTaskAt(tasks, task, index)` stay **synchronous** (the flagged exception — see Global Constraints) because `useDeleteWithUndo` needs the removed item back immediately.
 
 - [ ] **Step 1: Run the existing test file to confirm the baseline is green**
 
@@ -50,9 +51,9 @@ const ASSIGNEE_COLOR: Record<string, string> = {
   RC: 'linear-gradient(135deg,#00D4AA,#059669)',
 }
 
-export function buildNewTask(existingTasks: Task[], input: NewTaskInput): Task {
+export function buildNewTask(existingTasks: Task[], input: NewTaskInput): Promise<Task> {
   const newId = existingTasks.length > 0 ? Math.max(...existingTasks.map((t) => t.id)) + 1 : 1
-  return {
+  return Promise.resolve({
     id: newId,
     title: input.title,
     project: input.project,
@@ -66,11 +67,11 @@ export function buildNewTask(existingTasks: Task[], input: NewTaskInput): Task {
     comments: [],
     attachments: [],
     description: input.description,
-  }
+  })
 }
 
-export function applyTaskEdit(task: Task, input: NewTaskInput): Task {
-  return {
+export function applyTaskEdit(task: Task, input: NewTaskInput): Promise<Task> {
+  return Promise.resolve({
     ...task,
     title: input.title,
     project: input.project,
@@ -79,35 +80,38 @@ export function applyTaskEdit(task: Task, input: NewTaskInput): Task {
     due: input.due,
     priority: input.priority,
     description: input.description,
-  }
+  })
 }
 
-export function setTaskStatus(task: Task, status: 'todo' | 'done'): Task {
-  return { ...task, status: status as TaskStatus }
+export function setTaskStatus(task: Task, status: 'todo' | 'done'): Promise<Task> {
+  return Promise.resolve({ ...task, status: status as TaskStatus })
 }
 
-export function addSubtaskTo(task: Task, text: string): Task {
-  return { ...task, subtasks: [...task.subtasks, { t: text, done: false }] }
+export function addSubtaskTo(task: Task, text: string): Promise<Task> {
+  return Promise.resolve({ ...task, subtasks: [...task.subtasks, { t: text, done: false }] })
 }
 
-export function toggleSubtaskAt(task: Task, index: number): Task {
-  return {
+export function toggleSubtaskAt(task: Task, index: number): Promise<Task> {
+  return Promise.resolve({
     ...task,
     subtasks: task.subtasks.map((s, i) => (i === index ? { ...s, done: !s.done } : s)),
-  }
+  })
 }
 
-export function setTaskDescription(task: Task, description: string): Task {
-  return { ...task, description }
+export function setTaskDescription(task: Task, description: string): Promise<Task> {
+  return Promise.resolve({ ...task, description })
 }
 
-export function addCommentTo(task: Task, text: string): Task {
-  return {
+export function addCommentTo(task: Task, text: string): Promise<Task> {
+  return Promise.resolve({
     ...task,
     comments: [...task.comments, { author: 'You', text, time: 'Just now' }],
-  }
+  })
 }
 
+// Stays synchronous — see the flagged exception in Global Constraints:
+// useDeleteWithUndo needs { task, index } back immediately to render the
+// "Undo" toast, so wrapping this in a Promise is deferred to F1.
 export function removeTaskAt(
   tasks: Task[],
   id: number,
@@ -136,33 +140,41 @@ import * as taskService from '../services/taskService'
 interface TasksState {
   tasks: Task[]
   todoKpiOverride: number | null
-  addTask: (input: NewTaskInput) => void
-  updateTask: (id: number, input: NewTaskInput) => void
+  addTask: (input: NewTaskInput) => Promise<void>
+  updateTask: (id: number, input: NewTaskInput) => Promise<void>
   removeTask: (id: number) => { task: Task; index: number } | null
   restoreTask: (task: Task, index: number) => void
-  setTaskStatus: (id: number, status: 'todo' | 'done') => void
-  addSubtask: (id: number, text: string) => void
-  toggleSubtask: (id: number, index: number) => void
-  updateTaskDescription: (id: number, description: string) => void
-  addComment: (id: number, text: string) => void
+  setTaskStatus: (id: number, status: 'todo' | 'done') => Promise<void>
+  addSubtask: (id: number, text: string) => Promise<void>
+  toggleSubtask: (id: number, index: number) => Promise<void>
+  updateTaskDescription: (id: number, description: string) => Promise<void>
+  addComment: (id: number, text: string) => Promise<void>
 }
 
 export const useTasksStore = create<TasksState>((set, get) => ({
   tasks: MOCK_TASKS,
   todoKpiOverride: null,
-  addTask: (input) => {
+  addTask: async (input) => {
     const { tasks } = get()
-    const nextTasks = [...tasks, taskService.buildNewTask(tasks, input)]
+    const newTask = await taskService.buildNewTask(tasks, input)
+    const nextTasks = [...tasks, newTask]
     set({
       tasks: nextTasks,
       todoKpiOverride: nextTasks.filter((t) => t.status === 'todo').length,
     })
   },
-  updateTask: (id, input) => {
+  updateTask: async (id, input) => {
+    const { tasks } = get()
+    const target = tasks.find((task) => task.id === id)
+    if (!target) return
+    const edited = await taskService.applyTaskEdit(target, input)
     set((state) => ({
-      tasks: state.tasks.map((task) => (task.id === id ? taskService.applyTaskEdit(task, input) : task)),
+      tasks: state.tasks.map((task) => (task.id === id ? edited : task)),
     }))
   },
+  // Stays synchronous — see the flagged exception in Global Constraints /
+  // taskService.removeTaskAt: useDeleteWithUndo needs the removed item back
+  // immediately to render the "Undo" toast.
   removeTask: (id) => {
     const { tasks } = get()
     const result = taskService.removeTaskAt(tasks, id)
@@ -173,49 +185,73 @@ export const useTasksStore = create<TasksState>((set, get) => ({
   restoreTask: (task, index) => {
     set((state) => ({ tasks: taskService.restoreTaskAt(state.tasks, task, index) }))
   },
-  setTaskStatus: (id, status) => {
+  setTaskStatus: async (id, status) => {
+    const { tasks } = get()
+    const target = tasks.find((task) => task.id === id)
+    if (!target) return
+    const updated = await taskService.setTaskStatus(target, status)
     set((state) => ({
-      tasks: state.tasks.map((task) => (task.id === id ? taskService.setTaskStatus(task, status) : task)),
+      tasks: state.tasks.map((task) => (task.id === id ? updated : task)),
     }))
   },
-  addSubtask: (id, text) => {
+  addSubtask: async (id, text) => {
+    const { tasks } = get()
+    const target = tasks.find((task) => task.id === id)
+    if (!target) return
+    const updated = await taskService.addSubtaskTo(target, text)
     set((state) => ({
-      tasks: state.tasks.map((task) => (task.id === id ? taskService.addSubtaskTo(task, text) : task)),
+      tasks: state.tasks.map((task) => (task.id === id ? updated : task)),
     }))
   },
-  toggleSubtask: (id, index) => {
+  toggleSubtask: async (id, index) => {
+    const { tasks } = get()
+    const target = tasks.find((task) => task.id === id)
+    if (!target) return
+    const updated = await taskService.toggleSubtaskAt(target, index)
     set((state) => ({
-      tasks: state.tasks.map((task) => (task.id === id ? taskService.toggleSubtaskAt(task, index) : task)),
+      tasks: state.tasks.map((task) => (task.id === id ? updated : task)),
     }))
   },
-  updateTaskDescription: (id, description) => {
+  updateTaskDescription: async (id, description) => {
+    const { tasks } = get()
+    const target = tasks.find((task) => task.id === id)
+    if (!target) return
+    const updated = await taskService.setTaskDescription(target, description)
     set((state) => ({
-      tasks: state.tasks.map((task) => (task.id === id ? taskService.setTaskDescription(task, description) : task)),
+      tasks: state.tasks.map((task) => (task.id === id ? updated : task)),
     }))
   },
-  addComment: (id, text) => {
+  addComment: async (id, text) => {
+    const { tasks } = get()
+    const target = tasks.find((task) => task.id === id)
+    if (!target) return
+    const updated = await taskService.addCommentTo(target, text)
     set((state) => ({
-      tasks: state.tasks.map((task) => (task.id === id ? taskService.addCommentTo(task, text) : task)),
+      tasks: state.tasks.map((task) => (task.id === id ? updated : task)),
     }))
   },
 }))
 ```
 
-- [ ] **Step 4: Run the test file again to confirm it's still green, unmodified**
+- [ ] **Step 4: Update `src/store/tasksStore.test.tsx` to `await` the now-async actions**
+
+`addTask`, `updateTask`, `setTaskStatus`, `addSubtask`, `toggleSubtask`, `updateTaskDescription`, and `addComment` now return `Promise<void>`. For every direct call to one of these via `useTasksStore.getState().<action>(...)`, add `await` and make the enclosing `it(...)` callback `async`. Do **not** touch calls to `removeTask`/`restoreTask` — those stay synchronous and unchanged. This is the one deliberate, expected modification to an "unmodified" test file in this plan (see Global Constraints) — everything else about the assertions stays the same.
+
+- [ ] **Step 5: Run the test file again to confirm it's still green**
 
 Run: `pnpm vitest run src/store/tasksStore.test.tsx`
-Expected: PASS (11 tests), zero changes to the test file itself.
+Expected: PASS (11 tests) — same assertions as before, now with `await` added to the async action calls.
 
-- [ ] **Step 5: Typecheck**
+- [ ] **Step 6: Typecheck**
 
 Run: `pnpm typecheck`
 Expected: no errors.
 
-- [ ] **Step 6: Commit**
+- [ ] **Step 7: Commit**
 
 ```bash
-git add src/services/taskService.ts src/store/tasksStore.ts
-git commit -m "feat: Phase B0 — extract task mutation logic into taskService"
+git add src/services/taskService.ts src/store/tasksStore.ts src/store/tasksStore.test.tsx
+git commit -m "feat: Phase B0 — extract task mutation logic into taskService (async, per spec)"
 ```
 
 ---
@@ -225,11 +261,11 @@ git commit -m "feat: Phase B0 — extract task mutation logic into taskService"
 **Files:**
 - Create: `src/services/projectService.ts`
 - Modify: `src/store/projectsStore.ts`
-- Test (unmodified, used to verify): `src/store/projectsStore.test.tsx`
+- Test (modified: add await to async action calls): `src/store/projectsStore.test.tsx`
 
 **Interfaces:**
 - Consumes: `NewProjectInput`, `Project` from `../types/project`.
-- Produces: `buildNewProject(input)`, `withoutProject(projects, id)`.
+- Produces: `buildNewProject(input): Promise<Project>`, `withoutProject(projects, id): Promise<Project[]>` — both `Promise.resolve()`-wrapped, per the async Global Constraint. No `useDeleteWithUndo`-style consumer here, so no exception needed.
 
 - [ ] **Step 1: Run the existing test file to confirm the baseline is green**
 
@@ -241,8 +277,8 @@ Expected: PASS (4 tests).
 ```typescript
 import type { NewProjectInput, Project } from '../types/project'
 
-export function buildNewProject(input: NewProjectInput): Project {
-  return {
+export function buildNewProject(input: NewProjectInput): Promise<Project> {
+  return Promise.resolve({
     id: `p_new_${Date.now()}`,
     name: input.name,
     client: input.client || 'No client',
@@ -263,11 +299,11 @@ export function buildNewProject(input: NewProjectInput): Project {
     desc: input.desc || 'No description provided.',
     team: [{ i: 'JA', c: '#4A90FF', n: 'Jacobs A.' }],
     milestones: [],
-  }
+  })
 }
 
-export function withoutProject(projects: Project[], id: string): Project[] {
-  return projects.filter((p) => p.id !== id)
+export function withoutProject(projects: Project[], id: string): Promise<Project[]> {
+  return Promise.resolve(projects.filter((p) => p.id !== id))
 }
 ```
 
@@ -281,36 +317,43 @@ import * as projectService from '../services/projectService'
 
 interface ProjectsState {
   projects: Project[]
-  addProject: (input: NewProjectInput) => void
-  removeProject: (id: string) => void
+  addProject: (input: NewProjectInput) => Promise<void>
+  removeProject: (id: string) => Promise<void>
 }
 
-export const useProjectsStore = create<ProjectsState>((set) => ({
+export const useProjectsStore = create<ProjectsState>((set, get) => ({
   projects: MOCK_PROJECTS,
-  addProject: (input) => {
-    set((state) => ({ projects: [projectService.buildNewProject(input), ...state.projects] }))
+  addProject: async (input) => {
+    const newProject = await projectService.buildNewProject(input)
+    set((state) => ({ projects: [newProject, ...state.projects] }))
   },
-  removeProject: (id) => {
-    set((state) => ({ projects: projectService.withoutProject(state.projects, id) }))
+  removeProject: async (id) => {
+    const { projects } = get()
+    const next = await projectService.withoutProject(projects, id)
+    set({ projects: next })
   },
 }))
 ```
 
-- [ ] **Step 4: Run the test file again to confirm it's still green, unmodified**
+- [ ] **Step 4: Update `src/store/projectsStore.test.tsx` to `await` the now-async actions**
+
+`addProject` and `removeProject` now return `Promise<void>`. Add `await` to each direct call via `useProjectsStore.getState().<action>(...)` and make the enclosing `it(...)` callback `async`.
+
+- [ ] **Step 5: Run the test file again to confirm it's still green**
 
 Run: `pnpm vitest run src/store/projectsStore.test.tsx`
-Expected: PASS (4 tests), zero changes to the test file itself.
+Expected: PASS (4 tests) — same assertions, now with `await` added.
 
-- [ ] **Step 5: Typecheck**
+- [ ] **Step 6: Typecheck**
 
 Run: `pnpm typecheck`
 Expected: no errors.
 
-- [ ] **Step 6: Commit**
+- [ ] **Step 7: Commit**
 
 ```bash
-git add src/services/projectService.ts src/store/projectsStore.ts
-git commit -m "feat: Phase B0 — extract project mutation logic into projectService"
+git add src/services/projectService.ts src/store/projectsStore.ts src/store/projectsStore.test.tsx
+git commit -m "feat: Phase B0 — extract project mutation logic into projectService (async, per spec)"
 ```
 
 ---
@@ -320,11 +363,11 @@ git commit -m "feat: Phase B0 — extract project mutation logic into projectSer
 **Files:**
 - Create: `src/services/sprintService.ts`
 - Modify: `src/store/sprintsStore.ts`
-- Test (unmodified, used to verify): `src/store/sprintsStore.test.ts`
+- Test (modified: add await to async action calls): `src/store/sprintsStore.test.ts`
 
 **Interfaces:**
 - Consumes: `EditSprintInput`, `NewSprintInput`, `Sprint` from `../types/sprint`.
-- Produces: `formatDate(raw)`, `buildNewSprint(existingSprints, input)`, `applySprintEdit(sprint, input)`, `withoutSprint(sprints, id)`, `completeSprint(sprint)`.
+- Produces: `formatDate(raw)` (stays synchronous — pure string formatting, not a mutation, no reason to wrap it), `buildNewSprint(existingSprints, input): Promise<Sprint>`, `applySprintEdit(sprint, input): Promise<Sprint>`, `withoutSprint(sprints, id): Promise<Sprint[]>`, `completeSprint(sprint): Promise<Sprint>` — the four mutation functions are `Promise.resolve()`-wrapped, per the async Global Constraint. No `useDeleteWithUndo`-style consumer here, so no exception needed.
 
 - [ ] **Step 1: Run the existing test file to confirm the baseline is green**
 
@@ -342,9 +385,9 @@ export function formatDate(raw: string): string {
     : 'TBD'
 }
 
-export function buildNewSprint(existingSprints: Sprint[], input: NewSprintInput): Sprint {
+export function buildNewSprint(existingSprints: Sprint[], input: NewSprintInput): Promise<Sprint> {
   const number = `SPRINT ${String(existingSprints.length + 1).padStart(2, '0')}`
-  return {
+  return Promise.resolve({
     id: `s_${Date.now()}`,
     number,
     name: input.name,
@@ -368,11 +411,11 @@ export function buildNewSprint(existingSprints: Sprint[], input: NewSprintInput)
     team: [{ i: 'JA', c: '#4A90FF' }],
     burndown: [],
     sprintTasks: [],
-  }
+  })
 }
 
-export function applySprintEdit(sprint: Sprint, input: EditSprintInput): Sprint {
-  return {
+export function applySprintEdit(sprint: Sprint, input: EditSprintInput): Promise<Sprint> {
+  return Promise.resolve({
     ...sprint,
     name: input.name,
     goal: input.goal,
@@ -384,15 +427,15 @@ export function applySprintEdit(sprint: Sprint, input: EditSprintInput): Sprint 
     endDate: input.endRaw ? formatDate(input.endRaw) : sprint.endDate,
     endRaw: input.endRaw || sprint.endRaw,
     progress: input.status === 'completed' ? 100 : sprint.progress,
-  }
+  })
 }
 
-export function withoutSprint(sprints: Sprint[], id: string): Sprint[] {
-  return sprints.filter((s) => s.id !== id)
+export function withoutSprint(sprints: Sprint[], id: string): Promise<Sprint[]> {
+  return Promise.resolve(sprints.filter((s) => s.id !== id))
 }
 
-export function completeSprint(sprint: Sprint): Sprint {
-  return { ...sprint, status: 'completed', progress: 100 }
+export function completeSprint(sprint: Sprint): Promise<Sprint> {
+  return Promise.resolve({ ...sprint, status: 'completed', progress: 100 })
 }
 ```
 
@@ -406,48 +449,64 @@ import * as sprintService from '../services/sprintService'
 
 interface SprintsState {
   sprints: Sprint[]
-  addSprint: (input: NewSprintInput) => void
-  updateSprint: (id: string, input: EditSprintInput) => void
-  removeSprint: (id: string) => void
-  markComplete: (id: string) => void
+  addSprint: (input: NewSprintInput) => Promise<void>
+  updateSprint: (id: string, input: EditSprintInput) => Promise<void>
+  removeSprint: (id: string) => Promise<void>
+  markComplete: (id: string) => Promise<void>
 }
 
-export const useSprintsStore = create<SprintsState>((set) => ({
+export const useSprintsStore = create<SprintsState>((set, get) => ({
   sprints: MOCK_SPRINTS,
-  addSprint: (input) => {
-    set((state) => ({ sprints: [sprintService.buildNewSprint(state.sprints, input), ...state.sprints] }))
+  addSprint: async (input) => {
+    const { sprints } = get()
+    const newSprint = await sprintService.buildNewSprint(sprints, input)
+    set((state) => ({ sprints: [newSprint, ...state.sprints] }))
   },
-  updateSprint: (id, input) => {
+  updateSprint: async (id, input) => {
+    const { sprints } = get()
+    const target = sprints.find((s) => s.id === id)
+    if (!target) return
+    const edited = await sprintService.applySprintEdit(target, input)
     set((state) => ({
-      sprints: state.sprints.map((s) => (s.id === id ? sprintService.applySprintEdit(s, input) : s)),
+      sprints: state.sprints.map((s) => (s.id === id ? edited : s)),
     }))
   },
-  removeSprint: (id) => {
-    set((state) => ({ sprints: sprintService.withoutSprint(state.sprints, id) }))
+  removeSprint: async (id) => {
+    const { sprints } = get()
+    const next = await sprintService.withoutSprint(sprints, id)
+    set({ sprints: next })
   },
-  markComplete: (id) => {
+  markComplete: async (id) => {
+    const { sprints } = get()
+    const target = sprints.find((s) => s.id === id)
+    if (!target) return
+    const completed = await sprintService.completeSprint(target)
     set((state) => ({
-      sprints: state.sprints.map((s) => (s.id === id ? sprintService.completeSprint(s) : s)),
+      sprints: state.sprints.map((s) => (s.id === id ? completed : s)),
     }))
   },
 }))
 ```
 
-- [ ] **Step 4: Run the test file again to confirm it's still green, unmodified**
+- [ ] **Step 4: Update `src/store/sprintsStore.test.ts` to `await` the now-async actions**
+
+`addSprint`, `updateSprint`, `removeSprint`, and `markComplete` now return `Promise<void>`. Add `await` to each direct call via `useSprintsStore.getState().<action>(...)` and make the enclosing `it(...)` callback `async`.
+
+- [ ] **Step 5: Run the test file again to confirm it's still green**
 
 Run: `pnpm vitest run src/store/sprintsStore.test.ts`
-Expected: PASS (6 tests), zero changes to the test file itself.
+Expected: PASS (6 tests) — same assertions, now with `await` added.
 
-- [ ] **Step 5: Typecheck**
+- [ ] **Step 6: Typecheck**
 
 Run: `pnpm typecheck`
 Expected: no errors.
 
-- [ ] **Step 6: Commit**
+- [ ] **Step 7: Commit**
 
 ```bash
-git add src/services/sprintService.ts src/store/sprintsStore.ts
-git commit -m "feat: Phase B0 — extract sprint mutation logic into sprintService"
+git add src/services/sprintService.ts src/store/sprintsStore.ts src/store/sprintsStore.test.ts
+git commit -m "feat: Phase B0 — extract sprint mutation logic into sprintService (async, per spec)"
 ```
 
 ---
@@ -457,11 +516,11 @@ git commit -m "feat: Phase B0 — extract sprint mutation logic into sprintServi
 **Files:**
 - Create: `src/services/calendarService.ts`
 - Modify: `src/store/calendarStore.ts`
-- Test (unmodified, used to verify): `src/store/calendarStore.test.ts`
+- Test (modified: add await to async action calls): `src/store/calendarStore.test.ts`
 
 **Interfaces:**
 - Consumes: `CalendarEvent`, `NewCalendarEventInput` from `../types/calendar`.
-- Produces: `buildNewCalendarEvent(input)`.
+- Produces: `buildNewCalendarEvent(input): Promise<CalendarEvent>` — `Promise.resolve()`-wrapped, per the async Global Constraint.
 - Note: `view`/`filter`/`currentDate`/navigation are ephemeral client-side UI/nav state, not persisted `CalendarEvent` data (per the spec, there's no backend concept of "current calendar view") — `setView`, `setFilter`, `navigate`, `goToday`, `setCurrentDate` stay exactly as-is in the store, untouched by this task.
 
 - [ ] **Step 1: Run the existing test file to confirm the baseline is green**
@@ -481,8 +540,8 @@ const TYPE_COLORS: Record<string, string> = {
   meeting: '#FF8C42',
 }
 
-export function buildNewCalendarEvent(input: NewCalendarEventInput): CalendarEvent {
-  return {
+export function buildNewCalendarEvent(input: NewCalendarEventInput): Promise<CalendarEvent> {
+  return Promise.resolve({
     id: 'user-' + Date.now(),
     type: input.type,
     title: input.title,
@@ -499,7 +558,7 @@ export function buildNewCalendarEvent(input: NewCalendarEventInput): CalendarEve
     progress: 0,
     notes: input.notes,
     isMultiDay: !!(input.endDate && input.endDate !== input.date),
-  }
+  })
 }
 ```
 
@@ -521,7 +580,7 @@ interface CalendarState {
   navigate: (dir: 1 | -1) => void
   goToday: () => void
   setCurrentDate: (d: Date) => void
-  addUserEvent: (input: NewCalendarEventInput) => void
+  addUserEvent: (input: NewCalendarEventInput) => Promise<void>
 }
 
 export const useCalendarStore = create<CalendarState>((set, get) => ({
@@ -539,27 +598,32 @@ export const useCalendarStore = create<CalendarState>((set, get) => ({
   goToday: () => set({ currentDate: new Date() }),
   setCurrentDate: (d) => set({ currentDate: d }),
 
-  addUserEvent: (input) => {
-    set((state) => ({ userEvents: [...state.userEvents, calendarService.buildNewCalendarEvent(input)] }))
+  addUserEvent: async (input) => {
+    const newEvent = await calendarService.buildNewCalendarEvent(input)
+    set((state) => ({ userEvents: [...state.userEvents, newEvent] }))
   },
 }))
 ```
 
-- [ ] **Step 4: Run the test file again to confirm it's still green, unmodified**
+- [ ] **Step 4: Update `src/store/calendarStore.test.ts` to `await` the now-async `addUserEvent`**
+
+`addUserEvent` now returns `Promise<void>`. Add `await` to each direct call via `useCalendarStore.getState().addUserEvent(...)` and make the enclosing `it(...)` callback `async`.
+
+- [ ] **Step 5: Run the test file again to confirm it's still green**
 
 Run: `pnpm vitest run src/store/calendarStore.test.ts`
-Expected: PASS (11 tests), zero changes to the test file itself.
+Expected: PASS (11 tests) — same assertions, now with `await` added.
 
-- [ ] **Step 5: Typecheck**
+- [ ] **Step 6: Typecheck**
 
 Run: `pnpm typecheck`
 Expected: no errors.
 
-- [ ] **Step 6: Commit**
+- [ ] **Step 7: Commit**
 
 ```bash
-git add src/services/calendarService.ts src/store/calendarStore.ts
-git commit -m "feat: Phase B0 — extract calendar event creation into calendarService"
+git add src/services/calendarService.ts src/store/calendarStore.ts src/store/calendarStore.test.ts
+git commit -m "feat: Phase B0 — extract calendar event creation into calendarService (async, per spec)"
 ```
 
 ---
@@ -569,11 +633,11 @@ git commit -m "feat: Phase B0 — extract calendar event creation into calendarS
 **Files:**
 - Create: `src/services/integrationsService.ts`
 - Modify: `src/store/integrationsStore.ts`
-- Test (unmodified, used to verify): `src/store/integrationsStore.test.ts`
+- Test (modified: add await to async action calls): `src/store/integrationsStore.test.ts`
 
 **Interfaces:**
 - Consumes: `IntApp`, `IntWebhook`, `IntSyncRule`, `IntApiKey` from `../data/mockIntegrations`.
-- Produces: `NewApiKeyInput` (type), `connectAppStatus(apps, id)`, `disconnectAppStatus(apps, id)`, `toggleWebhookAt(webhooks, index)`, `removeWebhookAt(webhooks, index)`, `toggleSyncRuleAt(rules, index)`, `buildNewApiKey(input)`.
+- Produces: `NewApiKeyInput` (type), `connectAppStatus(apps, id): Promise<IntApp[]>`, `disconnectAppStatus(apps, id): Promise<IntApp[]>`, `toggleWebhookAt(webhooks, index): Promise<IntWebhook[]>`, `removeWebhookAt(webhooks, index): Promise<IntWebhook[]>`, `toggleSyncRuleAt(rules, index): Promise<IntSyncRule[]>`, `buildNewApiKey(input): Promise<IntApiKey>` — all `Promise.resolve()`-wrapped, per the async Global Constraint.
 
 - [ ] **Step 1: Run the existing test file to confirm the baseline is green**
 
@@ -593,37 +657,39 @@ export interface NewApiKeyInput {
   ipWhitelist: string
 }
 
-export function connectAppStatus(apps: IntApp[], id: string): IntApp[] {
-  return apps.map((a) => (a.id === id ? { ...a, status: 'connected' as const, syncedAt: 'Just now', users: 1 } : a))
-}
-
-export function disconnectAppStatus(apps: IntApp[], id: string): IntApp[] {
-  return apps.map((a) =>
-    a.id === id ? { ...a, status: 'available' as const, syncedAt: null, users: 0, calls: 0 } : a,
+export function connectAppStatus(apps: IntApp[], id: string): Promise<IntApp[]> {
+  return Promise.resolve(
+    apps.map((a) => (a.id === id ? { ...a, status: 'connected' as const, syncedAt: 'Just now', users: 1 } : a)),
   )
 }
 
-export function toggleWebhookAt(webhooks: IntWebhook[], index: number): IntWebhook[] {
-  return webhooks.map((w, i) => (i === index ? { ...w, active: !w.active } : w))
+export function disconnectAppStatus(apps: IntApp[], id: string): Promise<IntApp[]> {
+  return Promise.resolve(
+    apps.map((a) => (a.id === id ? { ...a, status: 'available' as const, syncedAt: null, users: 0, calls: 0 } : a)),
+  )
 }
 
-export function removeWebhookAt(webhooks: IntWebhook[], index: number): IntWebhook[] {
-  return webhooks.filter((_, i) => i !== index)
+export function toggleWebhookAt(webhooks: IntWebhook[], index: number): Promise<IntWebhook[]> {
+  return Promise.resolve(webhooks.map((w, i) => (i === index ? { ...w, active: !w.active } : w)))
 }
 
-export function toggleSyncRuleAt(rules: IntSyncRule[], index: number): IntSyncRule[] {
-  return rules.map((r, i) => (i === index ? { ...r, on: !r.on } : r))
+export function removeWebhookAt(webhooks: IntWebhook[], index: number): Promise<IntWebhook[]> {
+  return Promise.resolve(webhooks.filter((_, i) => i !== index))
 }
 
-export function buildNewApiKey(input: NewApiKeyInput): IntApiKey {
-  return {
+export function toggleSyncRuleAt(rules: IntSyncRule[], index: number): Promise<IntSyncRule[]> {
+  return Promise.resolve(rules.map((r, i) => (i === index ? { ...r, on: !r.on } : r)))
+}
+
+export function buildNewApiKey(input: NewApiKeyInput): Promise<IntApiKey> {
+  return Promise.resolve({
     id: `k_${Date.now()}`,
     label: input.label,
     val: `ck_new_••••••••${Math.random().toString(36).slice(-4)}`,
     scope: input.scope,
     created: 'Today',
     expires: input.expires || 'Never',
-  }
+  })
 }
 ```
 
@@ -641,53 +707,71 @@ interface IntegrationsState {
   webhooks: IntWebhook[]
   syncRules: IntSyncRule[]
   apiKeys: IntApiKey[]
-  connectApp: (id: string) => void
-  disconnectApp: (id: string) => void
-  toggleWebhook: (index: number) => void
-  removeWebhook: (index: number) => void
-  toggleSyncRule: (index: number) => void
-  addApiKey: (input: NewApiKeyInput) => void
+  connectApp: (id: string) => Promise<void>
+  disconnectApp: (id: string) => Promise<void>
+  toggleWebhook: (index: number) => Promise<void>
+  removeWebhook: (index: number) => Promise<void>
+  toggleSyncRule: (index: number) => Promise<void>
+  addApiKey: (input: NewApiKeyInput) => Promise<void>
 }
 
-export const useIntegrationsStore = create<IntegrationsState>((set) => ({
+export const useIntegrationsStore = create<IntegrationsState>((set, get) => ({
   apps: INT_APPS,
   webhooks: [...INT_WEBHOOKS],
   syncRules: [...INT_SYNC_ROWS],
   apiKeys: [...INT_KEYS],
 
-  connectApp: (id) => set((state) => ({ apps: integrationsService.connectAppStatus(state.apps, id) })),
+  connectApp: async (id) => {
+    const apps = await integrationsService.connectAppStatus(get().apps, id)
+    set({ apps })
+  },
 
-  disconnectApp: (id) => set((state) => ({ apps: integrationsService.disconnectAppStatus(state.apps, id) })),
+  disconnectApp: async (id) => {
+    const apps = await integrationsService.disconnectAppStatus(get().apps, id)
+    set({ apps })
+  },
 
-  toggleWebhook: (index) =>
-    set((state) => ({ webhooks: integrationsService.toggleWebhookAt(state.webhooks, index) })),
+  toggleWebhook: async (index) => {
+    const webhooks = await integrationsService.toggleWebhookAt(get().webhooks, index)
+    set({ webhooks })
+  },
 
-  removeWebhook: (index) =>
-    set((state) => ({ webhooks: integrationsService.removeWebhookAt(state.webhooks, index) })),
+  removeWebhook: async (index) => {
+    const webhooks = await integrationsService.removeWebhookAt(get().webhooks, index)
+    set({ webhooks })
+  },
 
-  toggleSyncRule: (index) =>
-    set((state) => ({ syncRules: integrationsService.toggleSyncRuleAt(state.syncRules, index) })),
+  toggleSyncRule: async (index) => {
+    const syncRules = await integrationsService.toggleSyncRuleAt(get().syncRules, index)
+    set({ syncRules })
+  },
 
-  addApiKey: (input) =>
-    set((state) => ({ apiKeys: [...state.apiKeys, integrationsService.buildNewApiKey(input)] })),
+  addApiKey: async (input) => {
+    const newKey = await integrationsService.buildNewApiKey(input)
+    set((state) => ({ apiKeys: [...state.apiKeys, newKey] }))
+  },
 }))
 ```
 
-- [ ] **Step 4: Run the test file again to confirm it's still green, unmodified**
+- [ ] **Step 4: Update `src/store/integrationsStore.test.ts` to `await` the now-async actions**
+
+`connectApp`, `disconnectApp`, `toggleWebhook`, `removeWebhook`, `toggleSyncRule`, and `addApiKey` now return `Promise<void>`. Add `await` to each direct call via `useIntegrationsStore.getState().<action>(...)` and make the enclosing `it(...)` callback `async`.
+
+- [ ] **Step 5: Run the test file again to confirm it's still green**
 
 Run: `pnpm vitest run src/store/integrationsStore.test.ts`
-Expected: PASS (6 tests), zero changes to the test file itself.
+Expected: PASS (6 tests) — same assertions, now with `await` added.
 
-- [ ] **Step 5: Typecheck**
+- [ ] **Step 6: Typecheck**
 
 Run: `pnpm typecheck`
 Expected: no errors.
 
-- [ ] **Step 6: Commit**
+- [ ] **Step 7: Commit**
 
 ```bash
-git add src/services/integrationsService.ts src/store/integrationsStore.ts
-git commit -m "feat: Phase B0 — extract integrations mutation logic into integrationsService"
+git add src/services/integrationsService.ts src/store/integrationsStore.ts src/store/integrationsStore.test.ts
+git commit -m "feat: Phase B0 — extract integrations mutation logic into integrationsService (async, per spec)"
 ```
 
 ---
@@ -701,8 +785,8 @@ git commit -m "feat: Phase B0 — extract integrations mutation logic into integ
 
 **Interfaces:**
 - Produces (types): `ProfileState`, `WorkspaceState`, `NotificationToggles`, `SettingsSessionEntry`.
-- Produces (functions): `mergeProfile(profile, updates)`, `mergeWorkspace(workspace, updates)`, `toggleNotificationFlag(notifications, key)`, `withoutSessionAt(sessions, index)`, `keepOnlyCurrentSession(sessions)`, `setRoleOverride(roleOverrides, memberId, role)`, `buildNewInvite(email, role)`, `withoutInvite(invites, email)`.
-- `setDigestFrequency`, `setAccentColor`'s data assignment, and `resendInvite` stay inline in the store per Global Constraints (trivial passthrough / intentional no-op).
+- Produces (functions, all returning `Promise<T>`, `Promise.resolve()`-wrapped per the async Global Constraint): `mergeProfile(profile, updates)`, `mergeWorkspace(workspace, updates)`, `toggleNotificationFlag(notifications, key)`, `withoutSessionAt(sessions, index)`, `keepOnlyCurrentSession(sessions)`, `setRoleOverride(roleOverrides, memberId, role)`, `buildNewInvite(email, role)`, `withoutInvite(invites, email)`.
+- `setDigestFrequency`, `setAccentColor`'s data assignment, and `resendInvite` stay inline in the store per Global Constraints (trivial passthrough / intentional no-op) — and stay synchronous, since they never call a service function.
 
 - [ ] **Step 1: Search for any existing settingsStore-specific test file to confirm none exists**
 
@@ -766,43 +850,46 @@ export interface SettingsSessionEntry {
   current?: boolean
 }
 
-export function mergeProfile(profile: ProfileState, updates: Partial<ProfileState>): ProfileState {
-  return { ...profile, ...updates }
+export function mergeProfile(profile: ProfileState, updates: Partial<ProfileState>): Promise<ProfileState> {
+  return Promise.resolve({ ...profile, ...updates })
 }
 
-export function mergeWorkspace(workspace: WorkspaceState, updates: Partial<WorkspaceState>): WorkspaceState {
-  return { ...workspace, ...updates }
+export function mergeWorkspace(workspace: WorkspaceState, updates: Partial<WorkspaceState>): Promise<WorkspaceState> {
+  return Promise.resolve({ ...workspace, ...updates })
 }
 
 export function toggleNotificationFlag(
   notifications: NotificationToggles,
   key: keyof NotificationToggles,
-): NotificationToggles {
-  return { ...notifications, [key]: !notifications[key] }
+): Promise<NotificationToggles> {
+  return Promise.resolve({ ...notifications, [key]: !notifications[key] })
 }
 
-export function withoutSessionAt(sessions: SettingsSessionEntry[], index: number): SettingsSessionEntry[] {
-  return sessions.filter((_, i) => i !== index)
+export function withoutSessionAt(
+  sessions: SettingsSessionEntry[],
+  index: number,
+): Promise<SettingsSessionEntry[]> {
+  return Promise.resolve(sessions.filter((_, i) => i !== index))
 }
 
-export function keepOnlyCurrentSession(sessions: SettingsSessionEntry[]): SettingsSessionEntry[] {
-  return sessions.filter((session) => session.current)
+export function keepOnlyCurrentSession(sessions: SettingsSessionEntry[]): Promise<SettingsSessionEntry[]> {
+  return Promise.resolve(sessions.filter((session) => session.current))
 }
 
 export function setRoleOverride(
   roleOverrides: Record<string, string>,
   memberId: string,
   role: string,
-): Record<string, string> {
-  return { ...roleOverrides, [memberId]: role }
+): Promise<Record<string, string>> {
+  return Promise.resolve({ ...roleOverrides, [memberId]: role })
 }
 
-export function buildNewInvite(email: string, role: string): PendingInvite {
-  return { email, role, sent: 'Today', expires: 'In 7 days' }
+export function buildNewInvite(email: string, role: string): Promise<PendingInvite> {
+  return Promise.resolve({ email, role, sent: 'Today', expires: 'In 7 days' })
 }
 
-export function withoutInvite(invites: PendingInvite[], email: string): PendingInvite[] {
-  return invites.filter((inv) => inv.email !== email)
+export function withoutInvite(invites: PendingInvite[], email: string): Promise<PendingInvite[]> {
+  return Promise.resolve(invites.filter((inv) => inv.email !== email))
 }
 ```
 
@@ -823,15 +910,15 @@ import type {
 interface SettingsState {
   // Profile
   profile: ProfileState
-  updateProfile: (updates: Partial<ProfileState>) => void
+  updateProfile: (updates: Partial<ProfileState>) => Promise<void>
 
   // Workspace
   workspace: WorkspaceState
-  updateWorkspace: (updates: Partial<WorkspaceState>) => void
+  updateWorkspace: (updates: Partial<WorkspaceState>) => Promise<void>
 
   // Notifications
   notifications: NotificationToggles
-  toggleNotification: (key: keyof NotificationToggles) => void
+  toggleNotification: (key: keyof NotificationToggles) => Promise<void>
   digestFrequency: string
   setDigestFrequency: (freq: string) => void
 
@@ -841,19 +928,19 @@ interface SettingsState {
 
   // Security — sessions
   sessions: SettingsSessionEntry[]
-  revokeSession: (index: number) => void
-  revokeAllSessions: () => void
+  revokeSession: (index: number) => Promise<void>
+  revokeAllSessions: () => Promise<void>
 
   // Team & Roles
   roleOverrides: Record<string, string>
-  setMemberRole: (memberId: string, role: string) => void
+  setMemberRole: (memberId: string, role: string) => Promise<void>
   pendingInvites: PendingInvite[]
-  addInvite: (email: string, role: string) => void
-  revokeInvite: (email: string) => void
+  addInvite: (email: string, role: string) => Promise<void>
+  revokeInvite: (email: string) => Promise<void>
   resendInvite: (email: string) => void
 }
 
-export const useSettingsStore = create<SettingsState>((set) => ({
+export const useSettingsStore = create<SettingsState>((set, get) => ({
   profile: {
     firstName: 'Jacob',
     lastName: 'Solayinka',
@@ -869,7 +956,10 @@ export const useSettingsStore = create<SettingsState>((set) => ({
     dateFormat: 'MM/DD/YYYY',
     timeFormat: '12-hour (AM/PM)',
   },
-  updateProfile: (updates) => set((s) => ({ profile: settingsService.mergeProfile(s.profile, updates) })),
+  updateProfile: async (updates) => {
+    const profile = await settingsService.mergeProfile(get().profile, updates)
+    set({ profile })
+  },
 
   workspace: {
     name: 'ChronoLoop',
@@ -882,7 +972,10 @@ export const useSettingsStore = create<SettingsState>((set) => ({
     workFrom: '09:00',
     workTo: '18:00',
   },
-  updateWorkspace: (updates) => set((s) => ({ workspace: settingsService.mergeWorkspace(s.workspace, updates) })),
+  updateWorkspace: async (updates) => {
+    const workspace = await settingsService.mergeWorkspace(get().workspace, updates)
+    set({ workspace })
+  },
 
   notifications: {
     all: true,
@@ -900,8 +993,10 @@ export const useSettingsStore = create<SettingsState>((set) => ({
     appOverdue: true,
     appMentions: true,
   },
-  toggleNotification: (key) =>
-    set((s) => ({ notifications: settingsService.toggleNotificationFlag(s.notifications, key) })),
+  toggleNotification: async (key) => {
+    const notifications = await settingsService.toggleNotificationFlag(get().notifications, key)
+    set({ notifications })
+  },
   digestFrequency: 'immediate',
   setDigestFrequency: (freq) => set({ digestFrequency: freq }),
 
@@ -917,17 +1012,29 @@ export const useSettingsStore = create<SettingsState>((set) => ({
     { icon: 'tablet', device: 'iPad Air — Chrome', meta: 'Abuja, Nigeria · 3 days ago' },
     { icon: 'laptop', device: 'MacBook Air — Firefox 125', meta: 'London, UK · 1 week ago' },
   ],
-  revokeSession: (index) => set((s) => ({ sessions: settingsService.withoutSessionAt(s.sessions, index) })),
-  revokeAllSessions: () => set((s) => ({ sessions: settingsService.keepOnlyCurrentSession(s.sessions) })),
+  revokeSession: async (index) => {
+    const sessions = await settingsService.withoutSessionAt(get().sessions, index)
+    set({ sessions })
+  },
+  revokeAllSessions: async () => {
+    const sessions = await settingsService.keepOnlyCurrentSession(get().sessions)
+    set({ sessions })
+  },
 
   roleOverrides: {},
-  setMemberRole: (memberId, role) =>
-    set((s) => ({ roleOverrides: settingsService.setRoleOverride(s.roleOverrides, memberId, role) })),
+  setMemberRole: async (memberId, role) => {
+    const roleOverrides = await settingsService.setRoleOverride(get().roleOverrides, memberId, role)
+    set({ roleOverrides })
+  },
   pendingInvites: [...PENDING_INVITES],
-  addInvite: (email, role) =>
-    set((s) => ({ pendingInvites: [...s.pendingInvites, settingsService.buildNewInvite(email, role)] })),
-  revokeInvite: (email) =>
-    set((s) => ({ pendingInvites: settingsService.withoutInvite(s.pendingInvites, email) })),
+  addInvite: async (email, role) => {
+    const newInvite = await settingsService.buildNewInvite(email, role)
+    set((s) => ({ pendingInvites: [...s.pendingInvites, newInvite] }))
+  },
+  revokeInvite: async (email) => {
+    const pendingInvites = await settingsService.withoutInvite(get().pendingInvites, email)
+    set({ pendingInvites })
+  },
   resendInvite: () => {
     /* toast only — no real email system */
   },
@@ -942,13 +1049,13 @@ Expected: no errors.
 - [ ] **Step 5: Run the Settings-related component tests to confirm no regressions**
 
 Run: `pnpm vitest run src/components/settings`
-Expected: PASS, zero changes to any test file.
+Expected: PASS, zero changes to any test file — these tests drive interactions through `@testing-library/user-event`, whose `.click()` already awaits internally, so the now-async store actions should resolve before assertions run (per the audited Global Constraint). If any assertion here does fail on a stale-state race, that's the first real signal the audit missed a spot — fix it locally in that one test file with `await waitFor(...)` rather than reverting the async change, and note it in Task 7's phase notes.
 
 - [ ] **Step 6: Commit**
 
 ```bash
 git add src/services/settingsService.ts src/store/settingsStore.ts
-git commit -m "feat: Phase B0 — extract settings mutation logic into settingsService"
+git commit -m "feat: Phase B0 — extract settings mutation logic into settingsService (async, per spec)"
 ```
 
 ---
@@ -964,7 +1071,7 @@ git commit -m "feat: Phase B0 — extract settings mutation logic into settingsS
 - [ ] **Step 1: Run the full test suite**
 
 Run: `pnpm test`
-Expected: PASS, same total test count as before this plan started (no test file was modified in Tasks 1–6 — confirm the count matches `git stash` / pre-plan baseline if in doubt).
+Expected: PASS, same total test count as before this plan started. Tasks 1–5 each modified one store test file (adding `await` to now-async action calls, per the async Global Constraint) — same number of assertions, no new or removed tests. No component test file should need changes; if `pnpm test` surfaces one that does, that's the audit's blind spot (see Task 6, Step 5) — fix it locally with `await waitFor(...)` and record it in the phase notes below rather than silently patching around it.
 
 - [ ] **Step 2: Run typecheck and lint across the whole repo**
 
@@ -982,8 +1089,11 @@ Add this section after the existing "Responsive Phase R.7 — notes" section:
 
 - `src/services/*.ts` introduced for tasks, projects, sprints, calendar, integrations, and settings — each store's mutation logic (id generation, field defaulting/merging, array add/remove/toggle) now lives in named pure functions there instead of inline in the Zustand store. Stores still own `set()`/`get()` and any UI-derived state (e.g. `tasksStore.todoKpiOverride`).
 - **No `teamService.ts` yet** — `teamStore` has zero mutating actions today (it only seeds from `TEAM_MEMBERS`). Add one when Team gets its first real mutation, or when B6/F6 needs `list()` for async hydration.
-- **Services are synchronous in B0, on purpose.** Making them return real Promises now would force every mutating store action to become `async`, which breaks every synchronous test assertion in all 6 touched store test files plus `useDeleteWithUndo.test.tsx` and an unknown subset of component tests that click a mutating action and assert the DOM synchronously — none of that is actually asynchronous yet. `VITE_USE_MOCK_DATA` is deferred for the same reason: it has nothing to branch on until a domain has both a mock and a real implementation. Both land together in each domain's own F-phase, when a real `fetch` call is introduced and loading states become genuinely necessary — see `docs/superpowers/specs/2026-08-19-chronoloop-backend-design.md` §4.
-- Initial list hydration (`tasks: MOCK_TASKS`, `projects: MOCK_PROJECTS`, etc.) intentionally stays a direct synchronous mock import in every store — routing it through an async `service.list()` now would force a loading state onto every page for no real benefit yet. That wiring belongs to each domain's F-phase alongside its mutations going async.
+- **Services return `Promise<T>` (`Promise.resolve()`-wrapped), matching the spec's B0 target exactly** (`taskService.create(input): Promise<Task>`, §4) — not left synchronous. This was a deliberate correction mid-plan: an earlier draft of this plan proposed staying synchronous to avoid touching test assertions, but that both contradicted the spec and would have forced a second refactor of every store call site once F-phases introduce real `fetch` calls. Going async now means F-phase only swaps `Promise.resolve(mockLogic())` for `await fetch(...)` inside each service function.
+  - **One flagged exception:** `taskService.removeTaskAt`/`restoreTaskAt` and their store counterparts stay synchronous — `useDeleteWithUndo` needs `{ task, index }` back immediately to render the "Undo" toast, and making that async would either delay the toast (a real behavior change) or require an optimistic-delete redesign, which is out of scope here. Revisit in F1.
+  - Cost was audited, not assumed: the 7 store unit-test files needed `await` added to direct action calls (mechanical, done in Tasks 1–5); component tests all drive interactions through `@testing-library/user-event`, which already awaits internally, so none needed changes (confirmed by this full regression run).
+- **`VITE_USE_MOCK_DATA` is still deferred, not dropped.** It has nothing to branch on until a domain has both a mock and a real implementation. It lands in each domain's own F-phase alongside that domain's first real `fetch` call — tracked here explicitly so B1+ doesn't quietly skip it.
+- Initial list hydration (`tasks: MOCK_TASKS`, `projects: MOCK_PROJECTS`, etc.) intentionally stays a direct synchronous mock import in every store — routing it through an async `service.list()` now would force a loading state onto every page for no real benefit yet. That wiring belongs to each domain's F-phase alongside `VITE_USE_MOCK_DATA`.
 ```
 
 - [ ] **Step 4: Commit**
