@@ -1,5 +1,30 @@
 # Backlog
 
+## Calendar — Event Detail Dialog Flickers/Jumps on Open (Pre-existing, Phase R)
+
+Clicking any scheduled event (Month view, and by the same mechanism any other view) flashes the detail modal at a mispositioned location before it snaps into its correct centered position. **User-visible on every single event click — not a rare edge case.**
+
+**Root cause (confirmed by tracing render + CSS, not guessed):** a CSS `transform` collision in `src/components/calendar/CalEventPopup.module.css`, introduced in commit `c8bb4fa` (2026-08-15, Phase R — the same commit that switched the popup from an anchored Popover to a centered Radix Dialog). `.dialogContent` sets a static centering transform:
+
+```css
+.dialogContent {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  animation: ddFadeIn 160ms var(--ease-out);
+}
+```
+
+`ddFadeIn`'s keyframes also set `transform` (`translateY(-4px)` → `translateY(0)`) — a leftover from the old anchored-popup styling, where a small vertical nudge made sense. Because both the static rule and the animation target the same `transform` property, the animation wins for its 160ms duration: on open, the dialog renders at raw `top:50%; left:50%` with `transform: translateY(-4px)` (no `-50%,-50%`) — i.e. pinned near the top-left of the viewport, not centered — then animates to `translateY(0)` (still off-center). Only when the animation completes does the static `transform: translate(-50%, -50%)` reassert (no `animation-fill-mode: forwards` is set anywhere), snapping the modal into its correct centered spot. That snap is the visible flicker/jump.
+
+**Confirmed NOT a Phase B0 regression** — no B0 commit touches `CalendarPage.tsx`, `CalMonthView.tsx`, `CalEventPopup.tsx`, or `CalEventPopup.module.css`; the entire event-click → detail-modal render path is synchronous (Zustand store reads via `useMemo`, no fetch/loading state) and has been unchanged since Phase R.6 (`99b7317`). B0's only calendar-related change extracted event *creation* (`addUserEvent`) into an async service — a separate code path from opening the detail modal.
+
+**Fix direction (not yet implemented):** decouple the centering transform from the entrance animation — either animate `opacity` only on `.dialogContent` (drop the `transform` from its keyframes), or move the fade/translateY animation to an inner, non-positioned wrapper so the outer `.dialogContent` keeps `translate(-50%, -50%)` static throughout. Small, isolated CSS-only change.
+
+**Recommendation:** this should get its own small isolated branch/fix pass soon, rather than waiting for a natural phase boundary — it's a real, constant-repro visual bug on a core interaction (opening any calendar event), and risks getting buried under B1–B9 if left here.
+
+---
+
 ## Settings — Misleading Discard Button (UX Bug)
 
 The "Discard" button in the Settings page header always shows a toast saying "No unsaved changes" regardless of whether the user has actually edited form fields. This is actively misleading — it implies no changes exist when they may. The button should be disabled (or hidden) when the form is clean, and should prompt or revert when dirty.
