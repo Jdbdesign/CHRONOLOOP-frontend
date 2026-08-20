@@ -1,6 +1,8 @@
 # Backlog
 
-## Calendar — Event Detail Dialog Flickers/Jumps on Open (Pre-existing, Phase R)
+## Calendar — Event Detail Dialog Flickers/Jumps on Open (Pre-existing, Phase R) — RESOLVED 2026-08-20
+
+**Status: Fixed.** See "Fix applied" note at the end of this entry. History below is kept as-is for anyone who lands here later.
 
 Clicking any scheduled event (Month view, and by the same mechanism any other view) flashes the detail modal at a mispositioned location before it snaps into its correct centered position. **User-visible on every single event click — not a rare edge case.**
 
@@ -22,6 +24,10 @@ Clicking any scheduled event (Month view, and by the same mechanism any other vi
 **Fix direction (not yet implemented):** decouple the centering transform from the entrance animation — either animate `opacity` only on `.dialogContent` (drop the `transform` from its keyframes), or move the fade/translateY animation to an inner, non-positioned wrapper so the outer `.dialogContent` keeps `translate(-50%, -50%)` static throughout. Small, isolated CSS-only change.
 
 **Recommendation:** this should get its own small isolated branch/fix pass soon, rather than waiting for a natural phase boundary — it's a real, constant-repro visual bug on a core interaction (opening any calendar event), and risks getting buried under B1–B9 if left here.
+
+**Fix applied (2026-08-20, branch `worktree-fix+calendar-dialog-flicker`):** took the "animate opacity only" direction, scoped narrowly. `.dialogContent`'s `animation` now points at a new `dialogContentFadeIn` keyframe (opacity `0` → `1`, no `transform`) instead of the shared `ddFadeIn` keyframe. `ddFadeIn` itself (still used by `.popupContent` and `.dialogOverlay`) was left untouched, so this doesn't alter the anchored-popup slide-in effect those rules still rely on and doesn't require any JSX/DOM restructuring (the alternative — wrapping the centering in a non-animated parent with an animated child — would have needed a new wrapper element inside Radix's `Dialog.Content` in `CalendarPage.tsx`, a larger change for the same outcome). The static `transform: translate(-50%, -50%)` on `.dialogContent` is now never touched by the animation, so there's nothing for it to "snap back" from.
+
+Verified: full suite (505 tests, 125 files) passes; `tsc -b --noEmit` clean; no test references `ddFadeIn`, `dialogContentFadeIn`, or `.dialogContent` directly, so nothing depended on the old animation identity. **Not verified: actual visual smoothness in a browser** — no browser access in this session; someone should open the calendar, click an event, and confirm the modal now fades in centered with no jump before treating this as fully closed out.
 
 ---
 
