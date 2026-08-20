@@ -1,5 +1,20 @@
 # Backlog
 
+## Auth — Accept-Invite-While-Logged-In Flow (Deferred from B1, targeted for B9)
+
+`POST /auth/accept-invite` (B1, Task 10) deliberately does not auto-link an invite to an existing account — see `docs/superpowers/specs/2026-08-19-chronoloop-backend-design.md`-derived plan `docs/superpowers/plans/2026-08-20-b1-backend-foundation.md`, Decision 5. When the invited email already has a `User` row, the endpoint returns `409 EMAIL_HAS_EXISTING_ACCOUNT` instead of guessing whether the requester is that account's owner — auto-linking on token possession alone would let anyone who intercepts an invite link attach themselves to someone else's existing account.
+
+That leaves a real user-facing dead end today: an invited person who already has an account gets a 409 and no path forward. B1 does not build the resolution flow. It belongs in **B9** (Settings/Team & Roles), alongside the invite list/resend/revoke CRUD that's already deferred there for the same "shared Settings surface" reason.
+
+**What B9 needs to build:**
+
+- **Endpoint:** `POST /auth/accept-invite-existing`, gated behind `requireAuth` (so the caller must already hold a valid access token for *some* account). Body: `{ token }`. Server must verify `invite.email === ` the authenticated user's email before creating the `WorkspaceMember` and marking the invite accepted — matching by authenticated identity, not by the token alone, is what makes this safe where the anonymous path wasn't.
+- **UX:** the frontend accept-invite page, on receiving `409 EMAIL_HAS_EXISTING_ACCOUNT` from the existing anonymous endpoint, should redirect to login with the invite token preserved (e.g. a `redirect`/`inviteToken` query param on the login route), then after successful login call the new authenticated endpoint with that token to complete acceptance.
+
+Flagged now (Phase B1 planning, 2026-08-20) so B9 doesn't have to rediscover this design from scratch, and so the 409 response doesn't quietly ship as a permanent dead end.
+
+---
+
 ## Calendar — Event Detail Dialog Flickers/Jumps on Open (Pre-existing, Phase R) — RESOLVED 2026-08-20
 
 **Status: Fixed.** See "Fix applied" note at the end of this entry. History below is kept as-is for anyone who lands here later.
