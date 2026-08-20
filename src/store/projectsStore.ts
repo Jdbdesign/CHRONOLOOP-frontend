@@ -16,8 +16,7 @@ export const useProjectsStore = create<ProjectsState>((set, get) => ({
     set((state) => ({ projects: [newProject, ...state.projects] }))
   },
   removeProject: async (id) => {
-    const { projects } = get()
-    const next = await projectService.withoutProject(projects, id)
-    set({ projects: next })
+    await projectService.withoutProject(get().projects, id)
+    set((state) => ({ projects: state.projects.filter((p) => p.id !== id) }))
   },
 }))
