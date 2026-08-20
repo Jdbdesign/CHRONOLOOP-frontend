@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest'
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { TaskDetailBody } from './TaskDetailBody'
 import { useTasksStore } from '../../store/tasksStore'
 import { MOCK_TASKS } from '../../data/mockTasks'
@@ -33,22 +33,26 @@ describe('TaskDetailBody', () => {
     expect(screen.getByText('Three')).toBeInTheDocument()
   })
 
-  it('shows placeholder text as content when description is empty, and saves whatever is present on blur', () => {
+  it('shows placeholder text as content when description is empty, and saves whatever is present on blur', async () => {
     const task = { ...MOCK_TASKS[0], description: '' }
     render(<TaskDetailBody task={task} />)
     const desc = screen.getByText('Click to add a description...')
     fireEvent.blur(desc)
-    expect(useTasksStore.getState().tasks.find((t) => t.id === task.id)?.description).toBe(
-      'Click to add a description...',
-    )
+    await waitFor(() => {
+      expect(useTasksStore.getState().tasks.find((t) => t.id === task.id)?.description).toBe(
+        'Click to add a description...',
+      )
+    })
   })
 
-  it('saves edited description text on blur', () => {
+  it('saves edited description text on blur', async () => {
     const task = MOCK_TASKS.find((t) => t.id === 3)!
     render(<TaskDetailBody task={task} />)
     const desc = screen.getByText(task.description)
     desc.textContent = 'Edited description'
     fireEvent.blur(desc)
-    expect(useTasksStore.getState().tasks.find((t) => t.id === 3)?.description).toBe('Edited description')
+    await waitFor(() => {
+      expect(useTasksStore.getState().tasks.find((t) => t.id === 3)?.description).toBe('Edited description')
+    })
   })
 })
